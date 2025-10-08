@@ -31,6 +31,7 @@ jobs:
         uses: super-linter/super-linter@v8.2.0 # x-release-please-version
         env:
           VALIDATE_MARKDOWN: true
+          FIX_MARKDOWN: true
           VALIDATE_YAML: true
           VALIDATE_XML: true
           VALIDATE_GITLEAKS: true
