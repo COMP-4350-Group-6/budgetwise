@@ -1,7 +1,11 @@
 ---
 name: Lint
 
-on: [push, pull_request]
+on:
+  push:
+    branches-ignore: [main] # Will need to add our production branch also
+  pull_request:
+    branches: [main] # Will need to add our production branch also
 
 jobs:
   build:
