@@ -30,5 +30,9 @@ jobs:
       - name: Super-linter
         uses: super-linter/super-linter@v8.2.0 # x-release-please-version
         env:
+          VALIDATE_MARKDOWN: true
+          VALIDATE_YAML: true
+          VALIDATE_XML: true
+          VALIDATE_GITLEAKS: true
           # To report GitHub Actions status checks
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
