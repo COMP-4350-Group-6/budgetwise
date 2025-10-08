@@ -5,7 +5,8 @@ on: # yamllint disable-line rule:truthy
   push: null
   pull_request: null
 
-permissions: {}
+permissions:
+  contents: read
 
 jobs:
   build:
@@ -31,7 +32,6 @@ jobs:
         uses: super-linter/super-linter@v8.2.0
         env:
           VALIDATE_MARKDOWN: true
-          FIX_MARKDOWN: true
           VALIDATE_YAML: true
           VALIDATE_XML: true
           VALIDATE_GITLEAKS: true
