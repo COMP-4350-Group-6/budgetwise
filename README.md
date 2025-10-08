@@ -1,2 +1,3 @@
 # budgetwise
-COMP 4350 - Project Code 
+
+COMP 4350 - Project Code
