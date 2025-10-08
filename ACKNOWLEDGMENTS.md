@@ -29,6 +29,12 @@ Setup:
 - <https://github.com/skills/introduction-to-repository-management>
 
 
+## Repo misc.
+
+- Issue tag format from: <https://se-education.org/guides/guidelines/labels.html>
+- Misc. repo structure (@Von-Seth): <https://github.com/COMP-4350-Group-8/comp4350-project>
+
+
 ## AI
 
 
