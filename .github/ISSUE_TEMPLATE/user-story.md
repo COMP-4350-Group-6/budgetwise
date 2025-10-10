@@ -12,6 +12,6 @@ assignees: ''
 
 **Acceptance criteria:**
 
-- [ ] 
+- [ ]
 
 **Related features:**
