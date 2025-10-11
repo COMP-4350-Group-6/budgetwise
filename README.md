@@ -4,6 +4,12 @@ COMP 4350 - Project Code
 
 ## Folder structures
 
+
+
+## Docs:
+
+*API*: https://docs.google.com/document/d/1tYB-VAGl5qK_Bi0bbtqdJ5mbaJzvSiDYkD_54Wbm0mI/edit?usp=sharing
+
 - **budgetwise/**
   - **course-work/** (course work files, like sprint worksheets)
   - **src/** (For any program that can run on it's own will have it's own folder here)
