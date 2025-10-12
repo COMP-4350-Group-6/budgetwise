@@ -10,7 +10,7 @@ This deliverable focuses on testing coverage, test importance, and environment r
 
 ## 2. Unit / Integration / Acceptance Testing
 
-### General Rule:
+### General Rule
 
 Every user story must have at least one test before it is considered complete.
 
@@ -40,15 +40,15 @@ Every user story must have at least one test before it is considered complete.
 
 List your top 3 tests for each category:
 
-### Unit Tests:
+### Unit Tests
 
 [File path with clickable GitHub link] – short description of what it tests.
 
-### Integration Tests:
-    
+### Integration Tests
+
 [File path with clickable GitHub link] – short description of what it tests.
 
-### Acceptance Tests:
+### Acceptance Tests
 
 - If automated: [File path with clickable GitHub link] – story it tests.
 

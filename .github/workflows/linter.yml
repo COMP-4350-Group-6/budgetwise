@@ -30,10 +30,10 @@ jobs:
       - name: Super-linter
         uses: super-linter/super-linter/slim@v8.2.0
         env:
-          FILTER_REGEX_EXCLUDE: .*course-work/.*
+          FILTER_REGEX_EXCLUDE: '.*(node_modules/).*'
           VALIDATE_MARKDOWN: true
           VALIDATE_YAML: true
           VALIDATE_XML: true
           VALIDATE_GITLEAKS: true
-          # To report GitHub Actions status checks
+          LINTER_RULES_PATH: .github/linters   
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

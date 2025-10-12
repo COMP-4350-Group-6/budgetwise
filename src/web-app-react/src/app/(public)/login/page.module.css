@@ -1,0 +1,48 @@
+ .shell {
+  display: grid;
+  place-items: center;
+  height: 100vh;
+  background: #f2f3f7;
+}
+
+.card {
+  background: #fff;
+  padding: 24px;
+  border-radius: 12px;
+  width: 380px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
+}
+
+.title {
+  text-align: center;
+  margin-top: 0;
+}
+
+.form {
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.form input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+}
+
+.primaryBtn {
+  width: 100%;
+  padding: 10px;
+  background: #1f7a2e;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.meta {
+  margin-top: 12px;
+  font-size: 14px;
+  text-align: center;
+}

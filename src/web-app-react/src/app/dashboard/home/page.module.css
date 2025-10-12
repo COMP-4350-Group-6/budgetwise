@@ -1,0 +1,34 @@
+/* Heading + spacing */
+.heading { margin: 4px 0 16px; }
+.mt8 { margin-top: 8px; }     /* local utility (used via compose below) */
+.mt12 { margin-top: 12px; }
+.mb16 { margin-bottom: 16px; }
+
+
+.danger { color: #ef4444; }
+.ok { color: #16a34a; }
+
+/* Overview two-column grid */
+.overviewGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.innerCard { padding: 12px; }
+
+/* Button row under progress */
+.btnRow {
+  margin-top: 12px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* Width utilities for buttons in btnRow */
+.w30 { width: 30%; }
+.w55 { width: 55%; }
+.w64 { width: 64%; }
+
+/* Compose local spacing with globals where needed */
+.mt8 { margin-top: 8px; }

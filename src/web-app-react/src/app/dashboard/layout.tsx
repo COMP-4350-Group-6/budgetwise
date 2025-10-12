@@ -12,7 +12,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <div className="app-layout">
       <aside className="sidebar">
-        <div className="logo">◆ App</div>
+        <div className="logo"> BudgetWise</div>
 
         <div className="group">
           <h5>Area</h5>
@@ -27,7 +27,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
 
         <div className="bottom">
-          <Link href="/login"><button className="logout">Exit</button></Link>
+          <Link href="/login"><button className="logout">Logout</button></Link>
         </div>
       </aside>
 
