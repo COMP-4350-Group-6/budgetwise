@@ -1,0 +1,24 @@
+{
+  "name": "api",
+  "version": "0.0.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler dev",
+    "build": "tsc -p tsconfig.json && wrangler deploy --dry-run",
+    "typecheck": "tsc -p tsconfig.json",
+    "lint": "echo skip",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20251011.0",
+    "wrangler": "^4.42.2"
+  },
+  "dependencies": {
+    "@budget/composition-cloudflare-worker": "workspace:*",
+    "@budget/schemas": "workspace:*",
+    "@hono/zod-validator": "^0.7.4",
+    "hono": "^4.9.11",
+    "zod": "^4.1.12"
+  }
+}
