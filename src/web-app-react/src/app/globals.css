@@ -1,78 +1,71 @@
-/* This is just a mock style matching the design we discussed, you can feel free to modify any part  */
 :root{
-  --bg:#f2f3f7;
-  --panel:#ffffff;
-  --text:#141820;
-  --muted:#6b7280;
-  --border:#e5e7eb;
-  --brand:#1f7a2e;     /* BudgetWise  */
-  --brand-2:#2563eb;   /* secondary (links) */
-  --danger:#e11d48;
+  --bg:#f3f4f6; --panel:#ffffff; --text:#0f172a; --muted:#64748b; --border:#e5e7eb;
+  --brand:#2e7d32; --brand-2:#3b82f6; --danger:#ef4444; --ok:#16a34a;
   --shadow:0 10px 24px rgba(0,0,0,.06);
 }
-
 *{box-sizing:border-box}
-html,body,#root{height:100%}
+html,body{height:100%}
 body{margin:0;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
-
 a{color:var(--brand-2);text-decoration:none}
 a:hover{text-decoration:underline}
 
-.app-layout{display:grid;grid-template-columns:240px 1fr;grid-template-rows:56px 1fr;grid-template-areas:"sidebar navbar" "sidebar content";height:100vh}
+.app-layout{
+  display:grid;
+  grid-template-columns:240px 1fr;
+  grid-template-rows:56px 1fr;
+  grid-template-areas:"sidebar navbar" "sidebar content";
+  height:100vh;
+}
 
 /* Sidebar */
-.sidebar{grid-area:sidebar;background:white;color:black;padding:16px 12px;display:flex;flex-direction:column;gap:12px;border-right:1px solid #0b1220}
+.sidebar{
+  grid-area:sidebar;background:#111827;color:#e5e7eb;
+  padding:16px 12px;display:flex;flex-direction:column;gap:12px;border-right:1px solid #0b1220
+}
 .sidebar .logo{display:flex;align-items:center;gap:8px;font-weight:700;margin:8px 8px 16px}
 .sidebar .group{margin-top:8px}
-.sidebar .group h5{margin:10px 12px;color:black;font-size:12px;letter-spacing:.04em;text-transform:uppercase}
+.sidebar .group h5{margin:10px 12px;color:#9ca3af;font-size:12px;letter-spacing:.04em;text-transform:uppercase}
 .sidebar a{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;color:#d1d5db}
 .sidebar a:hover{background:#1f2937}
-.sidebar a.active{background:#0f172a;color:#fff;border:1px solid #22314e}
 .sidebar .bottom{margin-top:auto}
 .sidebar .logout{background:#ef4444;color:#fff;border:none;padding:10px 12px;border-radius:10px;cursor:pointer}
 
-/* Navbar */
-.navbar{grid-area:navbar;background:var(--panel);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 16px}
+/* Top nav */
+.navbar{
+  grid-area:navbar;background:var(--panel);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;padding:0 16px
+}
 .navbar .tabs{display:flex;gap:18px}
 .navbar .tabs a{padding:12px 0;color:#374151}
 .navbar .tabs a.active{color:var(--brand);font-weight:600;border-bottom:2px solid var(--brand)}
 .navbar .right{display:flex;align-items:center;gap:10px}
 .navbar .button{background:var(--brand);color:#fff;border:none;border-radius:8px;padding:8px 12px;cursor:pointer}
 
-/* Content area */
+/* Content */
 .main-content{grid-area:content;overflow:auto}
 .page{padding:24px;max-width:1200px;margin:0 auto}
 
-/* Cards & grid */
+/* Cards + grids */
 .card{background:var(--panel);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);padding:16px}
 .grid-2{display:grid;grid-template-columns:1.2fr .8fr;gap:16px}
 .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
 .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
-.section-title{margin:6px 0 12px;font-size:14px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.section-title{margin:6px 0 12px;font-size:14px;color:#6b7280;text-transform:uppercase;letter-spacing:.05em}
 
-/* Progress bars */
+/* Progress + table */
 .progress{height:10px;background:#eef2f7;border-radius:999px;overflow:hidden;border:1px solid var(--border)}
 .progress > span{display:block;height:100%;background:var(--brand)}
-
-/* Badges */
-.badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;border-radius:999px;padding:4px 8px;border:1px solid var(--border);color:#374151;background:#f9fafb}
-.badge.green{background:#ecfdf5;color:#065f46;border-color:#a7f3d0}
-.badge.blue{background:#eff6ff;color:#1e40af;border-color:#bfdbfe}
-.badge.red{background:#fef2f2;color:#991b1b;border-color:#fecaca}
-
-/* Table */
 .table{width:100%;border-collapse:separate;border-spacing:0}
 .table th,.table td{padding:12px 10px;border-bottom:1px solid var(--border);text-align:left}
-.table th{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
-.table tr:hover td{background:#fafafa}
+.table th{font-size:12px;color:#6b7280;text-transform:uppercase;letter-spacing:.05em}
 
-/* Forms */
+/* Forms / buttons */
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
 label{display:block;font-size:12px;color:#6b7280;margin-bottom:6px}
 input,select,textarea{width:100%;padding:10px;border:1px solid var(--border);border-radius:10px;background:#fff}
 .button.primary{background:var(--brand);color:#fff;border:none;padding:10px 14px;border-radius:10px;cursor:pointer}
 .button.ghost{background:#fff;border:1px solid var(--border);padding:10px 14px;border-radius:10px;cursor:pointer}
 
-/* Chart placeholders */
-.chart{height:260px;background:conic-gradient(#e5e7eb 0 20%, #c7d2fe 20% 55%, #bbf7d0 55% 85%, #fde68a 85% 100%);border-radius:12px;border:1px solid var(--border)}
+/* “fake” charts as placeholders */
+.chart{height:260px;background:conic-gradient(#e5e7eb 0 22%, #c7d2fe 22% 58%, #bbf7d0 58% 86%, #fde68a 86% 100%);border-radius:12px;border:1px solid var(--border)}
 .linechart{height:220px;background:linear-gradient(180deg,#eef2ff,transparent),linear-gradient(90deg,#e5e7eb 1px,transparent 1px);background-size:100% 100%, 48px 100%;border-radius:12px;border:1px solid var(--border)}
