@@ -13,6 +13,10 @@ out
 build
 dist
 
+
+# Turborepo
+.turbo
+
 # Production
 build
 dist
