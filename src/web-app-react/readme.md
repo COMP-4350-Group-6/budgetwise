@@ -1,4 +1,4 @@
-BudgetWise Front-End React
+# BudgetWise Front-End React
 
 **BudgetWise** is a personal finance web application that helps users track expenses, manage budgets, and visualize financial insights in one place.  
 It provides an intuitive dashboard with spending summaries, goal progress, and transaction management tools, all built for simplicity.
