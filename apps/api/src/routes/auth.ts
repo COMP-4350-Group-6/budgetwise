@@ -4,12 +4,12 @@ import { z } from "zod";
 
 
 const loginSchema = z.object({
-  email: z.string().email(),
+  email: z.email(),
   password: z.string().min(8),
 });
 
 const signupSchema = z.object({
-  email: z.string().email(),
+  email: z.email(),
   password: z.string().min(8),
   name: z.string().min(1),
   defaultCurrency: z.enum(['USD', 'EUR', 'GBP', 'JPY', 'INR']).default('USD'),
