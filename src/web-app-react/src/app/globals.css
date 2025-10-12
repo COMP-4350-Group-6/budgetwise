@@ -1,3 +1,4 @@
+/* Global styles and CSS variables, to be updated. */
 :root{
   --bg:#f3f4f6; --panel:#ffffff; --text:#0f172a; --muted:#64748b; --border:#e5e7eb;
   --brand:#2e7d32; --brand-2:#3b82f6; --danger:#ef4444; --ok:#16a34a;
@@ -69,3 +70,22 @@ input,select,textarea{width:100%;padding:10px;border:1px solid var(--border);bor
 /* “fake” charts as placeholders */
 .chart{height:260px;background:conic-gradient(#e5e7eb 0 22%, #c7d2fe 22% 58%, #bbf7d0 58% 86%, #fde68a 86% 100%);border-radius:12px;border:1px solid var(--border)}
 .linechart{height:220px;background:linear-gradient(180deg,#eef2ff,transparent),linear-gradient(90deg,#e5e7eb 1px,transparent 1px);background-size:100% 100%, 48px 100%;border-radius:12px;border:1px solid var(--border)}
+
+/* --- Utilities for headings layout, skeletons --- */
+.heading-lg { margin: 4px 0 16px; }
+.center-screen { display:grid; place-items:center; height:100vh; background: var(--bg); }
+.auth-card { width: 420px; }
+.kpi { font-weight: 700; font-size: 24px; }
+.table-skeleton { height: 200px; background: #f5f6f8; border-radius: 8px; }
+
+/* ---- Auth page utilities ---- */
+.text-center { text-align: center; }
+.text-sm { font-size: 14px; }
+.mt-12 { margin-top: 12px; }
+.mt-16 { margin-top: 16px; }
+
+/* small grid gap for forms */
+.grid-gap-sm {
+  display: grid;
+  gap: 10px;
+}
