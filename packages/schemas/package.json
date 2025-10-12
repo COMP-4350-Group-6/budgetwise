@@ -1,0 +1,9 @@
+{
+  "name": "@budget/schemas",
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "openapi:generate": "node ./src/openapi-stub.cjs"
+  },
+  "dependencies": { "zod": "^3.23.8" }
+}

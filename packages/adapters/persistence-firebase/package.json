@@ -1,0 +1,9 @@
+{
+  "name": "@budget/adapters-persistence-firebase",
+  "version": "0.0.0",
+  "type": "module",
+  "exports": { ".": "./src/index.ts" },
+  "peerDependencies": {
+    "firebase": "^10.0.0"
+  }
+}

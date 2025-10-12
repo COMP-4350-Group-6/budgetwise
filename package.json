@@ -1,0 +1,22 @@
+{
+  "name": "@root/budgeting",
+  "private": true,
+  "packageManager": "pnpm@10.15.1",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "typecheck": "turbo run typecheck",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "openapi:generate": "pnpm --filter @budget/schemas run openapi:generate && pnpm --filter @budget/sdk run generate"
+  },
+  "devDependencies": {
+    "@types/node": "^24.7.2",
+    "eslint": "^9.37.0",
+    "hono": "^4.9.11",
+    "turbo": "^2.5.8",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4",
+    "zod": "^4.1.12"
+  }
+}
