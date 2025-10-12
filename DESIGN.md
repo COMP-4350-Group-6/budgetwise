@@ -10,7 +10,7 @@ BudgetWise follows **Clean Architecture** principles with a monorepo structure. 
 
 Dependencies flow **inward only**:
 
-```
+```sh
 apps → composition → usecases → domain
                   ↓
               ports ← adapters
