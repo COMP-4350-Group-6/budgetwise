@@ -7,7 +7,9 @@ BudgetWise follows **Clean Architecture** principles with a monorepo structure. 
 ## Core Principles
 
 ### 1. Dependency Rule
+
 Dependencies flow **inward only**:
+
 ```
 apps → composition → usecases → domain
                   ↓
@@ -24,6 +26,7 @@ apps → composition → usecases → domain
 ### 2. Domain-Driven Design
 
 #### Money Value Object
+
 - Stores amounts as **integer cents** to avoid floating-point errors
 - Currency-aware with proper decimal place handling
 - Immutable - all operations return new instances
@@ -36,11 +39,13 @@ const price = Money.fromAmount(10.50, 'USD'); // 1050 cents internally
 ```
 
 #### Domain Entities
+
 - **Transaction**: Financial transaction with amount, budget, category
 - **Budget**: Spending limit with period (daily/weekly/monthly/yearly)
 - **User**: Account with email, name, default currency
 
 All entities:
+
 - Validate invariants in constructors
 - Expose immutable props
 - Encapsulate business rules
@@ -48,13 +53,17 @@ All entities:
 ### 3. Ports & Adapters (Hexagonal Architecture)
 
 #### Ports Package
+
 Defines **interfaces** for external dependencies:
+
 - `Clock`: Time abstraction for testing
 - `IdGenerator`: UUID generation
 - Repository interfaces: `TransactionsRepo`, `UsersRepo`, `BudgetsRepo`
 
 #### Adapters Package
+
 Provides **implementations**:
+
 - `persistence-inmem`: In-memory storage (for testing)
 - `persistence-firebase`: Firestore implementation
 - `system`: Real clock and UUID implementations
@@ -64,6 +73,7 @@ Provides **implementations**:
 ### 4. Use Cases
 
 Business operations are isolated in single-purpose classes:
+
 ```typescript
 class AddTransaction {
   constructor(
@@ -79,6 +89,7 @@ class AddTransaction {
 ```
 
 **Benefits:**
+
 - Each use case is independently testable
 - Clear separation of business rules
 - Easy to understand what the system does
@@ -105,37 +116,49 @@ class Container {
 ## Package Structure
 
 ### Domain (`packages/domain`)
+
 **No external dependencies** - pure TypeScript business logic.
+
 - Value objects: `Money`
 - Entities: `Transaction`, `Budget`, `User`
 - Invariant validation
 
 ### Ports (`packages/ports`)
+
 Interface definitions. Depends only on domain types.
+
 - Repository interfaces
 - External service interfaces
 - Keeps domain decoupled from infrastructure
 
 ### Adapters (`packages/adapters`)
+
 Infrastructure implementations.
+
 - **persistence-inmem**: Fast in-memory storage for testing
 - **persistence-firebase**: Production Firestore persistence
 - **system**: Real-world implementations (Clock, ID generation)
 
 ### Use Cases (`packages/usecases`)
+
 Application business logic.
+
 - Orchestrates domain objects
 - Uses ports for I/O
 - Single Responsibility Principle per use case
 
 ### Composition (`packages/composition`)
+
 Dependency injection container.
+
 - **cloudflare-worker**: Configuration for Cloudflare Workers runtime
 - Wires adapters to ports
 - Creates use case instances
 
 ### Schemas (`packages/schemas`)
+
 API contracts and validation.
+
 - OpenAPI specifications
 - Request/response schemas
 - Shared between frontend and backend
@@ -143,58 +166,72 @@ API contracts and validation.
 ### Apps
 
 #### `apps/api`
+
 REST API built with Hono on Cloudflare Workers.
+
 - Handles HTTP requests
 - Input validation with schemas
 - Routes to use cases
 - Error handling middleware
 
 #### `apps/web-next`
+
 Next.js frontend.
+
 - User interface
 - Deployed to Cloudflare Pages
 
 ## Key Design Decisions
 
 ### 1. Integer Cents Storage
+
 **Decision:** Store monetary amounts as integer cents, not floats.
 
 **Rationale:**
+
 - Avoids floating-point precision errors (0.1 + 0.2 ≠ 0.3)
 - Database-friendly (integers are exact)
 - Common pattern in financial systems
 
 ### 2. Currency-Aware Money Type
+
 **Decision:** Money includes both amount and currency.
 
 **Rationale:**
+
 - Prevents mixing currencies accidentally
 - Supports international users
 - Type-safe currency conversions
 - Different currencies have different decimal places
 
 ### 3. Repository Pattern
+
 **Decision:** Abstract data persistence behind interfaces.
 
 **Rationale:**
+
 - Swap databases without changing business logic
 - Easy testing with in-memory implementations
 - Clear contract between layers
 - Support multiple storage backends
 
 ### 4. Use Case per Operation
+
 **Decision:** Each business operation gets its own class.
 
 **Rationale:**
+
 - Single Responsibility Principle
 - Easy to test in isolation
 - Clear naming (AddTransaction, UpdateBudget, etc.)
 - Simple to understand system capabilities
 
 ### 5. Barrel Exports (index.ts)
+
 **Decision:** Use index files to re-export from folders.
 
 **Rationale:**
+
 - Cleaner import statements
 - Single entry point per module
 - Easier refactoring
@@ -203,18 +240,22 @@ Next.js frontend.
 **Trade-off:** May impact tree-shaking, adds files to maintain.
 
 ### 6. Monorepo Structure
+
 **Decision:** Multiple packages in single repo.
 
 **Rationale:**
+
 - Share code between API and web app
 - Atomic commits across layers
 - Easier dependency management
 - Single CI/CD pipeline
 
 ### 7. Cloudflare Workers
+
 **Decision:** Deploy API to edge computing platform.
 
 **Rationale:**
+
 - Global distribution (low latency)
 - Scales automatically
 - Cost-effective for small apps
@@ -238,7 +279,6 @@ Next.js frontend.
 - **Budgets**: Add spending alerts and forecasting
 - **Categories**: Hierarchical category system
 - **Recurring Transactions**: Automatic transaction creation
-
 
 ## References
 
