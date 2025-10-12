@@ -1,22 +1,13 @@
 import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
-import { z } from "zod";
+import { AddTransactionInput } from "@budget/schemas";
 import { makeContainer } from "@budget/composition-cloudflare-worker";
-
-const addTransactionSchema = z.object({
-  userId: z.string(),
-  budgetId: z.string(),
-  amountCents: z.number().int(),
-  occurredAt: z.coerce.date(),
-  note: z.string().max(280).optional(),
-  categoryId: z.string().optional(),
-});
 
 export const transactions = new Hono();
 
 transactions.post(
   "/transactions",
-  zValidator("json", addTransactionSchema),
+  zValidator("json", AddTransactionInput),
   async (c) => {
     const input = c.req.valid("json"); // Type-safe!
     const { usecases } = makeContainer();

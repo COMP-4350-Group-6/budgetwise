@@ -19,6 +19,7 @@
       "@budget/ports/*": ["../ports/src/*"],
       "@budget/ports": ["../ports/src/index.ts"],
       "@budget/schemas/*": ["../schemas/src/*"],
+      "@budget/schemas": ["../schemas/src/index.ts"],
       "@budget/adapters-system": ["../adapters/system/src/index.ts"],
       "@budget/adapters-system/*": ["../adapters/system/src/*"],
       "@budget/adapters-persistence-inmem": ["../adapters/persistence-inmem/src/index.ts"],
