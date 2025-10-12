@@ -11,12 +11,12 @@
     "lint": "eslint .",
     "prepare": "husky install"
   },
-    "lint-staged": {
-  "*.{js,jsx,ts,tsx,css,md}": [
-    "prettier --write",
-    "eslint --fix"
-  ]
-},
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,css,md}": [
+      "prettier --write",
+      "eslint --fix"
+    ]
+  },
   "dependencies": {
     "next": "14.2.5",
     "react": "18.3.1",
@@ -30,6 +30,7 @@
     "eslint-config-prettier": "^10.1.8",
     "husky": "^8.0.0",
     "lint-staged": "^16.2.4",
+    "markdownlint-cli2": "^0.18.1",
     "prettier": "^3.6.2",
     "typescript": "5.9.3"
   }
