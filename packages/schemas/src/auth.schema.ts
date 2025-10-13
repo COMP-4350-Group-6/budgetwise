@@ -1,15 +1,16 @@
 import { z } from "zod";
+import { CurrencySchema } from "./currency.schema";
 
 export const LoginInput = z.object({
-  email: z.string().email(),
+  email: z.email(),
   password: z.string().min(8),
 });
 
 export const SignupInput = z.object({
-  email: z.string().email(),
+  email: z.email(),
   password: z.string().min(8),
   name: z.string().min(1),
-  defaultCurrency: z.enum(['USD', 'EUR', 'GBP', 'JPY', 'INR']).default('USD'),
+  defaultCurrency: CurrencySchema.default('USD'),
 });
 
 export const RefreshTokenInput = z.object({
