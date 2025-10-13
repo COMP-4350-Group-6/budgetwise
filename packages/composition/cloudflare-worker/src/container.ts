@@ -1,5 +1,5 @@
-import { makeSystemClock, makeUlid } from "@budget/adapters-system";
-import { makeInMemTransactionsRepo } from "@budget/adapters-persistence-inmem";
+import { makeSystemClock, makeUlid } from "../../../adapters/system/src";
+import { makeInMemTransactionsRepo } from "@budget/adapters-persistence-local";
 import { makeAddTransaction } from "@budget/usecases";
 
 export function makeContainer(/* env: Env */) {
