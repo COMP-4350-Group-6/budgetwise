@@ -4,7 +4,7 @@ This document explains how to set up Firebase Authentication for the BudgetWise 
 
 ## Project Structure
 
-```
+```txt
 src/
 ├── shared/
 │   └── auth/
