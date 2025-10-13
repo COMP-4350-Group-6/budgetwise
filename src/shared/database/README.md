@@ -4,7 +4,7 @@ This document explains how to set up Firestore database operations for the Budge
 
 ## Project Structure
 
-```
+```txt
 src/
 ├── shared/
 │   └── database/
