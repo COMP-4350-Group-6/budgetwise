@@ -1,0 +1,141 @@
+/* colors fall back to CSS vars if you added them in globals.css */
+:root {
+  --bw-bg: var(--bg, #f2f3f7);
+  --bw-panel: var(--panel, #ffffff);
+  --bw-text: var(--text, #111827);
+  --bw-muted: var(--muted, #6b7280);
+  --bw-border: var(--border, #e5e7eb);
+  --bw-brand: var(--brand, #2e7d32);
+  --bw-brand-dark: #1b5e20;
+  --bw-shadow: var(--shadow, 0 10px 24px rgba(0, 0, 0, 0.06));
+}
+
+/* page frame */
+.shell {
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  background: var(--bw-bg);
+  padding: 24px;
+}
+
+/* the white auth card */
+.card {
+  width: 360px;
+  max-width: 92vw;
+  background: var(--bw-panel);
+  border: 1px solid var(--bw-border);
+  border-radius: 12px;
+  padding: 20px 22px 18px;
+  box-shadow: var(--bw-shadow);
+}
+
+/* brand + title */
+.logo {
+  text-align: center;
+  font-weight: 800;
+  color: var(--bw-brand);
+  margin-top: 4px;
+}
+.title {
+  text-align: center;
+  margin: 6px 0 18px;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--bw-text);
+}
+
+/* form */
+.form {
+  display: grid;
+  gap: 10px;
+}
+.form label {
+  font-size: 12px;
+  color: var(--bw-muted);
+}
+.form input[type="email"],
+.form input[type="password"] {
+  width: 100%;
+  background: #fff;
+  border: 1px solid var(--bw-border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: var(--bw-text);
+}
+
+/* password row with eye icon placeholder */
+.passwordRow {
+  position: relative;
+}
+.eyeBtn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  translate: 0 -50%;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  background: transparent;
+  cursor: default; /* visual only */
+}
+.eyeBtn::before {
+  content: '';
+  display: block;
+  width: 18px;
+  height: 12px;
+  border: 2px solid var(--bw-muted);
+  border-radius: 10px / 8px;
+  opacity: 0.6;
+}
+
+/* row with "forgot password?" */
+.linksRow {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 2px;
+}
+.link {
+  color: var(--bw-brand);
+  text-decoration: none;
+  font-size: 12px;
+}
+.link:hover {
+  text-decoration: underline;
+}
+
+/* fake reCAPTCHA */
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--bw-muted);
+  margin: 4px 0 2px;
+}
+.checkbox input {
+  width: 16px;
+  height: 16px;
+}
+
+/* submit button */
+.primaryBtn {
+  width: 100%;
+  background: var(--bw-brand);
+  color: #fff;
+  border: 0;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 4px;
+}
+.primaryBtn:hover { background: var(--bw-brand-dark); }
+
+/* footer */
+.footerText {
+  text-align: center;
+  margin-top: 14px;
+  font-size: 12px;
+  color: var(--bw-muted);
+}

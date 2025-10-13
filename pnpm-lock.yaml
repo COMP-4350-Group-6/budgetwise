@@ -103,7 +103,21 @@ importers:
 
   packages/adapters/persistence-inmem: {}
 
+  packages/adapters/persistence/firebase:
+    dependencies:
+      firebase:
+        specifier: ^10.0.0
+        version: 10.14.1
+
+  packages/adapters/persistence/local: {}
+
   packages/adapters/system:
+    dependencies:
+      ulid:
+        specifier: ^2.3.0
+        version: 2.4.0
+
+  packages/adapters/utils:
     dependencies:
       ulid:
         specifier: ^2.3.0
@@ -120,8 +134,8 @@ importers:
   packages/schemas:
     dependencies:
       zod:
-        specifier: ^3.23.8
-        version: 3.25.76
+        specifier: ^4.1.12
+        version: 4.1.12
 
   packages/usecases: {}
 
@@ -4842,9 +4856,6 @@ packages:
 
   zod@3.22.3:
     resolution: {integrity: sha512-EjIevzuJRiRPbVH4mGc8nApb/lVLKVpmUhAaR5R5doKGfAnGJ6Gr3CViAVjP+4FWSxCsybeWQdcgCtbX+7oZug==}
-
-  zod@3.25.76:
-    resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
 
   zod@4.1.12:
     resolution: {integrity: sha512-JInaHOamG8pt5+Ey8kGmdcAcg3OL9reK8ltczgHTAwNhMys/6ThXHityHxVV2p3fkw/c+MAvBHFVYHFZDmjMCQ==}
@@ -10776,7 +10787,5 @@ snapshots:
       youch-core: 0.3.3
 
   zod@3.22.3: {}
-
-  zod@3.25.76: {}
 
   zod@4.1.12: {}

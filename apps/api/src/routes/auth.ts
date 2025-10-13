@@ -1,33 +1,16 @@
 import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
-import { z } from "zod";
+import { LoginInput, SignupInput, RefreshTokenInput, ForgotPasswordInput, ResetPasswordInput } from "@budget/schemas";
 
-
-const loginSchema = z.object({
-  email: z.email(),
-  password: z.string().min(8),
-});
-
-const signupSchema = z.object({
-  email: z.email(),
-  password: z.string().min(8),
-  name: z.string().min(1),
-  defaultCurrency: z.enum(['USD', 'EUR', 'GBP', 'JPY', 'INR']).default('USD'),
-});
-
-const refreshSchema = z.object({
-  refreshToken: z.string(),
-});
 
 export const auth = new Hono();
 
 // POST /auth/signup
-
 auth.get("/auth", (c) => c.json({ message: "Auth API is running" }));
 
 auth.post(
   "/auth/signup",
-  zValidator("json", signupSchema),
+  zValidator("json", SignupInput),
   async (c) => {
     const body = c.req.valid("json");
     
@@ -51,7 +34,7 @@ auth.post(
 // POST /auth/login
 auth.post(
   "/auth/login",
-  zValidator("json", loginSchema),
+  zValidator("json", LoginInput),
   async (c) => {
     const body = c.req.valid("json");
     
@@ -84,7 +67,7 @@ auth.post("/auth/logout", async (c) => {
 // POST /auth/refresh
 auth.post(
   "/auth/refresh",
-  zValidator("json", refreshSchema),
+  zValidator("json", RefreshTokenInput),
   async (c) => {
     const body = c.req.valid("json");
     
@@ -106,9 +89,9 @@ auth.get("/auth/me", async (c) => {
   // const getUserUseCase = container.getGetUserUseCase();
   // const user = await getUserUseCase.execute(userId);
   const header = c.req.header("Authorization");
-    if (!header || !header.startsWith("Bearer ")) {
-        return c.json({ error: "Unauthorized" }, 401);
-    }
+  if (!header || !header.startsWith("Bearer ")) {
+    return c.json({ error: "Unauthorized" }, 401);
+  }
   
   return c.json({
     id: "user-123",
@@ -122,7 +105,7 @@ auth.get("/auth/me", async (c) => {
 // POST /auth/forgot-password
 auth.post(
   "/auth/forgot-password",
-  zValidator("json", z.object({ email: z.string().email() })),
+  zValidator("json", ForgotPasswordInput),
   async (c) => {
     const body = c.req.valid("json");
     
@@ -137,14 +120,11 @@ auth.post(
 // POST /auth/reset-password
 auth.post(
   "/auth/reset-password",
-  zValidator("json", z.object({
-    token: z.string(),
-    newPassword: z.string().min(8),
-  })),
+  zValidator("json", ResetPasswordInput),
   async (c) => {
     const body = c.req.valid("json");
     
-    // TODO: Reset password
+    // TODO: Send password reset email
     // const resetPasswordUseCase = container.getResetPasswordUseCase();
     // await resetPasswordUseCase.execute(body);
     
