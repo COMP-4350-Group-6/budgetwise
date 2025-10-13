@@ -1,9 +1,10 @@
-# How to use this file: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+# How to use this file: <https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners>
 
 # Frontends
+
 /src/web-app-react/ @chinch02 @nene2004 @Von-Seth
 /src/web-app-vue/ @chinch02 @nene2004 @Von-Seth
 
 # Backend
-/src/backend/ @ahnafaf @RamatjyotSingh @sidfer
 
+/src/backend/ @ahnafaf @RamatjyotSingh @sidfer

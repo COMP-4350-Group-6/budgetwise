@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "noEmit": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+
+    "lib": ["ES2022"],
+
+    "baseUrl": ".",
+    "paths": {
+      "@budget/domain/*": ["../domain/src/*"],
+      "@budget/usecases/*": ["../usecases/src/*"],
+      "@budget/usecases": ["../usecases/src/index.ts"],
+      "@budget/ports/*": ["../ports/src/*"],
+      "@budget/ports": ["../ports/src/index.ts"],
+      "@budget/schemas/*": ["../schemas/src/*"],
+      "@budget/schemas": ["../schemas/src/index.ts"],
+      "@budget/adapters-system": ["../adapters/system/src/index.ts"],
+      "@budget/adapters-system/*": ["../adapters/system/src/*"],
+      "@budget/adapters-persistence-local": ["../adapters/persistence/local/src/index.ts"],
+      "@budget/adapters-persistence-local/*": ["../adapters/persistence/local/src/*"],
+      "@budget/adapters-persistence-firebase": ["../adapters/persistence/firebase/src/index.ts"],
+      "@budget/adapters-persistence-firebase/*": ["../adapters/persistence/firebase/src/*"],
+      "@budget/composition-cloudflare-worker": ["../composition/cloudflare-worker/src/index.ts"],
+      "@budget/composition-cloudflare-worker/*": ["../composition/cloudflare-worker/src/*"]
+    }
+  }
+}

@@ -1,0 +1,11 @@
+packages:
+  - apps/**
+  - packages/**
+  - infra/**
+
+onlyBuiltDependencies:
+  - esbuild
+  - protobufjs
+  - sharp
+  - unrs-resolver
+  - workerd
