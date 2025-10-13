@@ -20,6 +20,6 @@ COMP 4350 - Project Code
   - **tests/** (For our code tests)
   - ACKNOWLEDGMENTS.md For citations (each member should be adding to this file)
 
-## Docs:
+## Docs
 
-*API*: https://docs.google.com/document/d/1tYB-VAGl5qK_Bi0bbtqdJ5mbaJzvSiDYkD_54Wbm0mI/edit?usp=sharing
+*API*: <https://docs.google.com/document/d/1tYB-VAGl5qK_Bi0bbtqdJ5mbaJzvSiDYkD_54Wbm0mI/edit?usp=sharing>
