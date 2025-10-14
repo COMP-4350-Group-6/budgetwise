@@ -106,21 +106,51 @@ importers:
 
   packages/adapters/persistence/firebase:
     dependencies:
+      '@budget/domain':
+        specifier: workspace:*
+        version: link:../../../domain
+      '@budget/ports':
+        specifier: workspace:*
+        version: link:../../../ports
       firebase:
         specifier: ^10.0.0
         version: 10.14.1
 
-  packages/adapters/persistence/local: {}
+  packages/adapters/persistence/local:
+    dependencies:
+      '@budget/domain':
+        specifier: workspace:*
+        version: link:../../../domain
+      '@budget/ports':
+        specifier: workspace:*
+        version: link:../../../ports
 
   packages/adapters/system:
     dependencies:
+      '@budget/ports':
+        specifier: workspace:*
+        version: link:../../ports
       ulid:
         specifier: ^2.3.0
         version: 2.4.0
 
-  packages/composition/cloudflare-worker: {}
+  packages/composition/cloudflare-worker:
+    dependencies:
+      '@budget/adapters-persistence-local':
+        specifier: workspace:*
+        version: link:../../adapters/persistence/local
+      '@budget/usecases':
+        specifier: workspace:*
+        version: link:../../usecases
 
-  packages/composition/web-auth-client: {}
+  packages/composition/web-auth-client:
+    dependencies:
+      '@budget/adapters-auth-supabase':
+        specifier: workspace:*
+        version: link:../../adapters/auth-supabase
+      '@budget/usecases':
+        specifier: workspace:*
+        version: link:../../usecases
 
   packages/config: {}
 
