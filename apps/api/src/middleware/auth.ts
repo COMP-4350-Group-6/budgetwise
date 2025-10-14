@@ -7,7 +7,7 @@ async function verifySupabaseJwt(token: string, projectUrl: string): Promise<JWT
   const jwksUrl = new URL("/auth/v1/keys", projectUrl);
   const JWKS = createRemoteJWKSet(jwksUrl);
   const { payload } = await jwtVerify(token, JWKS, {
-    issuer: projectUrl,
+    issuer: new URL("/auth/v1", projectUrl).toString(),
   });
   return payload;
 }
