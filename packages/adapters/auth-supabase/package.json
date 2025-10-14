@@ -2,6 +2,11 @@
   "name": "@budget/adapters-auth-supabase",
   "version": "0.0.0",
   "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:unit": "vitest run --exclude \"**/*.int.test.ts\"",
+    "test:integration": "vitest run -t \"Supabase auth adapter (integration)\""
+  },
   "exports": { ".": "./src/index.ts" },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.4"

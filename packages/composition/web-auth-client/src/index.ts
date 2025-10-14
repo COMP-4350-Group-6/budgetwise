@@ -3,13 +3,13 @@ import { makeAuthClientUsecases } from "@budget/usecases";
 
 export type MakeWebAuthClientOptions = {
   supabaseUrl: string;
-  supabaseAnonKey: string;
+  supabasePublishableKey: string;
 };
 
 export function makeWebAuthClientContainer(opts: MakeWebAuthClientOptions) {
   const auth = makeSupabaseAuthClient({
     supabaseUrl: opts.supabaseUrl,
-    supabaseAnonKey: opts.supabaseAnonKey,
+    supabaseAnonKey: opts.supabasePublishableKey,
   });
 
   return {
