@@ -1,0 +1,9 @@
+{
+  "extends": "../../packages/config/tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["@cloudflare/workers-types"],
+    "outDir": "dist",
+    "disableSourceOfProjectReferenceRedirect": true
+  },
+  "include": ["src"]
+}

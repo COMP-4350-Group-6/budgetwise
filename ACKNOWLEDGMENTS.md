@@ -5,9 +5,9 @@
 
 ## Inspiration for folder structure
 
-- <https://github.com/open-telemetry/opentelemetry-dotnet?tab=readme-ov-file>
-- <https://nicholasrogoff.com/2023/09/21/mono-repository-folder-structures/>
-- <https://medium.com/@julakadaredrishi/monorepos-a-comprehensive-guide-with-examples-63202cfab711>
+root project structure was created with the help of chatgpt
+
+web-next project strucutr was genereated with npm create cloudflare@latest -- my-next-app --framework=next --platform=workers
 
 ## Linter
 
@@ -31,6 +31,8 @@ Setup:
 - Misc. repo structure (@Von-Seth): <https://github.com/COMP-4350-Group-8/comp4350-project>
 
 ## AI
+
+used to generate inital project structure
 
 ## Misc. tools used outside of repo
 

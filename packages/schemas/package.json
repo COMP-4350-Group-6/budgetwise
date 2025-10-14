@@ -1,0 +1,13 @@
+{
+  "name": "@budget/schemas",
+  "version": "0.0.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": { ".": { "import": "./dist/index.js", "types": "./dist/index.d.ts" } },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "openapi:generate": "node ./src/openapi-stub.cjs"
+  },
+  "dependencies": { "zod": "^4.1.12" }
+}

@@ -1,0 +1,10 @@
+{
+  // The name of your Worker
+  "name": "budget-api",
+  
+  // The entry point for your Worker
+  "main": "src/index.ts",
+  
+  // Date to use for Workers Runtime compatibility
+  "compatibility_date": "2025-05-05"
+}
