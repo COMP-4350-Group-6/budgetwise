@@ -15,15 +15,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div className="logo"> BudgetWise</div>
 
         <div className="group">
-          <h5>Area</h5>
-          <Link href="/dashboard/home">Section 1</Link>
-        </div>
-
-        <div className="group">
-          <h5>Area</h5>
-          <Link href="/dashboard/transactions">Section 2</Link>
-          <Link href="/dashboard/budget">Section 3</Link>
-          <Link href="/dashboard/insights">Section 4</Link>
+          <Link href="/dashboard/home">Home</Link>
+          <Link href="/dashboard/transactions">Transaction Management</Link>
+          <Link href="/dashboard/budget">Budget</Link>
+          <Link href="/dashboard/insights">Insights</Link>
         </div>
 
         <div className="bottom">
@@ -33,10 +28,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       <nav className="navbar">
         <div className="tabs">
-          <Tab href="/dashboard/home">View A</Tab>
-          <Tab href="/dashboard/transactions">View B</Tab>
-          <Tab href="/dashboard/budget">View C</Tab>
-          <Tab href="/dashboard/insights">View D</Tab>
+          <Tab href="/dashboard/home">Home</Tab>
+          <Tab href="/dashboard/transactions">Transaction Management</Tab>
+          <Tab href="/dashboard/budget">Budget</Tab>
+          <Tab href="/dashboard/insights">Insights</Tab>
         </div>
         <div className="right">
           <button className="button">Action</button>
