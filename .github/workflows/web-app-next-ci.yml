@@ -3,10 +3,10 @@ name: web-app-react CI
 on:
   pull_request:
     branches: [ dev ]
-    paths: [ 'src/web-app-react/**' ]
+    paths: [ 'src/web-next/**' ]
   push:
     branches: [ dev ]
-    paths: [ 'src/web-app-react/**' ]
+    paths: [ 'src/web-next/**' ]
 
 jobs:
   build:
@@ -15,7 +15,7 @@ jobs:
       CI: true
     defaults:
       run:
-        working-directory: src/web-app-react
+        working-directory: src/web-next
 
     steps:
       - name: Checkout

@@ -1,14 +1,4 @@
 /* colors fall back to CSS vars if you added them in globals.css */
-:root {
-  --bw-bg: var(--bg, #f2f3f7);
-  --bw-panel: var(--panel, #ffffff);
-  --bw-text: var(--text, #111827);
-  --bw-muted: var(--muted, #6b7280);
-  --bw-border: var(--border, #e5e7eb);
-  --bw-brand: var(--brand, #2e7d32);
-  --bw-brand-dark: #1b5e20;
-  --bw-shadow: var(--shadow, 0 10px 24px rgba(0, 0, 0, 0.06));
-}
 
 /* page frame */
 .shell {

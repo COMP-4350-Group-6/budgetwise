@@ -1,13 +1,4 @@
-:root {
-  --bw-bg: #f2f3f7;
-  --bw-panel: #ffffff;
-  --bw-text: #0f172a;
-  --bw-muted: #6b7280;
-  --bw-border: #e5e7eb;
-  --bw-brand: #2e7d32;
-  --bw-brand-dark: #1b5e20;
-  --bw-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-}
+
 
 /* Page layout */
 .shell {
