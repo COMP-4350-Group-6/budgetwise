@@ -9,5 +9,9 @@
   "dependencies": {
     "@budget/domain": "workspace:*",
     "@budget/ports": "workspace:*"
+  },
+  "devDependencies": {
+    "@budget/adapters-persistence-local": "workspace:*",
+    "@budget/adapters-system": "workspace:*"
   }
 }

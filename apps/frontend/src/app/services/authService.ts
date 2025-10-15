@@ -21,13 +21,8 @@ export const authService = {
 
   login: async (email: string, password: string) => {
     await authUsecases.signIn({ email, password });
-    // Optionally mirror access token to localStorage for now if needed by apiClient
-    try {
-      const me = await authUsecases.getCurrentUser();
-      return { id: me?.id || "", email: me?.email || email, name: me?.name || "" };
-    } catch {
-      return { id: "", email, name: "" };
-    }
+    const me = await authUsecases.getCurrentUser();
+    return { id: me?.id || "", email: me?.email || email, name: me?.name || "" };
   },
 
   getMe: async (): Promise<UserProfile> => {

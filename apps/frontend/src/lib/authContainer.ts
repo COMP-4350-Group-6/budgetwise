@@ -11,5 +11,6 @@ export const authContainer = makeWebAuthClientContainer({
 });
 
 export const authUsecases = authContainer.usecases.auth;
+export const authClient = authContainer.ports.auth;
 
 

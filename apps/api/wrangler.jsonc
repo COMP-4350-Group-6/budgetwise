@@ -10,4 +10,5 @@
   "vars": {
     "SUPABASE_URL": "https://yikylzhrskotiqnaitwz.supabase.co"
   }
+  // Note: SUPABASE_JWT_SECRET is loaded from .dev.vars (local) or Cloudflare secrets (production)
 }
