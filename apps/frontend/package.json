@@ -11,6 +11,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@budget/composition-web-auth-client": "workspace:*",
     "@next/font": "^14.2.15",
     "lucide-react": "^0.545.0",
     "msw": "^2.11.5",

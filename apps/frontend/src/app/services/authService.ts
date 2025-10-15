@@ -1,14 +1,4 @@
-import { apiFetch } from "@/lib/apiClient";
-
-interface AuthResponse {
-  user: {
-    id: string;
-    email: string;
-    name: string;
-  };
-  accessToken: string;
-  refreshToken: string;
-}
+import { authUsecases } from "@/lib/authContainer";
 
 interface UserProfile {
   id: string;
@@ -19,38 +9,39 @@ interface UserProfile {
 
 export const authService = {
   signup: async (email: string, password: string, name: string) => {
-    const body = { email, password, name };
-
-    const res = await apiFetch<AuthResponse>("/auth/signup", {
-      method: "POST",
-      body: JSON.stringify(body),
+    await authUsecases.signUp({
+      email,
+      password,
+      name,
+      defaultCurrency: "CAD",
     });
-
-    localStorage.setItem("accessToken", res.accessToken);
-    localStorage.setItem("refreshToken", res.refreshToken);
-    return res.user;
+    // For now, keep localStorage handling unchanged (no token set by Supabase directly here)
+    return { id: "", email, name };
   },
 
   login: async (email: string, password: string) => {
-    const body = { email, password };
-
-    const res = await apiFetch<AuthResponse>("/auth/login", {
-      method: "POST",
-      body: JSON.stringify(body),
-    });
-
-    localStorage.setItem("accessToken", res.accessToken);
-    localStorage.setItem("refreshToken", res.refreshToken);
-    return res.user;
+    await authUsecases.signIn({ email, password });
+    // Optionally mirror access token to localStorage for now if needed by apiClient
+    try {
+      const me = await authUsecases.getCurrentUser();
+      return { id: me?.id || "", email: me?.email || email, name: me?.name || "" };
+    } catch {
+      return { id: "", email, name: "" };
+    }
   },
 
   getMe: async (): Promise<UserProfile> => {
-    return apiFetch<UserProfile>("/auth/me", { method: "GET" }, true);
+    const me = await authUsecases.getCurrentUser();
+    if (!me) throw new Error("Not authenticated");
+    return {
+      id: me.id,
+      email: me.email,
+      name: me.name,
+      createdAt: me.createdAt,
+    };
   },
 
   logout: async () => {
-    await apiFetch("/auth/logout", { method: "POST" }, true);
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
+    await authUsecases.signOut();
   },
 };

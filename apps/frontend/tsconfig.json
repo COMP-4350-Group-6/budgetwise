@@ -1,5 +1,7 @@
 {
+  "extends": "../../packages/config/tsconfig.base.json",
   "compilerOptions": {
+    "baseUrl": ".",
     "target": "ES2017",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
@@ -19,9 +21,27 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
-    },
-    "types": ["vitest/globals"]
+      "@/*": ["./src/*"],
+      "@budget/domain/*": ["../../packages/domain/src/*"],
+      "@budget/usecases/*": ["../../packages/usecases/src/*"],
+      "@budget/usecases": ["../../packages/usecases/src/index.ts"],
+      "@budget/ports/*": ["../../packages/ports/src/*"],
+      "@budget/ports": ["../../packages/ports/src/index.ts"],
+      "@budget/schemas/*": ["../../packages/schemas/src/*"],
+      "@budget/schemas": ["../../packages/schemas/src/index.ts"],
+      "@budget/adapters-system": ["../../packages/adapters/system/src/index.ts"],
+      "@budget/adapters-system/*": ["../../packages/adapters/system/src/*"],
+      "@budget/adapters-persistence-local": ["../../packages/adapters/persistence/local/src/index.ts"],
+      "@budget/adapters-persistence-local/*": ["../../packages/adapters/persistence/local/src/*"],
+      "@budget/adapters-persistence-firebase": ["../../packages/adapters/persistence/firebase/src/index.ts"],
+      "@budget/adapters-persistence-firebase/*": ["../../packages/adapters/persistence/firebase/src/*"],
+      "@budget/composition-cloudflare-worker": ["../../packages/composition/cloudflare-worker/src/index.ts"],
+      "@budget/composition-cloudflare-worker/*": ["../../packages/composition/cloudflare-worker/src/*"],
+      "@budget/adapters-auth-supabase": ["../../packages/adapters/auth-supabase/src/index.ts"],
+      "@budget/adapters-auth-supabase/*": ["../../packages/adapters/auth-supabase/src/*"],
+      "@budget/composition-web-auth-client": ["../../packages/composition/web-auth-client/src/index.ts"],
+      "@budget/composition-web-auth-client/*": ["../../packages/composition/web-auth-client/src/*"]
+    }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
   "exclude": ["node_modules"]

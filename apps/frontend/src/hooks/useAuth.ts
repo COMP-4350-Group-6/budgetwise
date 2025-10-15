@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { apiFetch } from "@/lib/apiClient";
+import { authUsecases } from "@/lib/authContainer";
 
 export interface User {
   id: string;
@@ -16,8 +16,9 @@ export function useAuth() {
   useEffect(() => {
     async function fetchUser() {
       try {
-        const res = await apiFetch<User>("/auth/me", { method: "GET" }, true);
-        setUser(res);
+        const me = await authUsecases.getCurrentUser();
+        if (me) setUser({ id: me.id, email: me.email, name: me.name });
+        else setUser(null);
       } catch {
         setUser(null);
       } finally {
@@ -25,9 +26,7 @@ export function useAuth() {
       }
     }
 
-    const token = localStorage.getItem("accessToken");
-    if (token) fetchUser();
-    else setLoading(false);
+    fetchUser();
   }, []);
 
   return { user, loading, isAuthenticated: !!user };
