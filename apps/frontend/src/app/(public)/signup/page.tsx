@@ -3,22 +3,44 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
-
+import { useRouter } from "next/navigation";
+import { authService } from "@/app/services/authService";
 
 export default function SignupPage() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSignup = (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError(null);
 
-    // simulate signup delay
-    setTimeout(() => {
+    const form = e.target as HTMLFormElement;
+    const formData = new FormData(form);
+
+    const name = formData.get("name") as string;
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+    const confirmPassword = formData.get("confirm-password") as string;
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
       setIsLoading(false);
-      window.location.href = "/login"; // temporary redirect
-    }, 1000);
+      return;
+    }
+
+    try {
+      await authService.signup(email, password, name);
+      router.push("/login");
+    } catch (err: any) {
+      setError("Signup failed. Please try again.");
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -27,10 +49,13 @@ export default function SignupPage() {
         onSubmit={handleSignup}
         className="w-full max-w-lg space-y-3 bg-inherit"
       >
-        {/* Header */}
         <h2 className="text-2xl font-bold text-gray-900 text-center mb-6">
           Create Your Account
         </h2>
+
+        {error && (
+          <p className="text-red-500 text-sm text-center mb-2">{error}</p>
+        )}
 
         {/* Full Name */}
         <div>
@@ -43,6 +68,7 @@ export default function SignupPage() {
           <input
             type="text"
             id="name"
+            name="name"
             placeholder="John Doe"
             className="w-full border border-gray-300 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-mid"
             required
@@ -60,6 +86,7 @@ export default function SignupPage() {
           <input
             type="email"
             id="email"
+            name="email"
             placeholder="john.doe@example.com"
             className="w-full border border-gray-300 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-mid"
             required
@@ -78,6 +105,7 @@ export default function SignupPage() {
             <input
               type={showPassword ? "text" : "password"}
               id="password"
+              name="password"
               placeholder="••••••••"
               className="w-full border border-gray-300 rounded-full px-4 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-green-mid"
               required
@@ -109,13 +137,16 @@ export default function SignupPage() {
             <input
               type={showConfirmPassword ? "text" : "password"}
               id="confirm-password"
+              name="confirm-password"
               placeholder="••••••••"
               className="w-full border border-gray-300 rounded-full px-4 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-green-mid"
               required
             />
             <button
               type="button"
-              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              onClick={() =>
+                setShowConfirmPassword(!showConfirmPassword)
+              }
               className="absolute right-3 top-2.5 text-gray-500 hover:text-gray-700"
               aria-label="Toggle confirm password visibility"
             >
@@ -128,46 +159,22 @@ export default function SignupPage() {
           </div>
         </div>
 
-        {/* Create Account Button */}
+        {/* Submit */}
         <button
-            type="submit"
-            disabled={isLoading}
-            className={`
-                w-full text-sm rounded-full py-2.5 flex items-center justify-center 
-                transition font-semibold
-                bg-green-pale text-green-dark
-                hover:bg-green-mid hover:text-white
-                disabled:cursor-not-allowed
-                disabled:bg-gray-400
-            `}
+          type="submit"
+          disabled={isLoading}
+          className={`
+              w-full text-sm rounded-full py-2.5 flex items-center justify-center 
+              transition font-semibold
+              bg-green-pale text-green-dark
+              hover:bg-green-mid hover:text-white
+              disabled:cursor-not-allowed
+              disabled:bg-gray-400
+          `}
         >
-          {isLoading ? (
-            <svg
-              className="animate-spin h-5 w-5 text-white"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              />
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8v8H4z"
-              />
-            </svg>
-          ) : (
-            "Create Account"
-          )}
+          {isLoading ? "Creating Account..." : "Create Account"}
         </button>
 
-        {/* Sign In Link */}
         <p className="text-center text-sm text-gray-600 mt-6">
           Already have an account?{" "}
           <Link href="/login" className="text-green-mid hover:text-green-dark">

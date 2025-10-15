@@ -4,23 +4,34 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
+import { authService } from "@/app/services/authService";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError(null);
 
-    // Simulate async login delay
-    setTimeout(() => {
+    const form = e.target as HTMLFormElement;
+    const formData = new FormData(form);
+
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+
+    try {
+      await authService.login(email, password);
+      router.push("/home"); // ✅ redirect after successful login
+    } catch (err: any) {
+      console.error("Login failed:", err);
+      setError("Invalid credentials or server error. Please try again.");
+    } finally {
       setIsLoading(false);
-
-      // ✅ Temporary redirect to protected home page
-      router.push("/home");
-    }, 1000);
+    }
   };
 
   return (
@@ -34,6 +45,11 @@ export default function LoginPage() {
           Welcome Back
         </h2>
 
+        {/* Error Message */}
+        {error && (
+          <p className="text-red-500 text-sm text-center mb-2">{error}</p>
+        )}
+
         {/* Email */}
         <div>
           <label
@@ -45,6 +61,7 @@ export default function LoginPage() {
           <input
             type="email"
             id="email"
+            name="email"
             placeholder="john.doe@example.com"
             className="w-full border border-gray-300 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-mid"
             required
@@ -63,6 +80,7 @@ export default function LoginPage() {
             <input
               type={showPassword ? "text" : "password"}
               id="password"
+              name="password"
               placeholder="••••••••"
               className="w-full border border-gray-300 rounded-full px-4 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-green-mid"
               required
@@ -83,7 +101,7 @@ export default function LoginPage() {
         </div>
 
         {/* Forgot Password */}
-        <p className="text-center text-sm text-gray-600 dark:text-gray-400">
+        <p className="text-center text-sm text-gray-600">
           <Link
             href="#"
             className="text-green-mid hover:text-green-dark font-medium"
