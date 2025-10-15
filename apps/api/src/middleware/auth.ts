@@ -25,9 +25,6 @@ export async function authMiddleware(c: Context, next: Next) {
   const token = authHeader.substring(7);
   const jwtSecret = c.env?.SUPABASE_JWT_SECRET as string | undefined;
   
-  console.log("Auth middleware - JWT secret present:", !!jwtSecret);
-  console.log("Auth middleware - token prefix:", token.substring(0, 20));
-  
   if (!jwtSecret) {
     console.error("SUPABASE_JWT_SECRET not configured");
     throw new HTTPException(500, { message: "Server auth misconfigured" });
@@ -37,7 +34,6 @@ export async function authMiddleware(c: Context, next: Next) {
     const payload = await verifySupabaseJwt(token, jwtSecret);
     const userId = (payload.sub as string) || "";
     if (!userId) throw new Error("Missing sub in token");
-    console.log("Auth successful for userId:", userId);
     c.set("userId", userId);
     await next();
   } catch (err) {

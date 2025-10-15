@@ -48,7 +48,10 @@ export function makeSupabaseAuthClient(opts: MakeSupabaseAuthClientOptions): Aut
         email: input.email,
         password: input.password,
       });
-      if (error) throw error;
+      if (error) {
+        console.log("Login error:", error.message);
+        throw error;
+      }
     },
 
     async logout() {

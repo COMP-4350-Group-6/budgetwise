@@ -2,10 +2,10 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 
 // Create a shared mock for the Supabase auth client methods
 const mockAuth = {
-  signUp: vi.fn<[], any>(),
-  signInWithPassword: vi.fn<[], any>(),
-  signOut: vi.fn<[], any>(),
-  getUser: vi.fn<[], any>(),
+  signUp: vi.fn(),
+  signInWithPassword: vi.fn(),
+  signOut: vi.fn(),
+  getUser: vi.fn(),
 };
 
 // Mock the supabase-js createClient to return the above mock
