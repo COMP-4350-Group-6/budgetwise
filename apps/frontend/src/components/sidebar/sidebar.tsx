@@ -1,34 +1,41 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { FiArrowLeft, FiArrowRight } from "react-icons/fi";
 import { FaHome, FaChartLine, FaWallet, FaLightbulb } from "react-icons/fa";
 import { useSidebarState } from "@/app/(protected)/ProtectedLayoutClient";
+import styles from "./sidebar.module.css";
 
 export default function Sidebar() {
+  const router = useRouter();
   const { collapsed, toggleCollapse } = useSidebarState();
+
+  // Handle user logout by clearing tokens and redirecting to login
+  const handleLogout = () => {
+    localStorage.removeItem("bw_access");
+    localStorage.removeItem("bw_refresh");
+    router.push("/login");
+  };
 
   return (
     <aside
-      className={`h-full bg-white border-r border-brandGrey shadow-sm transition-all duration-300 flex flex-col ${
-        collapsed ? "w-20" : "w-64"
+      className={`${styles.sidebar} ${
+        collapsed ? styles.collapsed : styles.expanded
       }`}
     >
-      {/* Header / Toggle */}
-      <div className="p-4 flex items-center justify-between border-b border-brandGrey">
-        <span className="font-bold text-brandDarkerGreen">
-          {collapsed ? "B" : "BudgetWise"}
+      {/* Sidebar header with logo and collapse toggle */}
+      <div className={styles.header}>
+        <span className={styles.logo}>
+          {collapsed ? "B" : "BudgetWise"} {/* Collapsed shows only initial */}
         </span>
-        <button
-          onClick={toggleCollapse}
-          className="text-brandDarkerGreen hover:text-brandGreen transition"
-        >
+        <button onClick={toggleCollapse} className={styles.toggle}>
           {collapsed ? <FiArrowRight size={18} /> : <FiArrowLeft size={18} />}
         </button>
       </div>
 
-      {/* Nav links */}
-      <nav className="flex-1 px-3 py-4 space-y-1">
+      {/* Main navigation links */}
+      <nav className={styles.nav}>
         <SidebarLink
           href="/home"
           icon={<FaHome />}
@@ -54,11 +61,16 @@ export default function Sidebar() {
           collapsed={collapsed}
         />
       </nav>
+
+      {/* Logout button at bottom */}
+      <button onClick={handleLogout} className={styles.logout}>
+        Logout
+      </button>
     </aside>
   );
 }
 
-/** Reusable link component */
+// Reusable sidebar link component that handles collapsed state
 function SidebarLink({
   href,
   icon,
@@ -73,10 +85,9 @@ function SidebarLink({
   return (
     <Link
       href={href}
-      className={`flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-brandLightGreen/50 text-brandDarkerGreen transition-all ${
-        collapsed ? "justify-center" : ""
-      }`}
+      className={`${styles.link} ${collapsed ? styles.centered : ""}`}
     >
+      {/* Always show icon, conditionally show label */}
       <span className="text-lg">{icon}</span>
       {!collapsed && <span className="font-medium">{label}</span>}
     </Link>

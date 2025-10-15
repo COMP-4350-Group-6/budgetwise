@@ -10,18 +10,23 @@ export const requirements = [
   { re: /[!@#$%^&*(),.?\":{}|<>]/, label: "Contains at least one special symbol" },
 ];
 
-
 export function isPasswordValid(password: string): boolean {
   return requirements.every((req) => req.re.test(password));
 }
 
 export default function PasswordRequirements({ password }: { password: string }) {
   return (
-    <ul className={styles.list}>
+    <ul className={styles.list} data-testid="pw-req-list">
       {requirements.map((req, i) => {
         const meets = req.re.test(password);
         return (
-          <li key={i} className={meets ? styles.valid : styles.invalid}>
+          <li
+            key={i}
+            role="listitem"
+            className={meets ? styles.valid : styles.invalid}
+            data-state={meets ? "valid" : "invalid"}   
+            data-label={req.label}                 
+          >
             {meets ? <Check size={14} /> : <X size={14} />}
             <span>{req.label}</span>
           </li>

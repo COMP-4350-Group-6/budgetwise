@@ -6,6 +6,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { authService } from "@/app/services/authService";
 import PasswordRequirements, { isPasswordValid } from "@/components/signup/PasswordRequirement";
+import styles from "./signup.module.css";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -52,20 +53,15 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="flex justify-center min-h-screen items-center bg-shade-light">
-      <form onSubmit={handleSignup} className="w-full max-w-lg space-y-3 bg-inherit">
-        <h2 className="text-2xl font-bold text-gray-900 text-center mb-6">
-          Create Your Account
-        </h2>
+    <div className={styles.shell}>
+      <form onSubmit={handleSignup} className={styles.form}>
+        <h2 className={styles.heading}>Create Your Account</h2>
 
-        {/* Global Error Message */}
-        {error && (
-          <p className="text-red-500 text-sm text-center mb-2 font-medium">{error}</p>
-        )}
+        {error && <p className={styles.error}>{error}</p>}
 
         {/* Full Name */}
         <div>
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="name" className={styles.label}>
             Full Name
           </label>
           <input
@@ -73,14 +69,14 @@ export default function SignupPage() {
             id="name"
             name="name"
             placeholder="John Doe"
-            className="w-full border border-gray-300 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-mid"
+            className={styles.input}
             required
           />
         </div>
 
         {/* Email */}
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="email" className={styles.label}>
             Email Address
           </label>
           <input
@@ -88,26 +84,24 @@ export default function SignupPage() {
             id="email"
             name="email"
             placeholder="john.doe@example.com"
-            className="w-full border border-gray-300 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-mid"
+            className={styles.input}
             required
           />
         </div>
 
         {/* Password */}
         <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="password" className={styles.label}>
             Password
           </label>
-          <div className="relative">
+          <div className={styles.passwordWrapper}>
             <input
               type={showPassword ? "text" : "password"}
               id="password"
               name="password"
               placeholder="••••••••"
-              className={`w-full border rounded-full px-4 py-2 pr-10 text-sm focus:outline-none focus:ring-2 ${
-                !isPasswordOk && password.length > 0
-                  ? "border-red-500 focus:ring-red-300"
-                  : "border-gray-300 focus:ring-green-mid"
+              className={`${styles.passwordInput} ${
+                !isPasswordOk && password.length > 0 ? styles.invalidInput : ""
               }`}
               required
               value={password}
@@ -120,7 +114,7 @@ export default function SignupPage() {
             <button
               type="button"
               onClick={() => setShowPassword((prev) => !prev)}
-              className="absolute right-3 top-2.5 text-gray-500 hover:text-gray-700"
+              className={styles.toggleBtn}
               aria-label="Toggle password visibility"
             >
               {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -130,22 +124,22 @@ export default function SignupPage() {
 
         {/* Confirm Password */}
         <div>
-          <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="confirm-password" className={styles.label}>
             Confirm Password
           </label>
-          <div className="relative">
+          <div className={styles.passwordWrapper}>
             <input
               type={showConfirmPassword ? "text" : "password"}
               id="confirm-password"
               name="confirm-password"
               placeholder="••••••••"
-              className="w-full border border-gray-300 rounded-full px-4 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-green-mid"
+              className={styles.passwordInput}
               required
             />
             <button
               type="button"
               onClick={() => setShowConfirmPassword((prev) => !prev)}
-              className="absolute right-3 top-2.5 text-gray-500 hover:text-gray-700"
+              className={styles.toggleBtn}
               aria-label="Toggle confirm password visibility"
             >
               {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -153,30 +147,24 @@ export default function SignupPage() {
           </div>
         </div>
 
-          {/* Password requirements */}
+   {/* Password requirements */}
           <PasswordRequirements password={password} />
         </div>
 
+        
         {/* Submit */}
         <button
           type="submit"
           disabled={isLoading}
-          className={`
-            w-full text-sm rounded-full py-2.5 flex items-center justify-center 
-            transition font-semibold
-            bg-green-pale text-green-dark
-            hover:bg-green-mid hover:text-white
-            disabled:cursor-not-allowed
-            disabled:bg-gray-400
-          `}
+          className={styles.submitBtn}
         >
           {isLoading ? "Creating Account..." : "Create Account"}
         </button>
 
         {/* Login Link */}
-        <p className="text-center text-sm text-gray-600 mt-6">
+        <p className={styles.footerText}>
           Already have an account?{" "}
-          <Link href="/login" className="text-green-mid hover:text-green-dark">
+          <Link href="/login" className={styles.loginLink}>
             Sign in here
           </Link>
         </p>
