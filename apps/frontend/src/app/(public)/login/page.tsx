@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import { authService } from "@/app/services/authService";
+import styles from "./login.module.css";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -35,27 +36,17 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex justify-center min-h-screen items-center bg-shade-light">
-      <form
-        onSubmit={handleLogin}
-        className="w-full max-w-lg space-y-3 bg-inherit"
-      >
+    <div className={styles.shell}>
+      <form onSubmit={handleLogin} className={styles.form}>
         {/* Header */}
-        <h2 className="text-2xl font-bold text-gray-900 text-center mb-6">
-          Welcome Back
-        </h2>
-
+        <h1 className={styles.heading}>BudgetWise</h1>
+        
         {/* Error Message */}
-        {error && (
-          <p className="text-red-500 text-sm text-center mb-2">{error}</p>
-        )}
+        {error && <p className={styles.error}>{error}</p>}
 
         {/* Email */}
         <div>
-          <label
-            htmlFor="email"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
+          <label htmlFor="email" className={styles.label}>
             Email Address
           </label>
           <input
@@ -63,32 +54,29 @@ export default function LoginPage() {
             id="email"
             name="email"
             placeholder="john.doe@example.com"
-            className="w-full border border-gray-300 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-mid"
+            className={styles.input}
             required
           />
         </div>
 
         {/* Password */}
         <div>
-          <label
-            htmlFor="password"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
+          <label htmlFor="password" className={styles.label}>
             Password
           </label>
-          <div className="relative">
+          <div className={styles.passwordWrapper}>
             <input
               type={showPassword ? "text" : "password"}
               id="password"
               name="password"
               placeholder="••••••••"
-              className="w-full border border-gray-300 rounded-full px-4 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-green-mid"
+              className={styles.passwordInput}
               required
             />
             <button
               type="button"
               onClick={() => setShowPassword((prev) => !prev)}
-              className="absolute right-3 top-2.5 text-gray-500 hover:text-gray-700"
+              className={styles.toggleBtn}
               aria-label="Toggle password visibility"
             >
               {showPassword ? (
@@ -101,11 +89,8 @@ export default function LoginPage() {
         </div>
 
         {/* Forgot Password */}
-        <p className="text-center text-sm text-gray-600">
-          <Link
-            href="#"
-            className="text-green-mid hover:text-green-dark font-medium"
-          >
+        <p className={styles.textCenter}>
+          <Link href="#" className={styles.link}>
             Forgot password?
           </Link>
         </p>
@@ -114,18 +99,11 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={isLoading}
-          className={`
-            w-full text-sm rounded-full py-2.5 flex items-center justify-center 
-            transition font-semibold
-            bg-green-pale text-green-dark
-            hover:bg-green-mid hover:text-white
-            disabled:cursor-not-allowed
-            disabled:bg-gray-400
-          `}
+          className={styles.submitBtn}
         >
           {isLoading ? (
             <svg
-              className="animate-spin h-5 w-5 text-white"
+              className={styles.spinner}
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
@@ -150,12 +128,9 @@ export default function LoginPage() {
         </button>
 
         {/* Sign Up Link */}
-        <p className="text-center text-sm text-gray-600 mt-6">
+        <p className={styles.footerText}>
           Don’t have an account?{" "}
-          <Link
-            href="/signup"
-            className="text-green-mid font-semibold hover:text-green-dark"
-          >
+          <Link href="/signup" className={styles.signUpLink}>
             Sign up here
           </Link>
         </p>
