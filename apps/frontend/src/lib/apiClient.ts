@@ -1,10 +1,9 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8787";
-
 export async function apiFetch<T = Record<string, unknown>>(
   endpoint: string,
   options: RequestInit = {},
   authRequired: boolean = false
 ): Promise<T> {
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8787"; // <-- move inside
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     ...(options.headers as Record<string, string>),

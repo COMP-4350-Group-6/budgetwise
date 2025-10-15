@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { authService } from "@/app/services/authService";
-import PasswordRequirements, { isPasswordValid } from "@/components/signup/PasswordRequirement";
+import PasswordRequirements, { isPasswordValid } from "@/components/validation/PasswordRequirement";
 import styles from "./signup.module.css";
 
 export default function SignupPage() {

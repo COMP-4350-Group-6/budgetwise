@@ -3,7 +3,7 @@ import { render, screen, within } from "@testing-library/react";
 import PasswordRequirements, {
   requirements,
   isPasswordValid,
-} from "@/components/signup/PasswordRequirement";
+} from "@/components/validation/PasswordRequirement";
 
 describe("PasswordRequirements (UI)", () => {
   it("renders all requirement labels", () => {
