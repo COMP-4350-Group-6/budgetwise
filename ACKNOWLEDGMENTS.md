@@ -1,4 +1,4 @@
-clear# ACKNOWLEDGMENTS
+# ACKNOWLEDGMENTS
 
 - Project commissioned for group project
 - Initial concept for app from @ahnafaf

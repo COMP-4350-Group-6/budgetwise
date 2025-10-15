@@ -1,7 +1,14 @@
 import { apiFetch } from "@/lib/apiClient";
+import { authClient } from "@/lib/authContainer";
 
 const mockFetch = vi.fn();
 global.fetch = mockFetch as any;
+
+vi.mock("@/lib/authContainer", () => ({
+  authClient: {
+    getSessionToken: vi.fn(),
+  },
+}));
 
 describe("apiFetch", () => {
   const endpoint = "/users";
@@ -49,7 +56,7 @@ describe("apiFetch", () => {
   });
 
   it("adds Authorization header when authRequired is true", async () => {
-    localStorage.setItem("accessToken", "abc123");
+    (authClient.getSessionToken as any).mockResolvedValueOnce("abc123");
     const mockData = { id: 1 };
     mockFetch.mockResolvedValueOnce({
       ok: true,

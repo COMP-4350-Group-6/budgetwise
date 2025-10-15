@@ -35,3 +35,4 @@ export const BudgetDTO = z.object({
 export type CreateBudgetInput = z.infer<typeof CreateBudgetInputSchema>;
 export type UpdateBudgetInput = z.infer<typeof UpdateBudgetInputSchema>;
 export type BudgetDTO = z.infer<typeof BudgetDTO>;
+export type BudgetPeriod = z.infer<typeof BudgetPeriodSchema>;

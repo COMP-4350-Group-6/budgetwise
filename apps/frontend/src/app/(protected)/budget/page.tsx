@@ -4,13 +4,18 @@ import React, { useState, useEffect } from "react";
 import styles from "./budget.module.css";
 import { budgetService, categoryService } from "@/services/budgetService";
 import type { BudgetDashboard, Category } from "@/services/budgetService";
+import { 
+  CreateBudgetInput, 
+  BudgetPeriod, 
+  Currency
+} from "@budget/schemas";
 
 export default function BudgetPage() {
   const [dashboard, setDashboard] = useState<BudgetDashboard | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [showCreateForm, setShowCreateForm] = useState(false);
+  // const [showCreateForm, setShowCreateForm] = useState(false);
   const [showCategoryForm, setShowCategoryForm] = useState(false);
   const [addingBudgetForCategory, setAddingBudgetForCategory] = useState<string | null>(null);
   const [formData, setFormData] = useState({
@@ -68,45 +73,45 @@ export default function BudgetPage() {
     }).format(amount);
   };
 
-  const getStatusColor = (percentageUsed: number, isOverBudget: boolean): string => {
-    if (isOverBudget) return 'bg-red-600';
-    if (percentageUsed >= 80) return 'bg-yellow-500';
-    return 'bg-green-600';
-  };
+  // const getStatusColor = (percentageUsed: number, isOverBudget: boolean): string => {
+  //   if (isOverBudget) return 'bg-red-600';
+  //   if (percentageUsed >= 80) return 'bg-yellow-500';
+  //   return 'bg-green-600';
+  // };
 
-  const handleCreateBudget = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const budgetData = {
-        categoryId: formData.categoryId,
-        name: formData.name,
-        amountCents: Math.round(parseFloat(formData.amount) * 100),
-        currency: formData.currency,
-        period: formData.period,
-        startDate: formData.startDate, // Send as ISO string
-        alertThreshold: parseInt(formData.alertThreshold),
-      };
+  // const handleCreateBudget = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   try {
+  //     const budgetData = {
+  //       categoryId: formData.categoryId,
+  //       name: formData.name,
+  //       amountCents: Math.round(parseFloat(formData.amount) * 100),
+  //       currency: formData.currency,
+  //       period: formData.period,
+  //       startDate: formData.startDate, // Send as ISO string
+  //       alertThreshold: parseInt(formData.alertThreshold),
+  //     };
       
-      console.log('Creating budget with data:', budgetData);
-      await budgetService.createBudget(budgetData as any);
+  //     console.log('Creating budget with data:', budgetData);
+  //     await budgetService.createBudget(budgetData as any);
       
-      // Reset form and reload
-      setShowCreateForm(false);
-      setFormData({
-        categoryId: '',
-        name: '',
-        amount: '',
-        currency: 'CAD',
-        period: 'MONTHLY',
-        startDate: new Date().toISOString().split('T')[0],
-        alertThreshold: '80',
-      });
-      loadDashboard();
-    } catch (err) {
-      console.error('Budget creation error:', err);
-      alert('Failed to create budget: ' + (err instanceof Error ? err.message : 'Unknown error'));
-    }
-  };
+  //     // Reset form and reload
+  //     setShowCreateForm(false);
+  //     setFormData({
+  //       categoryId: '',
+  //       name: '',
+  //       amount: '',
+  //       currency: 'CAD',
+  //       period: 'MONTHLY',
+  //       startDate: new Date().toISOString().split('T')[0],
+  //       alertThreshold: '80',
+  //     });
+  //     loadDashboard();
+  //   } catch (err) {
+  //     console.error('Budget creation error:', err);
+  //     alert('Failed to create budget: ' + (err instanceof Error ? err.message : 'Unknown error'));
+  //   }
+  // };
 
   const handleCreateCategory = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -187,17 +192,17 @@ export default function BudgetPage() {
   const handleSubmitBudget = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const budgetData = {
+      const budgetData: CreateBudgetInput = {
         categoryId: formData.categoryId,
         name: formData.name,
         amountCents: Math.round(parseFloat(formData.amount) * 100),
-        currency: formData.currency,
+        currency: formData.currency as Currency, 
         period: formData.period,
-        startDate: formData.startDate,
+        startDate: new Date(formData.startDate),
         alertThreshold: parseInt(formData.alertThreshold),
       };
-      
-      await budgetService.createBudget(budgetData as any);
+
+      await budgetService.createBudget(budgetData);
       handleCancelBudgetForm();
       loadDashboard();
     } catch (err) {
@@ -421,7 +426,7 @@ export default function BudgetPage() {
                       />
                       <select
                         value={formData.period}
-                        onChange={(e) => setFormData({ ...formData, period: e.target.value as any })}
+                        onChange={(e) => setFormData({ ...formData, period: e.target.value as BudgetPeriod})}
                         className={styles.input}
                       >
                         <option value="DAILY">Daily</option>

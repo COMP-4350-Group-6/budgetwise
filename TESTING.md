@@ -6,6 +6,7 @@ Run these first:
 - Domain tests with coverage: `pnpm test --filter @budget/domain -- --coverage`
 - Usecases tests with coverage: `pnpm test --filter @budget/usecases -- --coverage`
 - API tests: `pnpm test --filter api`
+- Frontend: `cd apps/frontend && pnpm vitest`
 - Open coverage report (HTML):
   - Domain: `open packages/domain/coverage/index.html`
   - Usecases: `open packages/usecases/coverage/index.html`

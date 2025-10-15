@@ -16,6 +16,7 @@ This guide explains why we test specific behaviors for Categories and Budgets, a
 ## Categories: What and Why We Test
 
 1) Name validation (A–Z and spaces, no emoji/specials, non-empty, <= 50 chars)
+
 - Why: Prevents invalid user inputs, ensures clean semantics across locales and UI.
 - Where enforced: [Category](budgetwise/packages/domain/src/category.ts:16).
 - Tests:
@@ -25,6 +26,7 @@ This guide explains why we test specific behaviors for Categories and Budgets, a
 - Files: [category-edge-cases.test.ts](budgetwise/packages/usecases/src/categories/category-edge-cases.test.ts:1)
 
 2) Duplicate name restriction (per user, case-insensitive)
+
 - Why: Within a single user’s catalog, duplicates cause confusion. Across users, names can collide independently (multi-tenant).
 - Where enforced: Duplicate check in [makeCreateCategory()](budgetwise/packages/usecases/src/categories/create-category.ts:23).
 - Tests:
@@ -33,6 +35,7 @@ This guide explains why we test specific behaviors for Categories and Budgets, a
 - Files: [category-edge-cases.test.ts](budgetwise/packages/usecases/src/categories/category-edge-cases.test.ts:359)
 
 3) Active/inactive toggling and list filters
+
 - Why: Common lifecycle flows; lists must faithfully reflect active-only filtering.
 - Tests:
   - Toggling state multiple times preserves expected state
@@ -40,6 +43,7 @@ This guide explains why we test specific behaviors for Categories and Budgets, a
 - Files: [category-edge-cases.test.ts](budgetwise/packages/usecases/src/categories/category-edge-cases.test.ts:186)
 
 4) Sort order handling (negative, large, duplicates)
+
 - Why: Ensure sort values can represent user-defined priorities without hidden coupling.
 - Tests:
   - Accept negative and large values
@@ -47,6 +51,7 @@ This guide explains why we test specific behaviors for Categories and Budgets, a
 - Files: [category-edge-cases.test.ts](budgetwise/packages/usecases/src/categories/category-edge-cases.test.ts:239)
 
 5) Default categories seeding (idempotent per user)
+
 - Why: Avoid duplicate defaults, support multi-tenant isolation, and label defaults.
 - Tests:
   - Seeding twice for same user does not change count
@@ -55,6 +60,7 @@ This guide explains why we test specific behaviors for Categories and Budgets, a
 - Files: [category-edge-cases.test.ts](budgetwise/packages/usecases/src/categories/category-edge-cases.test.ts:290)
 
 6) Deletion constraints (no delete if budgets exist)
+
 - Why: Protect referential integrity and UX expectations.
 - Tests:
   - Deleting a category with active budgets is rejected
@@ -63,6 +69,7 @@ This guide explains why we test specific behaviors for Categories and Budgets, a
 - Files: [category-edge-cases.test.ts](budgetwise/packages/usecases/src/categories/category-edge-cases.test.ts:386)
 
 7) High volume behavior
+
 - Why: Ensure repositories and filtering are performant and stable under load.
 - Tests:
   - Rapid creation of many categories
@@ -70,11 +77,13 @@ This guide explains why we test specific behaviors for Categories and Budgets, a
 - Files: [category-edge-cases.test.ts](budgetwise/packages/usecases/src/categories/category-edge-cases.test.ts:497)
 
 Note on name uniqueness in high-volume tests
+
 - The domain enforces no duplicates per user. We generate unique, letters-only two-letter names to satisfy domain constraints and still stress list/filters: see adjusted test in [category-edge-cases.test.ts](budgetwise/packages/usecases/src/categories/category-edge-cases.test.ts:511).
 
 ## Budgets: What and Why We Test
 
 1) Amount boundaries and integrity
+
 - Why: Guard correctness on extremes, avoid floating issues, and enforce integers.
 - Where enforced: [Budget](budgetwise/packages/domain/src/budget.ts:22).
 - Tests:
@@ -84,6 +93,7 @@ Note on name uniqueness in high-volume tests
 - Files: [create-budget.test.ts](budgetwise/packages/usecases/src/budgets/create-budget.test.ts:1), [budget-edge-cases.test.ts](budgetwise/packages/usecases/src/budgets/budget-edge-cases.test.ts:1)
 
 2) Dates and periods
+
 - Why: Period math underpins spend calculations and dashboards. We ensure robust behavior across time edges.
 - Tests:
   - Far past/future start dates, same-day start/end, multi-year spans
@@ -92,6 +102,7 @@ Note on name uniqueness in high-volume tests
 - Files: [budget-edge-cases.test.ts](budgetwise/packages/usecases/src/budgets/budget-edge-cases.test.ts:168), [create-budget.test.ts](budgetwise/packages/usecases/src/budgets/create-budget.test.ts:1)
 
 3) Overspending and exact-limit spending
+
 - Why: Users hit edges; ensure clean reports and no off-by-one surprises.
 - Tests:
   - Exact to the penny at limit: not over
@@ -100,6 +111,7 @@ Note on name uniqueness in high-volume tests
 - Files: [budget-edge-cases.test.ts](budgetwise/packages/usecases/src/budgets/budget-edge-cases.test.ts:348)
 
 4) Updates under transactional history
+
 - Why: Real-world budgets change; system must recompute derived status correctly.
 - Tests:
   - Increase budget after transactions: percentage recalculates
@@ -107,6 +119,7 @@ Note on name uniqueness in high-volume tests
 - Files: [budget-edge-cases.test.ts](budgetwise/packages/usecases/src/budgets/budget-edge-cases.test.ts:433)
 
 5) Alert thresholds semantics (0%, 100%, boundary, zero-amount guard)
+
 - Why: Alerts drive UX nudges; edge semantics must be precise.
 - Where implemented: [Budget.shouldAlert()](budgetwise/packages/domain/src/budget.ts:71)
 - Rationale and fixes:
@@ -117,6 +130,7 @@ Note on name uniqueness in high-volume tests
 - Files: [budget-edge-cases.test.ts](budgetwise/packages/usecases/src/budgets/budget-edge-cases.test.ts:83), [budget.ts](budgetwise/packages/domain/src/budget.ts:39)
 
 6) Concurrency and aggregation stability
+
 - Why: Batch imports or concurrent inputs must yield stable counts and sums.
 - Tests:
   - Add 100 transactions concurrently and validate accumulated spend and count
@@ -160,6 +174,7 @@ Note on name uniqueness in high-volume tests
   - [makeGetBudgetDashboard()](budgetwise/packages/usecases/src/budgets/get-budget-dashboard.ts:27) → rolls per-budget status up to the category
 
 This design is why our tests focus on:
+
 - Proving per-budget correctness first
 - Then verifying category-level aggregation
 

@@ -1,7 +1,5 @@
 import { authClient } from "./authContainer";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8787";
-
 export async function apiFetch<T = Record<string, unknown>>(
   endpoint: string,
   options: RequestInit = {},
