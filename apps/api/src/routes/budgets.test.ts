@@ -1,6 +1,50 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { app } from '../app';
 
+interface BudgetDTO {
+  id: string;
+  name: string;
+  amountCents: number;
+  currency: string;
+  period: string;
+  startDate: string;
+  endDate?: string;
+  isActive: boolean;
+  alertThreshold?: number;
+}
+
+interface BudgetsListResponse {
+  budgets: BudgetDTO[];
+}
+
+interface BudgetCreateResponse {
+  budget: BudgetDTO;
+}
+
+interface BudgetUpdateResponse {
+  budget: BudgetDTO;
+}
+
+interface BudgetDeleteResponse {
+  message: string;
+}
+
+interface DashboardResponse {
+  dashboard: {
+    categories: unknown[];
+    totalBudgetCents: number;
+    totalSpentCents: number;
+  };
+}
+
+interface ErrorResponse {
+  error: string;
+}
+
+async function parseJson<T>(res: Response): Promise<T> {
+  return (await res.json()) as T;
+}
+
 describe('Budgets API Integration Tests', () => {
   let authToken: string;
   let userId: string;
@@ -25,7 +69,7 @@ describe('Budgets API Integration Tests', () => {
       }),
     });
     
-    const categoryData = await categoryRes.json();
+    const categoryData = await parseJson<{ category: { id: string } }>(categoryRes);
     categoryId = categoryData.category.id;
   });
 
@@ -48,7 +92,7 @@ describe('Budgets API Integration Tests', () => {
       });
 
       expect(res.status).toBe(201);
-      const data = await res.json();
+      const data = await parseJson<BudgetCreateResponse>(res);
       expect(data.budget).toBeDefined();
       expect(data.budget.name).toBe('Monthly Groceries');
       expect(data.budget.amountCents).toBe(50000);
@@ -91,7 +135,7 @@ describe('Budgets API Integration Tests', () => {
       });
 
       expect(res.status).toBe(400);
-      const data = await res.json();
+      const data = await parseJson<ErrorResponse>(res);
       expect(data.error).toContain('Invalid category');
     });
 
@@ -154,7 +198,7 @@ describe('Budgets API Integration Tests', () => {
       });
 
       expect(res.status).toBe(201);
-      const data = await res.json();
+      const data = await parseJson<BudgetCreateResponse>(res);
       expect(data.budget.alertThreshold).toBe(80);
     });
 
@@ -177,7 +221,7 @@ describe('Budgets API Integration Tests', () => {
       });
 
       expect(res.status).toBe(201);
-      const data = await res.json();
+      const data = await parseJson<BudgetCreateResponse>(res);
       expect(data.budget.endDate).toBeDefined();
     });
   });
@@ -225,7 +269,7 @@ describe('Budgets API Integration Tests', () => {
       });
 
       expect(res.status).toBe(200);
-      const data = await res.json();
+      const data = await parseJson<BudgetsListResponse>(res);
       expect(data.budgets).toHaveLength(2);
     });
 
@@ -255,9 +299,9 @@ describe('Budgets API Integration Tests', () => {
       });
 
       expect(res.status).toBe(200);
-      const data = await res.json();
+      const data = await parseJson<BudgetsListResponse>(res);
       expect(data.budgets.length).toBeGreaterThan(0);
-      expect(data.budgets.every((b: any) => b.isActive)).toBe(true);
+      expect(data.budgets.every((b) => b.isActive)).toBe(true);
     });
   });
 
@@ -271,7 +315,7 @@ describe('Budgets API Integration Tests', () => {
       });
 
       expect(res.status).toBe(200);
-      const data = await res.json();
+      const data = await parseJson<DashboardResponse>(res);
       expect(data.dashboard).toBeDefined();
       expect(data.dashboard.categories).toBeDefined();
       expect(data.dashboard.totalBudgetCents).toBeDefined();
@@ -306,7 +350,7 @@ describe('Budgets API Integration Tests', () => {
         }),
       });
 
-      const createData = await createRes.json();
+      const createData = await parseJson<BudgetCreateResponse>(createRes);
       const budgetId = createData.budget.id;
 
       // Update it
@@ -322,7 +366,7 @@ describe('Budgets API Integration Tests', () => {
       });
 
       expect(updateRes.status).toBe(200);
-      const updateData = await updateRes.json();
+      const updateData = await parseJson<BudgetUpdateResponse>(updateRes);
       expect(updateData.budget.amountCents).toBe(75000);
     });
 
@@ -344,7 +388,7 @@ describe('Budgets API Integration Tests', () => {
         }),
       });
 
-      const createData = await createRes.json();
+      const createData = await parseJson<BudgetCreateResponse>(createRes);
       const budgetId = createData.budget.id;
 
       // Try to update as different user
@@ -382,7 +426,7 @@ describe('Budgets API Integration Tests', () => {
         }),
       });
 
-      const createData = await createRes.json();
+      const createData = await parseJson<BudgetCreateResponse>(createRes);
       const budgetId = createData.budget.id;
 
       // Delete it
@@ -394,7 +438,7 @@ describe('Budgets API Integration Tests', () => {
       });
 
       expect(deleteRes.status).toBe(200);
-      const deleteData = await deleteRes.json();
+      const deleteData = await parseJson<BudgetDeleteResponse>(deleteRes);
       expect(deleteData.message).toContain('deleted');
     });
 
@@ -429,7 +473,7 @@ describe('Budgets API Integration Tests', () => {
       });
 
       expect(res.status).toBe(201);
-      const data = await res.json();
+      const data = await parseJson<BudgetCreateResponse>(res);
       expect(data.budget.amountCents).toBe(0);
     });
 
@@ -474,7 +518,7 @@ describe('Budgets API Integration Tests', () => {
         });
 
         expect(res.status).toBe(201);
-        const data = await res.json();
+        const data = await parseJson<BudgetCreateResponse>(res);
         expect(data.budget.period).toBe(period);
       }
     });

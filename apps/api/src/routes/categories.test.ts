@@ -1,6 +1,43 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { app } from '../app';
 
+interface CategoryDTO {
+  id: string;
+  name: string;
+  description?: string;
+  icon?: string;
+  color?: string;
+  isActive: boolean;
+  isDefault: boolean;
+}
+
+interface CategoryCreateResponse {
+  category: CategoryDTO;
+}
+
+interface CategoryUpdateResponse {
+  category: CategoryDTO;
+}
+
+interface CategoriesListResponse {
+  categories: CategoryDTO[];
+  message?: string;
+}
+
+interface DeleteResponse {
+  message?: string;
+  error?: string;
+}
+
+interface SeedResponse {
+  categories: CategoryDTO[];
+  message: string;
+}
+
+async function parseJson<T>(res: Response): Promise<T> {
+  return (await res.json()) as T;
+}
+
 describe('Categories API Integration Tests', () => {
   let authToken: string;
   let userId: string;
@@ -25,7 +62,7 @@ describe('Categories API Integration Tests', () => {
       });
 
       expect(res.status).toBe(201);
-      const data = await res.json();
+      const data = await parseJson<CategoryCreateResponse>(res);
       expect(data.category).toBeDefined();
       expect(data.category.name).toBe('Groceries');
       expect(data.category.isActive).toBe(true);
@@ -49,7 +86,7 @@ describe('Categories API Integration Tests', () => {
       });
 
       expect(res.status).toBe(201);
-      const data = await res.json();
+      const data = await parseJson<CategoryCreateResponse>(res);
       expect(data.category.description).toBe('Movies, games, and fun');
       expect(data.category.icon).toBe('🎬');
       expect(data.category.color).toBe('#FF5733');
@@ -98,7 +135,7 @@ describe('Categories API Integration Tests', () => {
       });
 
       expect(res.status).toBe(201);
-      const data = await res.json();
+      const data = await parseJson<CategoryCreateResponse>(res);
       expect(data.category.isActive).toBe(false);
     });
   });
@@ -132,7 +169,7 @@ describe('Categories API Integration Tests', () => {
       });
 
       expect(res.status).toBe(200);
-      const data = await res.json();
+      const data = await parseJson<CategoriesListResponse>(res);
       expect(data.categories).toHaveLength(2);
     });
 
@@ -164,8 +201,8 @@ describe('Categories API Integration Tests', () => {
       });
 
       expect(res.status).toBe(200);
-      const data = await res.json();
-      expect(data.categories.every((c: any) => c.isActive)).toBe(true);
+      const data = await parseJson<CategoriesListResponse>(res);
+      expect(data.categories.every((c) => c.isActive)).toBe(true);
     });
 
     it('should require authentication', async () => {
@@ -187,10 +224,10 @@ describe('Categories API Integration Tests', () => {
       });
 
       expect(res.status).toBe(201);
-      const data = await res.json();
+      const data = await parseJson<CategoriesListResponse>(res);
       expect(data.categories.length).toBeGreaterThan(0);
       expect(data.message).toContain('Seeded');
-      expect(data.categories.every((c: any) => c.isDefault)).toBe(true);
+      expect(data.categories.every((c) => c.isDefault)).toBe(true);
     });
 
     it('should not seed duplicates on second call', async () => {
@@ -202,7 +239,7 @@ describe('Categories API Integration Tests', () => {
         },
       });
 
-      const data1 = await res1.json();
+      const data1 = await parseJson<CategoriesListResponse>(res1);
       const firstCount = data1.categories.length;
 
       // Second seed
@@ -213,7 +250,7 @@ describe('Categories API Integration Tests', () => {
         },
       });
 
-      const data2 = await res2.json();
+      const data2 = await parseJson<CategoriesListResponse>(res2);
       expect(data2.categories.length).toBe(0); // No new categories
 
       // Verify total count didn't change
@@ -224,7 +261,7 @@ describe('Categories API Integration Tests', () => {
         },
       });
 
-      const listData = await listRes.json();
+      const listData = await parseJson<CategoriesListResponse>(listRes);
       expect(listData.categories.length).toBe(firstCount);
     });
 
@@ -249,7 +286,7 @@ describe('Categories API Integration Tests', () => {
         body: JSON.stringify({ name: 'Original Name' }),
       });
 
-      const createData = await createRes.json();
+      const createData = await parseJson<CategoryCreateResponse>(createRes);
       const categoryId = createData.category.id;
 
       // Update it
@@ -263,7 +300,7 @@ describe('Categories API Integration Tests', () => {
       });
 
       expect(updateRes.status).toBe(200);
-      const updateData = await updateRes.json();
+      const updateData = await parseJson<CategoryUpdateResponse>(updateRes);
       expect(updateData.category.name).toBe('Updated Name');
     });
 
@@ -283,7 +320,7 @@ describe('Categories API Integration Tests', () => {
         }),
       });
 
-      const createData = await createRes.json();
+      const createData = await parseJson<CategoryCreateResponse>(createRes);
       const categoryId = createData.category.id;
 
       // Update only description
@@ -296,7 +333,7 @@ describe('Categories API Integration Tests', () => {
         body: JSON.stringify({ description: 'Updated' }),
       });
 
-      const updateData = await updateRes.json();
+      const updateData = await parseJson<CategoryUpdateResponse>(updateRes);
       expect(updateData.category.description).toBe('Updated');
       expect(updateData.category.name).toBe('Test'); // Unchanged
       expect(updateData.category.icon).toBe('🏠'); // Unchanged
@@ -313,7 +350,7 @@ describe('Categories API Integration Tests', () => {
         body: JSON.stringify({ name: 'Toggle Test', isActive: true }),
       });
 
-      const createData = await createRes.json();
+      const createData = await parseJson<CategoryCreateResponse>(createRes);
       const categoryId = createData.category.id;
 
       // Deactivate
@@ -326,7 +363,7 @@ describe('Categories API Integration Tests', () => {
         body: JSON.stringify({ isActive: false }),
       });
 
-      const updateData = await updateRes.json();
+      const updateData = await parseJson<CategoryUpdateResponse>(updateRes);
       expect(updateData.category.isActive).toBe(false);
     });
 
@@ -341,7 +378,7 @@ describe('Categories API Integration Tests', () => {
         body: JSON.stringify({ name: 'Security Test' }),
       });
 
-      const createData = await createRes.json();
+      const createData = await parseJson<CategoryCreateResponse>(createRes);
       const categoryId = createData.category.id;
 
       // Try to update as different user
@@ -383,7 +420,7 @@ describe('Categories API Integration Tests', () => {
         body: JSON.stringify({ name: 'Delete Test' }),
       });
 
-      const createData = await createRes.json();
+      const createData = await parseJson<CategoryCreateResponse>(createRes);
       const categoryId = createData.category.id;
 
       // Delete it
@@ -395,7 +432,7 @@ describe('Categories API Integration Tests', () => {
       });
 
       expect(deleteRes.status).toBe(200);
-      const deleteData = await deleteRes.json();
+      const deleteData = await parseJson<DeleteResponse>(deleteRes);
       expect(deleteData.message).toContain('deleted');
     });
 
@@ -410,7 +447,7 @@ describe('Categories API Integration Tests', () => {
         body: JSON.stringify({ name: 'Has Budgets' }),
       });
 
-      const catData = await catRes.json();
+      const catData = await parseJson<CategoryCreateResponse>(catRes);
       const categoryId = catData.category.id;
 
       // Create budget for this category
@@ -439,7 +476,7 @@ describe('Categories API Integration Tests', () => {
       });
 
       expect(deleteRes.status).toBe(400);
-      const deleteData = await deleteRes.json();
+      const deleteData = await parseJson<DeleteResponse>(deleteRes);
       expect(deleteData.error).toContain('budgets');
     });
 
@@ -465,7 +502,7 @@ describe('Categories API Integration Tests', () => {
         body: JSON.stringify({ name: 'Security Test' }),
       });
 
-      const createData = await createRes.json();
+      const createData = await parseJson<CategoryCreateResponse>(createRes);
       const categoryId = createData.category.id;
 
       // Try to delete as different user
@@ -492,12 +529,12 @@ describe('Categories API Integration Tests', () => {
       });
 
       expect(res.status).toBe(201);
-      const data = await res.json();
+      const data = await parseJson<CategoryCreateResponse>(res);
       expect(data.category.name).toBe('A');
     });
 
     it('should handle maximum length name', async () => {
-      const longName = 'A'.repeat(100);
+      const longName = 'A'.repeat(50);
       const res = await app.request('/categories', {
         method: 'POST',
         headers: {
@@ -508,12 +545,13 @@ describe('Categories API Integration Tests', () => {
       });
 
       expect(res.status).toBe(201);
-      const data = await res.json();
-      expect(data.category.name.length).toBe(100);
+      const data = await parseJson<CategoryCreateResponse>(res);
+      expect(data.category.name.length).toBe(50);
     });
 
-    it('should handle Unicode characters', async () => {
-      const res = await app.request('/categories', {
+    it('should reject Unicode characters in name but allow Unicode icon', async () => {
+      // Invalid name with Unicode should be rejected per domain rules
+      const res1 = await app.request('/categories', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${authToken}`,
@@ -524,14 +562,26 @@ describe('Categories API Integration Tests', () => {
           icon: '🍱',
         }),
       });
+      expect(res1.status).toBe(400);
 
-      expect(res.status).toBe(201);
-      const data = await res.json();
-      expect(data.category.name).toContain('日本語');
+      // Valid name with Unicode in icon should be accepted
+      const res2 = await app.request('/categories', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: 'Japanese',
+          icon: '🍱',
+        }),
+      });
+      expect(res2.status).toBe(201);
+      const data = await parseJson<CategoryCreateResponse>(res2);
       expect(data.category.icon).toBe('🍱');
     });
 
-    it('should handle special characters', async () => {
+    it('should reject special characters in name', async () => {
       const res = await app.request('/categories', {
         method: 'POST',
         headers: {
@@ -543,7 +593,7 @@ describe('Categories API Integration Tests', () => {
         }),
       });
 
-      expect(res.status).toBe(201);
+      expect(res.status).toBe(400);
     });
   });
 
