@@ -35,6 +35,15 @@ Feature branch `feature/`
 - Feature branches need to be connected to atleast 1 issue.
 
 
+## Versioning
+
+V**X**.0.0 - For major releases (Sprints)
+
+V0.**X**.0 - For minor releases (Features)
+
+V0.0.**X** - For patches (Hotfixes, missing deliverables, etc.)
+
+
 ## Folder structures
 
 ## Docs
