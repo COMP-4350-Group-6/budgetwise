@@ -2,7 +2,7 @@
 
 Run these first:
 
-- All tests (monorepo): `pnpm test`
+- All tests (monorepo): `pnpm vitest run`
 - Domain tests with coverage: `pnpm test --filter @budget/domain -- --coverage`
 - Usecases tests with coverage: `pnpm test --filter @budget/usecases -- --coverage`
 - API tests: `pnpm test --filter api`
