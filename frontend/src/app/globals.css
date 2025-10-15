@@ -1,0 +1,50 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+
+  --green-dark: #164E50;
+  --green-mid: #21776A;
+  --green-light: #88DE7B;
+  --green-pale: #DBF4D7;
+
+  --shade-light: #EEEEEE;
+  --shade-mid: #D9D9D9;
+  --shade-white: #FFFFFF;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --font-poppins: var(--font-poppins);
+  --font-figtree: var(--font-figtree);
+  --font-vibes: var(--font-greatvibes);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+  @apply text-gray-900;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-figtree);
+}
+
+.brand-script {
+  font-family: var(--font-greatvibes);
+}
+
+button {
+  @apply transition-colors duration-200;
+}
