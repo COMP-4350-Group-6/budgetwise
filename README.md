@@ -2,6 +2,14 @@
 
 COMP 4350 - Project Code
 
+## Branching workflow
+
+> [!IMPORTANT] Some of these standards may not be implemented fully as of writting
+
+Repo is using a GitFlow-like workflow.
+
+
+
 ## Folder structures
 
 ## Docs
