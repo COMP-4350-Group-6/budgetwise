@@ -1,9 +1,76 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import styles from "./transactions.module.css";
+import { categoryService, budgetService } from "@/services/budgetService";
+import { transactionsService } from "@/services/transactionsService";
+import type { Category, Budget } from "@/services/budgetService";
 
 export default function TransactionsPage() {
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [budgets, setBudgets] = useState<Budget[]>([]);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>("");
+  const [selectedBudgetId, setSelectedBudgetId] = useState<string>("");
+  const [description, setDescription] = useState<string>("");
+  const [amount, setAmount] = useState<string>("");
+  const [date, setDate] = useState<string>(new Date().toISOString().split("T")[0]);
+  const [note, setNote] = useState<string>("");
+  const [submitting, setSubmitting] = useState<boolean>(false);
+  const [message, setMessage] = useState<string>("");
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const cats = await categoryService.listCategories(true);
+        setCategories(cats);
+        const bs = await budgetService.listBudgets(true);
+        setBudgets(bs);
+      } catch (e) {
+        console.error("Failed to load categories/budgets", e);
+      }
+    };
+    load();
+  }, []);
+
+  const filteredBudgets = selectedCategoryId
+    ? budgets.filter((b) => b.categoryId === selectedCategoryId)
+    : [];
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setMessage("");
+    if (!selectedCategoryId) {
+      setMessage("Please select a category.");
+      return;
+    }
+    const cents = Math.round(parseFloat(amount || "0") * 100);
+    if (!Number.isFinite(cents) || cents === 0) {
+      setMessage("Enter a non-zero amount.");
+      return;
+    }
+    try {
+      setSubmitting(true);
+      await transactionsService.addTransaction({
+        budgetId: selectedBudgetId,
+        categoryId: selectedCategoryId,
+        amountCents: cents,
+        note: note || description || undefined,
+        occurredAt: new Date(date),
+      });
+      setDescription("");
+      setAmount("");
+      setNote("");
+      setDate(new Date().toISOString().split("T")[0]);
+      setSelectedBudgetId("");
+      setMessage("Transaction added.");
+    } catch (err) {
+      console.error("Add transaction error", err);
+      setMessage(err instanceof Error ? err.message : "Failed to add transaction");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <div className={styles.shell}>
       {/* ===== Page Heading ===== */}
@@ -16,7 +83,7 @@ export default function TransactionsPage() {
           Enter details for a recent expense or income.
         </p>
 
-        <form className={styles.formGrid}>
+        <form className={styles.formGrid} onSubmit={onSubmit}>
           {/* Description */}
           <div className={styles.formGroup}>
             <label className={styles.label}>Description</label>
@@ -24,6 +91,8 @@ export default function TransactionsPage() {
               type="text"
               placeholder="e.g., Coffee, Salary, Groceries"
               className={styles.input}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
             />
           </div>
 
@@ -34,34 +103,66 @@ export default function TransactionsPage() {
               type="number"
               placeholder="$ e.g., 5.50"
               className={styles.input}
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              step="0.01"
+              min="0"
+              required
             />
           </div>
 
           {/* Category */}
           <div className={styles.formGroup}>
             <label className={styles.label}>Category</label>
-            <select className={styles.input}>
+            <select
+              className={styles.input}
+              value={selectedCategoryId}
+              onChange={(e) => {
+                setSelectedCategoryId(e.target.value);
+                setSelectedBudgetId("");
+              }}
+              required
+            >
               <option value="">Select a category</option>
-              {/* Later dynamically populated */}
+              {categories.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Budget (optional, filtered by category) */}
+          <div className={styles.formGroup}>
+            <label className={styles.label}>Budget (optional)</label>
+            <select
+              className={styles.input}
+              value={selectedBudgetId}
+              onChange={(e) => setSelectedBudgetId(e.target.value)}
+              disabled={!selectedCategoryId}
+            >
+              <option value="">
+                {selectedCategoryId ? "No budget (unassigned)" : "Select category first"}
+              </option>
+              {selectedCategoryId &&
+                filteredBudgets.map((b) => (
+                  <option key={b.id} value={b.id}>
+                    {b.name} • {(b.amountCents / 100).toFixed(2)} {b.currency}
+                  </option>
+                ))}
             </select>
           </div>
 
           {/* Date */}
           <div className={styles.formGroup}>
             <label className={styles.label}>Date</label>
-            <input type="date" className={styles.input} />
-          </div>
-
-          {/* Payment Type */}
-          <div className={styles.formGroup}>
-            <label className={styles.label}>Payment Type</label>
-            <select className={styles.input}>
-              <option value="">Select payment type</option>
-              <option value="cash">Cash</option>
-              <option value="debit">Debit Card</option>
-              <option value="credit">Credit Card</option>
-              <option value="bank">Bank Transfer</option>
-            </select>
+            <input
+              type="date"
+              className={styles.input}
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              required
+            />
           </div>
 
           {/* Notes */}
@@ -71,15 +172,19 @@ export default function TransactionsPage() {
               placeholder="Any additional details..."
               className={styles.textarea}
               rows={1}
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
             />
+          </div>
+
+          <div className={styles.submitContainer}>
+            <button type="submit" className={styles.primaryBtn} disabled={submitting}>
+              {submitting ? "Adding..." : "Add Transaction"}
+            </button>
+            {message && <span className="ml-3 text-sm text-gray-600">{message}</span>}
           </div>
         </form>
 
-        <div className={styles.submitContainer}>
-          <button type="submit" className={styles.primaryBtn}>
-            Add Transaction
-          </button>
-        </div>
       </section>
 
       {/* ===== Recent Transactions ===== */}
