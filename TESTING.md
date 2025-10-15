@@ -1,6 +1,7 @@
 # Testing Guide (Quick Start)
 
 Run these first:
+
 - All tests (monorepo): `pnpm test`
 - Domain tests with coverage: `pnpm test --filter @budget/domain -- --coverage`
 - Usecases tests with coverage: `pnpm test --filter @budget/usecases -- --coverage`
@@ -10,6 +11,7 @@ Run these first:
   - Usecases: `open packages/usecases/coverage/index.html`
 
 Notes:
+
 - Coverage is per-package. API tests do not raise Domain coverage and vice versa.
 - Barrel files like [`index.ts`](budgetwise/packages/usecases/src/index.ts:1) may show 0% (re-exports only) — this is normal.
 - If API tests fail resolving schemas or due to auth, run packages individually (Domain/Usecases) for coverage.
