@@ -5,6 +5,8 @@ import styles from "./transactions.module.css";
 import { categoryService, budgetService } from "@/services/budgetService";
 import { transactionsService } from "@/services/transactionsService";
 import type { Category, Budget } from "@/services/budgetService";
+import { apiFetch } from "@/lib/apiClient";
+import type { TransactionDTO } from "@/services/transactionsService";
 
 export default function TransactionsPage() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -18,6 +20,25 @@ export default function TransactionsPage() {
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [message, setMessage] = useState<string>("");
 
+  const [recent, setRecent] = useState<TransactionDTO[]>([]);
+  const [recentLoading, setRecentLoading] = useState<boolean>(false);
+
+  const loadRecent = async () => {
+    try {
+      setRecentLoading(true);
+      const resp = await apiFetch<{ transactions: TransactionDTO[] }>(
+        "/transactions?days=30&limit=20",
+        {},
+        true
+      );
+      setRecent(resp.transactions);
+    } catch (e) {
+      console.error("Failed to load recent transactions", e);
+    } finally {
+      setRecentLoading(false);
+    }
+  };
+
   useEffect(() => {
     const load = async () => {
       try {
@@ -25,6 +46,7 @@ export default function TransactionsPage() {
         setCategories(cats);
         const bs = await budgetService.listBudgets(true);
         setBudgets(bs);
+        await loadRecent();
       } catch (e) {
         console.error("Failed to load categories/budgets", e);
       }
@@ -62,6 +84,7 @@ export default function TransactionsPage() {
       setNote("");
       setDate(new Date().toISOString().split("T")[0]);
       setSelectedBudgetId("");
+      await loadRecent();
       setMessage("Transaction added.");
     } catch (err) {
       console.error("Add transaction error", err);
@@ -205,9 +228,38 @@ export default function TransactionsPage() {
           </div>
         </div>
 
-        <div className={styles.emptyState}>
-          No transactions available yet.
-        </div>
+        {recentLoading ? (
+          <div className={styles.emptyState}>Loading...</div>
+        ) : recent.length === 0 ? (
+          <div className={styles.emptyState}>No transactions available yet.</div>
+        ) : (
+          <ul>
+            {recent.map((tx) => {
+              const cat = categories.find((c) => c.id === tx.categoryId);
+              const budget = budgets.find((b) => b.id === tx.budgetId);
+              const amount = (tx.amountCents / 100).toFixed(2);
+              const currency = budget?.currency ?? "CAD";
+              const dateStr = new Date(tx.occurredAt).toLocaleDateString();
+              return (
+                <li key={tx.id}>
+                  <div>
+                    <strong>{cat ? cat.name : "Uncategorized"}</strong>
+                    {" • "}
+                    <span>{budget ? budget.name : "Unassigned"}</span>
+                  </div>
+                  <div>
+                    <span>{dateStr}</span>
+                    {tx.note ? <span>{" • "}{tx.note}</span> : null}
+                  </div>
+                  <div>
+                    <span>{currency} {amount}</span>
+                  </div>
+                  <hr />
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </section>
 
       {/* ===== Recurring Payments ===== */}
