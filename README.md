@@ -9,6 +9,30 @@ COMP 4350 - Project Code
 Repo is using a GitFlow-like workflow.
 
 
+| Branch              | Description                                                                                                          | Branches from     | Merges to                   |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------- | ----------------- | --------------------------- |
+| `main`              | For production active code                                                                                           | NONE              | N/A                         |
+| `dev`               | For development code                                                                                                 | `main`            |                             |
+| `release/{VERSION}` | For releases                                                                                                         | `dev`             | `dev`, `main`               |
+| `feature/{TITLE}`   | For work on features                                                                                                 | `dev`             | `dev`                       |
+| `hotfix/{TITLE}`    | Fixes for critical errors in the production code on `main`                                                           | `main`            | `main`, `dev`               |
+| `test/{TITLE}`      | For testing. Modifications and additions made here are never to be merged or pulled from by other non test branches. | (ANY)             | only other `test/` branches |
+| `doc/{TITLE}`       | For documentation updates                                                                                            | `dev`, `feature/` | `dev`, `feature/`           |
+
+
+
+Development branch `dev`
+
+- All merges to `dev` must,
+  - be up to date on the `dev` branch's current commits (rebase)
+  - pass implemented code tests (At the time of writing some linting check may be overly stringent and fail)
+  - have the appropriate reviewer confirm the changes (which includes running the code)
+
+
+Feature branch `feature/`
+
+- Feature branches need to be connected to atleast 1 issue.
+
 
 ## Folder structures
 
