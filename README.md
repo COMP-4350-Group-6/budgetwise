@@ -2,7 +2,30 @@
 
 COMP 4350 - Project Code
 
-## Branching workflow
+
+Folders & Files of note:
+
+- **course-work/** (course work files, like sprint worksheets)
+- ACKNOWLEDGMENTS.md (For citations)
+
+*API*: <https://docs.google.com/document/d/1tYB-VAGl5qK_Bi0bbtqdJ5mbaJzvSiDYkD_54Wbm0mI/edit?usp=sharing>
+
+
+# How to run project
+
+> [!NOTE]
+> Most of the developement took place on Mac hardware.
+
+## Backend setup
+
+
+## API setup
+
+
+## Frontend setup
+
+
+# Branching workflow
 
 > [!IMPORTANT]
 > Some of these standards may not be implemented fully as of writting
@@ -35,26 +58,10 @@ Feature branch `feature/`
 - Feature branches need to be connected to atleast 1 issue.
 
 
-## Versioning
+# Versioning
 
 V**X**.0.0 - For major releases (Sprints)
 
 V0.**X**.0 - For minor releases (Features)
 
 V0.0.**X** - For patches (Hotfixes, missing deliverables, etc.)
-
-
-## Folder structures
-
-## Docs
-
-*API*: <https://docs.google.com/document/d/1tYB-VAGl5qK_Bi0bbtqdJ5mbaJzvSiDYkD_54Wbm0mI/edit?usp=sharing>
-
-- **budgetwise/**
-  - **course-work/** (course work files, like sprint worksheets)
-  - **src/** (For any program that can run on it's own will have it's own folder here)
-    - **web-app-react/**
-    - **web-app-vue/**
-    - **backend/** (this folder may need to be split into it's individual services)
-  - **tests/** (For our code tests)
-  - ACKNOWLEDGMENTS.md For citations (each member should be adding to this file)
