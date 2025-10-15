@@ -60,6 +60,9 @@ importers:
 
   apps/frontend:
     dependencies:
+      '@budget/composition-web-auth-client':
+        specifier: workspace:*
+        version: link:../../packages/composition/web-auth-client
       '@next/font':
         specifier: ^14.2.15
         version: 14.2.15(next@15.5.5(react-dom@19.1.0(react@19.1.0))(react@19.1.0))
@@ -173,7 +176,14 @@ importers:
         specifier: ^4.1.12
         version: 4.1.12
 
-  packages/usecases: {}
+  packages/usecases:
+    dependencies:
+      '@budget/domain':
+        specifier: workspace:*
+        version: link:../domain
+      '@budget/ports':
+        specifier: workspace:*
+        version: link:../ports
 
 packages:
 
