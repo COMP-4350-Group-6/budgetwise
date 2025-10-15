@@ -1,16 +1,16 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import { FiArrowLeft, FiArrowRight } from "react-icons/fi";
 import { FaHome, FaChartLine, FaWallet, FaLightbulb } from "react-icons/fa";
+import { useSidebarState } from "@/app/(protected)/ProtectedLayoutClient";
 
 export default function Sidebar() {
-  const [collapsed, setCollapsed] = useState(false);
+  const { collapsed, toggleCollapse } = useSidebarState();
 
   return (
     <aside
-      className={`h-screen bg-white border-r border-brandGrey shadow-sm transition-all duration-300 flex flex-col ${
+      className={`h-full bg-white border-r border-brandGrey shadow-sm transition-all duration-300 flex flex-col ${
         collapsed ? "w-20" : "w-64"
       }`}
     >
@@ -20,7 +20,7 @@ export default function Sidebar() {
           {collapsed ? "B" : "BudgetWise"}
         </span>
         <button
-          onClick={() => setCollapsed(!collapsed)}
+          onClick={toggleCollapse}
           className="text-brandDarkerGreen hover:text-brandGreen transition"
         >
           {collapsed ? <FiArrowRight size={18} /> : <FiArrowLeft size={18} />}
@@ -30,7 +30,7 @@ export default function Sidebar() {
       {/* Nav links */}
       <nav className="flex-1 px-3 py-4 space-y-1">
         <SidebarLink
-          href="/"
+          href="/home"
           icon={<FaHome />}
           label="Home"
           collapsed={collapsed}
@@ -54,7 +54,6 @@ export default function Sidebar() {
           collapsed={collapsed}
         />
       </nav>
-
     </aside>
   );
 }

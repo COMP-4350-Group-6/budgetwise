@@ -4,7 +4,7 @@ import React from "react";
 
 export default function HomePage() {
   return (
-    <div className="flex flex-col w-full h-full bg-gray-50 p-6 space-y-8 overflow-y-auto">
+    <div className="flex flex-col w-full h-full bg-gray-50 p-6 space-y-8">
       <h1 className="text-3xl font-bold text-green-800">Home</h1>
 
       <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
