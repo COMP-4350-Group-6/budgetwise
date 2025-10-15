@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { authService } from "@/app/services/authService";
+import PasswordRequirements, { isPasswordValid } from "@/components/signup/PasswordRequirement";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -12,22 +13,29 @@ export default function SignupPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [password, setPassword] = useState("");
+  const [isPasswordOk, setIsPasswordOk] = useState(false);
 
   const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setIsLoading(true);
     setError(null);
+    setIsLoading(true);
 
     const form = e.currentTarget;
     const formData = new FormData(form);
 
     const name = String(formData.get("name") ?? "");
     const email = String(formData.get("email") ?? "");
-    const password = String(formData.get("password") ?? "");
     const confirmPassword = String(formData.get("confirm-password") ?? "");
 
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
+      setIsLoading(false);
+      return;
+    }
+
+    if (!isPasswordValid(password)) {
+      setError("Password does not meet one or more requirements.");
       setIsLoading(false);
       return;
     }
@@ -45,26 +53,19 @@ export default function SignupPage() {
 
   return (
     <div className="flex justify-center min-h-screen items-center bg-shade-light">
-      <form
-        onSubmit={handleSignup}
-        className="w-full max-w-lg space-y-3 bg-inherit"
-      >
-        {/* Header */}
+      <form onSubmit={handleSignup} className="w-full max-w-lg space-y-3 bg-inherit">
         <h2 className="text-2xl font-bold text-gray-900 text-center mb-6">
           Create Your Account
         </h2>
 
-        {/* Error Message */}
+        {/* Global Error Message */}
         {error && (
-          <p className="text-red-500 text-sm text-center mb-2">{error}</p>
+          <p className="text-red-500 text-sm text-center mb-2 font-medium">{error}</p>
         )}
 
         {/* Full Name */}
         <div>
-          <label
-            htmlFor="name"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
+          <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
             Full Name
           </label>
           <input
@@ -79,10 +80,7 @@ export default function SignupPage() {
 
         {/* Email */}
         <div>
-          <label
-            htmlFor="email"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
+          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
             Email Address
           </label>
           <input
@@ -97,10 +95,7 @@ export default function SignupPage() {
 
         {/* Password */}
         <div>
-          <label
-            htmlFor="password"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
+          <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
             Password
           </label>
           <div className="relative">
@@ -109,8 +104,18 @@ export default function SignupPage() {
               id="password"
               name="password"
               placeholder="••••••••"
-              className="w-full border border-gray-300 rounded-full px-4 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-green-mid"
+              className={`w-full border rounded-full px-4 py-2 pr-10 text-sm focus:outline-none focus:ring-2 ${
+                !isPasswordOk && password.length > 0
+                  ? "border-red-500 focus:ring-red-300"
+                  : "border-gray-300 focus:ring-green-mid"
+              }`}
               required
+              value={password}
+              onChange={(e) => {
+                const newPass = e.target.value;
+                setPassword(newPass);
+                setIsPasswordOk(isPasswordValid(newPass));
+              }}
             />
             <button
               type="button"
@@ -118,21 +123,14 @@ export default function SignupPage() {
               className="absolute right-3 top-2.5 text-gray-500 hover:text-gray-700"
               aria-label="Toggle password visibility"
             >
-              {showPassword ? (
-                <EyeOff size={18} strokeWidth={1.8} />
-              ) : (
-                <Eye size={18} strokeWidth={1.8} />
-              )}
+              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           </div>
-        </div>
+
 
         {/* Confirm Password */}
         <div>
-          <label
-            htmlFor="confirm-password"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
+          <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700 mb-1">
             Confirm Password
           </label>
           <div className="relative">
@@ -150,13 +148,13 @@ export default function SignupPage() {
               className="absolute right-3 top-2.5 text-gray-500 hover:text-gray-700"
               aria-label="Toggle confirm password visibility"
             >
-              {showConfirmPassword ? (
-                <EyeOff size={18} strokeWidth={1.8} />
-              ) : (
-                <Eye size={18} strokeWidth={1.8} />
-              )}
+              {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           </div>
+        </div>
+
+          {/* Password requirements */}
+          <PasswordRequirements password={password} />
         </div>
 
         {/* Submit */}
