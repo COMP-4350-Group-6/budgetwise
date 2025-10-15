@@ -2,20 +2,24 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulate async sign-in delay
+    // Simulate async login delay
     setTimeout(() => {
       setIsLoading(false);
-      window.location.href = "/dashboard"; // temporary redirect
+
+      // ✅ Temporary redirect to protected home page
+      router.push("/home");
     }, 1000);
   };
 
@@ -90,18 +94,17 @@ export default function LoginPage() {
 
         {/* Sign In Button */}
         <button
-            type="submit"
-            disabled={isLoading}
-            className={`
-                w-full text-sm rounded-full py-2.5 flex items-center justify-center 
-                transition font-semibold
-                bg-green-pale text-green-dark
-                hover:bg-green-mid hover:text-white
-                disabled:cursor-not-allowed
-                disabled:bg-gray-400
-            `}
+          type="submit"
+          disabled={isLoading}
+          className={`
+            w-full text-sm rounded-full py-2.5 flex items-center justify-center 
+            transition font-semibold
+            bg-green-pale text-green-dark
+            hover:bg-green-mid hover:text-white
+            disabled:cursor-not-allowed
+            disabled:bg-gray-400
+          `}
         >
-
           {isLoading ? (
             <svg
               className="animate-spin h-5 w-5 text-white"
