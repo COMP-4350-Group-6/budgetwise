@@ -54,12 +54,12 @@ export default function Sidebar() {
           label="Budget"
           collapsed={collapsed}
         />
-        <SidebarLink
+        {/* <SidebarLink
           href="/insights"
           icon={<FaLightbulb />}
           label="Insights"
           collapsed={collapsed}
-        />
+        /> */}
       </nav>
 
       {/* Logout button at bottom */}

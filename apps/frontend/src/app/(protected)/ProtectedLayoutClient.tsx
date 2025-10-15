@@ -41,7 +41,7 @@ export default function ProtectedLayoutClient({
       <div className="flex h-screen w-full bg-gray-50 overflow-hidden">
         {/* Sidebar */}
         <div
-          className={`transition-all duration-300 ease-in-out border-r border-gray-200 bg-white shadow-sm ${
+          className={`flex-none transition-all duration-300 ease-in-out border-r border-gray-200 bg-white shadow-sm ${
             collapsed ? "w-20" : "w-64"
           }`}
         >
@@ -49,9 +49,7 @@ export default function ProtectedLayoutClient({
         </div>
 
         {/* Main Content */}
-        <div
-          className={`flex-1 flex flex-col transition-[width] duration-300 ease-in-out overflow-hidden`}
-        >
+        <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
           <main className="flex-1 overflow-y-auto px-6 py-6">{children}</main>
         </div>
       </div>
