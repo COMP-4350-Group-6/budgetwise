@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import ProtectedLayoutClient from "./ProtectedLayoutClient";
 
 export default function ProtectedLayout({ children }: { children: React.ReactNode }) {
-  const { user, loading, isAuthenticated } = useAuth();
+  const { loading, isAuthenticated } = useAuth();
   const router = useRouter();
 
   if (loading) {

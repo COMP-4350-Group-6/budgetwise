@@ -12,21 +12,21 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
 
-    const form = e.target as HTMLFormElement;
+    const form = e.currentTarget;
     const formData = new FormData(form);
 
-    const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
+    const email = String(formData.get("email") ?? "");
+    const password = String(formData.get("password") ?? "");
 
     try {
       await authService.login(email, password);
-      router.push("/home"); // ✅ redirect after successful login
-    } catch (err: any) {
+      router.push("/home");
+    } catch (err) {
       console.error("Login failed:", err);
       setError("Invalid credentials or server error. Please try again.");
     } finally {
@@ -87,7 +87,7 @@ export default function LoginPage() {
             />
             <button
               type="button"
-              onClick={() => setShowPassword(!showPassword)}
+              onClick={() => setShowPassword((prev) => !prev)}
               className="absolute right-3 top-2.5 text-gray-500 hover:text-gray-700"
               aria-label="Toggle password visibility"
             >

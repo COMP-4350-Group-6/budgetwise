@@ -13,18 +13,18 @@ export default function SignupPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSignup = async (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
 
-    const form = e.target as HTMLFormElement;
+    const form = e.currentTarget;
     const formData = new FormData(form);
 
-    const name = formData.get("name") as string;
-    const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
-    const confirmPassword = formData.get("confirm-password") as string;
+    const name = String(formData.get("name") ?? "");
+    const email = String(formData.get("email") ?? "");
+    const password = String(formData.get("password") ?? "");
+    const confirmPassword = String(formData.get("confirm-password") ?? "");
 
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
@@ -35,9 +35,9 @@ export default function SignupPage() {
     try {
       await authService.signup(email, password, name);
       router.push("/login");
-    } catch (err: any) {
+    } catch (err) {
+      console.error("Signup failed:", err);
       setError("Signup failed. Please try again.");
-      console.error(err);
     } finally {
       setIsLoading(false);
     }
@@ -49,10 +49,12 @@ export default function SignupPage() {
         onSubmit={handleSignup}
         className="w-full max-w-lg space-y-3 bg-inherit"
       >
+        {/* Header */}
         <h2 className="text-2xl font-bold text-gray-900 text-center mb-6">
           Create Your Account
         </h2>
 
+        {/* Error Message */}
         {error && (
           <p className="text-red-500 text-sm text-center mb-2">{error}</p>
         )}
@@ -112,7 +114,7 @@ export default function SignupPage() {
             />
             <button
               type="button"
-              onClick={() => setShowPassword(!showPassword)}
+              onClick={() => setShowPassword((prev) => !prev)}
               className="absolute right-3 top-2.5 text-gray-500 hover:text-gray-700"
               aria-label="Toggle password visibility"
             >
@@ -144,9 +146,7 @@ export default function SignupPage() {
             />
             <button
               type="button"
-              onClick={() =>
-                setShowConfirmPassword(!showConfirmPassword)
-              }
+              onClick={() => setShowConfirmPassword((prev) => !prev)}
               className="absolute right-3 top-2.5 text-gray-500 hover:text-gray-700"
               aria-label="Toggle confirm password visibility"
             >
@@ -164,17 +164,18 @@ export default function SignupPage() {
           type="submit"
           disabled={isLoading}
           className={`
-              w-full text-sm rounded-full py-2.5 flex items-center justify-center 
-              transition font-semibold
-              bg-green-pale text-green-dark
-              hover:bg-green-mid hover:text-white
-              disabled:cursor-not-allowed
-              disabled:bg-gray-400
+            w-full text-sm rounded-full py-2.5 flex items-center justify-center 
+            transition font-semibold
+            bg-green-pale text-green-dark
+            hover:bg-green-mid hover:text-white
+            disabled:cursor-not-allowed
+            disabled:bg-gray-400
           `}
         >
           {isLoading ? "Creating Account..." : "Create Account"}
         </button>
 
+        {/* Login Link */}
         <p className="text-center text-sm text-gray-600 mt-6">
           Already have an account?{" "}
           <Link href="/login" className="text-green-mid hover:text-green-dark">
