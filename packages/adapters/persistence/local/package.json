@@ -2,5 +2,9 @@
   "name": "@budget/adapters-persistence-local",
   "version": "0.0.0",
   "type": "module",
-  "exports": { ".": "./src/index.ts" }
+  "exports": { ".": "./src/index.ts" },
+  "dependencies": {
+    "@budget/ports": "workspace:*",
+    "@budget/domain": "workspace:*"
+  }
 }

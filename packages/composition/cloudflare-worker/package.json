@@ -2,5 +2,9 @@
   "name": "@budget/composition-cloudflare-worker",
   "version": "0.0.0",
   "type": "module",
-  "exports": { ".": "./src/index.ts" }
+  "exports": { ".": "./src/index.ts" },
+  "dependencies": {
+    "@budget/adapters-persistence-local": "workspace:*",
+    "@budget/usecases": "workspace:*"
+  }
 }

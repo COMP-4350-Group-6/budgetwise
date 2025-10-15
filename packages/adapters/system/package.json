@@ -3,5 +3,5 @@
   "version": "0.0.0",
   "type": "module",
   "exports": { ".": "./src/index.ts" },
-  "dependencies": { "ulid": "^2.3.0" }
+  "dependencies": { "ulid": "^2.3.0", "@budget/ports": "workspace:*" }
 }

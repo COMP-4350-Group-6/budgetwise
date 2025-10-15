@@ -2,5 +2,16 @@
   "name": "@budget/usecases",
   "version": "0.0.0",
   "type": "module",
-  "exports": { ".": "./src/index.ts" }
+  "scripts": {
+    "test": "vitest run"
+  },
+  "exports": { ".": "./src/index.ts" },
+  "dependencies": {
+    "@budget/domain": "workspace:*",
+    "@budget/ports": "workspace:*"
+  },
+  "devDependencies": {
+    "@budget/adapters-persistence-local": "workspace:*",
+    "@budget/adapters-system": "workspace:*"
+  }
 }

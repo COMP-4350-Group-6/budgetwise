@@ -8,6 +8,14 @@ export function makeInMemTransactionsRepo(): TransactionsRepo {
     async listByBudget(budgetId, lim = 50) {
       return Array.from(byId.values()).filter(t => t.props.budgetId === budgetId).slice(0, lim);
     },
+    async listByUserInPeriod(userId: string, startDate: Date, endDate: Date) {
+      return Array.from(byId.values())
+        .filter(tx =>
+          tx.props.userId === userId &&
+          tx.props.occurredAt >= startDate &&
+          tx.props.occurredAt <= endDate
+        );
+    },
     async create(tx) { byId.set(tx.props.id, tx); },
     async update(tx) { byId.set(tx.props.id, tx); },
     async delete(id) { byId.delete(id); }

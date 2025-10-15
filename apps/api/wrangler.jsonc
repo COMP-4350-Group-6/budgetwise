@@ -6,5 +6,9 @@
   "main": "src/index.ts",
   
   // Date to use for Workers Runtime compatibility
-  "compatibility_date": "2025-05-05"
+  "compatibility_date": "2025-05-05",
+  "vars": {
+    "SUPABASE_URL": "https://yikylzhrskotiqnaitwz.supabase.co"
+  }
+  // Note: SUPABASE_JWT_SECRET is loaded from .dev.vars (local) or Cloudflare secrets (production)
 }
