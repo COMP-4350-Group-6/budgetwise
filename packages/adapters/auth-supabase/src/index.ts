@@ -67,6 +67,21 @@ export function makeSupabaseAuthClient(opts: MakeSupabaseAuthClientOptions): Aut
       const { data } = await client.auth.getUser();
       return mapUser(data.user);
     },
+
+    async getSessionToken(): Promise<string | null> {
+      const { data, error } = await client.auth.getSession();
+      if (error) {
+        console.error("Error getting session:", error);
+        return null;
+      }
+      if (!data.session) {
+        console.error("No active session found");
+        return null;
+      }
+      const token = data.session.access_token;
+      console.log("Retrieved session token:", token ? `${token.substring(0, 20)}...` : "null");
+      return token || null;
+    },
   };
 }
 

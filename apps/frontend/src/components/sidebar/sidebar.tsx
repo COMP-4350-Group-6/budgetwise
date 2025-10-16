@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FiArrowLeft, FiArrowRight } from "react-icons/fi";
-import { FaHome, FaChartLine, FaWallet, FaLightbulb } from "react-icons/fa";
+import { FaHome, FaChartLine, FaWallet } from "react-icons/fa";
 import { useSidebarState } from "@/app/(protected)/ProtectedLayoutClient";
 import styles from "./sidebar.module.css";
 

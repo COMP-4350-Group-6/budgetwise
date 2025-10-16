@@ -1,10 +1,12 @@
 import { renderHook, waitFor } from "@testing-library/react";
 import { vi, describe, it, expect, beforeEach } from "vitest";
 import { useAuth } from "@/hooks/useAuth";
-import { apiFetch } from "@/lib/apiClient";
+import { authUsecases } from "@/lib/authContainer";
 
-vi.mock("@/lib/apiClient", () => ({
-  apiFetch: vi.fn(),
+vi.mock("@/lib/authContainer", () => ({
+  authUsecases: {
+    getCurrentUser: vi.fn(),
+  },
 }));
 
 describe("useAuth hook", () => {
@@ -15,14 +17,17 @@ describe("useAuth hook", () => {
     localStorage.clear();
   });
 
-  it("should start with loading = false when no token exists", () => {
+  it("should start with loading = true initially, then false", async () => {
+    (authUsecases.getCurrentUser as any).mockResolvedValueOnce(null);
     const { result } = renderHook(() => useAuth());
-    expect(result.current.loading).toBe(false);
+    expect(result.current.loading).toBe(true);
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
   });
 
-  it("should fetch user when token exists", async () => {
-    localStorage.setItem("accessToken", "token123");
-    (apiFetch as any).mockResolvedValueOnce(mockUser);
+  it("should fetch user when user exists", async () => {
+    (authUsecases.getCurrentUser as any).mockResolvedValueOnce(mockUser);
 
     const { result } = renderHook(() => useAuth());
 
@@ -30,14 +35,13 @@ describe("useAuth hook", () => {
       expect(result.current.loading).toBe(false);
     });
 
-    expect(apiFetch).toHaveBeenCalledWith("/auth/me", { method: "GET" }, true);
+    expect(authUsecases.getCurrentUser).toHaveBeenCalled();
     expect(result.current.user).toEqual(mockUser);
     expect(result.current.isAuthenticated).toBe(true);
   });
 
   it("should set user to null when fetch fails", async () => {
-    localStorage.setItem("accessToken", "token123");
-    (apiFetch as any).mockRejectedValueOnce(new Error("Unauthorized"));
+    (authUsecases.getCurrentUser as any).mockRejectedValueOnce(new Error("Unauthorized"));
 
     const { result } = renderHook(() => useAuth());
 
@@ -49,14 +53,16 @@ describe("useAuth hook", () => {
     expect(result.current.isAuthenticated).toBe(false);
   });
 
-  it("should not fetch if no token exists", async () => {
+  it("should set user to null when no user exists", async () => {
+    (authUsecases.getCurrentUser as any).mockResolvedValueOnce(null);
+
     const { result } = renderHook(() => useAuth());
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
     });
 
-    expect(apiFetch).not.toHaveBeenCalled();
     expect(result.current.user).toBeNull();
+    expect(result.current.isAuthenticated).toBe(false);
   });
 });

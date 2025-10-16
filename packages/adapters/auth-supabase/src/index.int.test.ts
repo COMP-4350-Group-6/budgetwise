@@ -1,3 +1,5 @@
+import "dotenv/config"; // <-- Add this line at the very top
+
 import { describe, it, expect } from "vitest";
 import { makeSupabaseAuthClient } from "./index";
 

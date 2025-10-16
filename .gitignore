@@ -13,7 +13,6 @@ out
 build
 dist
 
-pnpm-lock.yaml
 
 # Turborepo
 .turbo

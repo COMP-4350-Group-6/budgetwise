@@ -1,4 +1,4 @@
-clear# ACKNOWLEDGMENTS
+# ACKNOWLEDGMENTS
 
 - Project commissioned for group project
 - Initial concept for app from @ahnafaf
@@ -33,6 +33,7 @@ Setup:
 ## AI
 
 used to generate inital project structure
+
 - implementing user authentication, unit tests, integration tests (GPT5)
 
 ## Misc. tools used outside of repo

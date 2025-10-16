@@ -1,17 +1,21 @@
 {
   "name": "@root/budgeting",
   "private": true,
-  "packageManager": "pnpm@10.18.2",
+  "packageManager": "pnpm@10.18.3",
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
     "typecheck": "turbo run typecheck",
     "lint": "turbo run lint",
     "test": "turbo run test",
+    "deploy:api": "pnpm --filter ./apps/api exec wrangler deploy",
+    "deploy:frontend": "pnpm run --filter ./apps/frontend deploy",
+    "deploy": "pnpm run deploy:api && pnpm run deploy:frontend",
     "openapi:generate": "pnpm --filter @budget/schemas run openapi:generate && pnpm --filter @budget/sdk run generate"
   },
   "devDependencies": {
     "@types/node": "^24.7.2",
+    "@vitest/coverage-v8": "3.2.4",
     "eslint": "^9.37.0",
     "hono": "^4.9.11",
     "turbo": "^2.5.8",

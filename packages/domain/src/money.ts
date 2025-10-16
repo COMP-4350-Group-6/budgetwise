@@ -1,4 +1,4 @@
-export type Currency = 'USD' | 'EUR' | 'GBP' | 'JPY' | 'INR';
+export type Currency = 'USD' | 'EUR' | 'GBP' | 'JPY' | 'INR' | 'CAD';
 
 export interface CurrencyConfig {
   code: Currency;
@@ -12,6 +12,7 @@ const CURRENCY_CONFIGS: Record<Currency, CurrencyConfig> = {
   GBP: { code: 'GBP', symbol: '£', decimalPlaces: 2 },
   JPY: { code: 'JPY', symbol: '¥', decimalPlaces: 0 },
   INR: { code: 'INR', symbol: '₹', decimalPlaces: 2 },
+  CAD: { code: 'CAD', symbol: 'C$', decimalPlaces: 2 },
 };
 
 export class Money {

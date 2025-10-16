@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import { TransactionDTO } from "@budget/schemas";
-import { makeContainer } from "@budget/composition-cloudflare-worker";
+import { container } from "../container";
 
 export const transactions = new Hono();
 
@@ -10,7 +10,7 @@ transactions.post(
   zValidator("json", TransactionDTO),
   async (c) => {
     const input = c.req.valid("json"); // Type-safe!
-    const { usecases } = makeContainer();
+    const { usecases } = container;
     const tx = await usecases.addTransaction(input);
 
     return c.json(

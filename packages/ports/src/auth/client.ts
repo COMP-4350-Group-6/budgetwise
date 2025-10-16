@@ -26,4 +26,6 @@ export interface AuthClientPort {
     defaultCurrency: string;
     createdAt: string;
   } | null>;
+
+  getSessionToken(): Promise<string | null>;
 }
