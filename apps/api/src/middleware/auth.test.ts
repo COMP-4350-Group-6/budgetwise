@@ -1,8 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { Hono } from "hono";
 import { authMiddleware } from "./auth";
-import dotenv from "dotenv";
-dotenv.config({ path: ".dev.vars" });
 
 // Hoisted mock for 'jose' to avoid top-level variable access issues
 vi.mock("jose", () => {
@@ -15,10 +13,7 @@ vi.mock("jose", () => {
 // Import mocked symbols after vi.mock so we can control behavior
 import { jwtVerify } from "jose";
 
-const ENV = {
-  SUPABASE_URL: "https://example.supabase.co",
-  SUPABASE_JWT_SECRET: process.env.SUPABASE_JWT_SECRET!,
-};
+const ENV = { SUPABASE_URL: "https://example.supabase.co" };
 
 describe("auth middleware", () => {
   beforeEach(() => {

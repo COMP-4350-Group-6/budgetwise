@@ -6,8 +6,8 @@ COMP 4350 - Project Code
 
 ## Overview
 
-BudgetWise is a full-stack budgeting application built with Clean Architecture principles in a monorepo.  
-It allows users to manage categories, budgets, and transactions, with real-time dashboards and smart alerts.
+BudgetWise is a full-stack budgeting application built with [Clean Architecture](DESIGN.md) principles in a monorepo.  
+It enables users to manage categories, budgets, and transactions, with real-time dashboards and smart alerts.
 
 ---
 
@@ -22,12 +22,13 @@ It allows users to manage categories, budgets, and transactions, with real-time 
 - [Branching Workflow](#branching-workflow)
 - [Versioning](#versioning)
 - [Acknowledgments](#acknowledgments)
+- [Further Reading](#further-reading)
 
 ---
 
 ## Architecture & Design
 
-BudgetWise follows Clean Architecture and Hexagonal Architecture patterns:
+BudgetWise follows [Clean Architecture](DESIGN.md) and Hexagonal Architecture patterns:
 
 - **Domain**: Pure business logic, no dependencies.
 - **Ports**: Interfaces for repositories and services.
@@ -39,12 +40,11 @@ BudgetWise follows Clean Architecture and Hexagonal Architecture patterns:
 **Key Design Choices:**
 
 - **Monorepo**: All packages and apps in a single repository for atomic commits and easy dependency management.
-<!-- - **Integer Cents**: All money values stored as integer cents for accuracy. -->
 - **Barrel Exports**: Each package uses `index.ts` for clean imports.
 - **Cloudflare Workers**: API deployed to edge for low latency.
 - **Next.js Frontend**: Deployed to Cloudflare Pages.
 
-For a detailed explanation, see [`DESIGN.md`](DESIGN.md).
+For a detailed explanation of these choices and the rationale, see [DESIGN.md](DESIGN.md).
 
 ---
 
@@ -72,6 +72,8 @@ budgetwise/
 └── ...
 ```
 
+For more on the folder structure and rationale, see [DESIGN.md](DESIGN.md#package-structure).
+
 ---
 
 ## Setup Guide
@@ -95,9 +97,8 @@ pnpm install
 
 Copy example env files and fill in values:
 
-
-
 **Frontend `.env.local` example:**
+
 ```
 NEXT_PUBLIC_API_URL="http://localhost:8787"
 NEXT_PUBLIC_SUPABASE_URL="https://your-project.supabase.co"
@@ -105,7 +106,9 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY="your-publishable-key"
 ```
 
 **API env vars:**  
-See `apps/api/wrangler.jsonc` and `.dev.vars` for local secrets.
+See [`apps/api/wrangler.jsonc`](apps/api/wrangler.jsonc) and `.dev.vars` for local secrets.
+
+For more on environment setup, see [BUDGET_IMPLEMENTATION_GUIDE.md](BUDGET_IMPLEMENTATION_GUIDE.md#backend-implementation).
 
 ---
 
@@ -135,6 +138,8 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## Testing
 
+See [TESTING.md](TESTING.md) for full details, rationale, and troubleshooting.
+
 ### Run All Tests (Monorepo)
 
 ```sh
@@ -149,8 +154,7 @@ pnpm vitest
 # or with coverage:
 pnpm vitest run --coverage
 ```
-
-- **Note:** Vitest loads `.env.local` for frontend tests via `vitest.setup.ts`.
+- Vitest loads `.env.local` for frontend tests via `vitest.setup.ts`.
 
 ### Backend/API Tests
 
@@ -166,14 +170,8 @@ pnpm test --filter @budget/domain -- --coverage
 pnpm test --filter @budget/usecases -- --coverage
 ```
 
-### E2E Tests
-
-```sh
-cd apps/frontend
-pnpm test:e2e
-```
-
-See [`TESTING.md`](TESTING.md) for more details and troubleshooting.
+- Coverage is per-package. Barrel files (pure re-exports) may show 0% coverage—see [TESTING.md](TESTING.md) for details.
+- For a summary of recent test results and coverage, see [`test-coverage/test-summary.md`](test-coverage/test-summary.md).
 
 ---
 
@@ -181,6 +179,7 @@ See [`TESTING.md`](TESTING.md) for more details and troubleshooting.
 
 - Some bugs and edge cases are tracked in the [GitHub Issues](https://github.com/COMP-4350-Group-6/budgetwise/issues) tab.
 - Please check issues before reporting new bugs.
+- API integration tests may fail if environment variables are missing—see [test-coverage/test-summary.md](test-coverage/test-summary.md) for troubleshooting.
 
 ---
 
@@ -222,9 +221,7 @@ See [`ACKNOWLEDGMENTS.md`](ACKNOWLEDGMENTS.md) for more details and attributions
 ## Further Reading
 
 - [DESIGN.md](DESIGN.md) — Architecture and rationale
-- [TESTING.md](TESTING.md) — Testing strategy and scenarios
-- [BUDGET_IMPLEMENTATION_GUIDE.md](BUDGET_IMPLEMENTATION_GUIDE.md) — Implementation details and troubleshooting
-
----
-
-*For API documentation and sprint planning, see the [API Doc](https://docs.google.com/document/d/1tYB-VAGl5qK_Bi0bbtqdJ5mbaJzvSiDYkD_54Wbm0mI/edit?usp=sharing) and `course-work/` folder.*
+- [TESTING.md](TESTING.md) — Testing strategy, scenarios, and troubleshooting
+- [TESTING-RATIONALE.md](TESTING-RATIONALE.md) — Why and how we test specific behaviors
+- [TEST_SUMMARY.md](./test-coverage/test-summary.md) - Test Coverage and results
+*For API documentation and sprint planning, see the [API Doc](https://docs.google.com/document/d/1tYB-VAGl5qK_Bi0bbtqdJ5mbaJzvSiDYkD_54Wbm0mI/edit?usp=sharing) and [`course-work/`](course-work/) folder.*

@@ -86,17 +86,6 @@ Notes:
 
 ---
 
-## Common Pitfalls
-
-- 0% coverage on barrels:
-  - Files like [`src/index.ts`](budgetwise/packages/usecases/src/index.ts:1) only re-export; exclude in vitest config if desired.
-- API auth:
-  - Routes use [`authMiddleware`](budgetwise/apps/api/src/middleware/auth.ts:17). Provide a test-friendly JWT or bypass for local runs.
-- Coverage mismatch (Domain vs Usecases):
-  - Coverage is per-package. Domain coverage rises only from tests in `packages/domain`.
-
----
-
 ## Example Scenarios
 
 - Category aggregation:

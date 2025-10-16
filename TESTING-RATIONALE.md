@@ -1,6 +1,6 @@
 # Testing Rationale: Budgets and Categories
 
-This guide explains why we test specific behaviors for Categories and Budgets, and how we structure those tests to validate domain rules, usecases, and cross-cutting flows. It complements the how-to in [TESTING.md](budgetwise/TESTING.md).
+This guide explains why we test specific behaviors and how we structure those tests to validate domain rules, usecases, and cross-cutting flows. It complements the how-to in [TESTING.md](budgetwise/TESTING.md).
 
 ## Principles and Strategy
 
@@ -201,4 +201,4 @@ This design is why our tests focus on:
 
 ## Summary
 
-We test Categories and Budgets by enforcing strict domain invariants, proving usecase behavior through edge and negative cases, and demonstrating end-to-end flows with deterministic, in-memory integration. Alerts and spend logic are budget-centric; categories are derived aggregations. This approach yields precise status reporting, clear edge semantics, and maintainable tests that evolve with the domain model.
+We test by enforcing strict domain invariants, proving usecase behavior through edge and negative cases, and demonstrating end-to-end flows with deterministic, in-memory integration. Alerts and spend logic are budget-centric; categories are derived aggregations. This approach yields precise status reporting, clear edge semantics, and maintainable tests that evolve with the domain model.

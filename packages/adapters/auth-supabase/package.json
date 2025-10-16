@@ -7,10 +7,13 @@
     "test:unit": "vitest run --exclude \"**/*.int.test.ts\"",
     "test:integration": "vitest run -t \"Supabase auth adapter (integration)\""
   },
-  "exports": { ".": "./src/index.ts" },
+  "exports": {
+    ".": "./src/index.ts"
+  },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.4"
+  },
+  "devDependencies": {
+    "dotenv": "^17.2.3"
   }
 }
-
-
