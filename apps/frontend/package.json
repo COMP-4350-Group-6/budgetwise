@@ -4,8 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build --turbopack",
-    "start": "next start",
+    "build": "next build",
+    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
+    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+    "upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload",
+    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts" ,
     "test": "jest",
     "test:watch": "jest --watchAll --verbose",
     "lint": "eslint"
@@ -13,6 +16,7 @@
   "dependencies": {
     "@budget/composition-web-auth-client": "workspace:*",
     "@next/font": "^14.2.15",
+    "@opennextjs/cloudflare": "^1.11.0",
     "lucide-react": "^0.545.0",
     "msw": "^2.11.5",
     "next": "15.5.5",
@@ -45,6 +49,7 @@
     "ts-jest": "^29.4.5",
     "ts-node": "^10.9.2",
     "typescript": "^5",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.4",
+    "wrangler": "^4.43.0"
   }
 }
