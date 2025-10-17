@@ -4,6 +4,10 @@ COMP 4350 - Project Code
 
 ---
 
+Sprint 1 Worksheet: [Sprint 1 Worksheet](course-work/sprint1_worksheet.md)
+
+Testing Plan: [Testing Plan](course-work/TESTING_PLAN.md)
+
 ## Overview
 
 BudgetWise is a full-stack budgeting application built with [Clean Architecture](DESIGN.md) principles in a monorepo.  
