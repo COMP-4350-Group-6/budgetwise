@@ -112,5 +112,20 @@ Top 3 tests for each category:
 
 ## 4. Reproducible Environments
 
-> [!WARNING]
-> {MISSING_TODO}
+[REVIEWING GROUP 2]
+
+The clarity of documentation was great at the start but there were a few things that threw me for a bit of a loop.
+
+1. (Possibly out of scope for this review) First was that I came in with the assumption that I only needed 1 repo. UM Learn lists only on link for group 2, which would not be an issue if I didn't initially see that group 4 had two links one for the front and one for the back. I didn't realize there were 2 repos I needed for group 2 until halfway through, which caused some head scratching. (The CONTRIBUTING.md file does make it clear that there are multiple repos)
+
+2. When I got to the step `### 4: Setup and Run Back End Server` I spent quite some time installing the tools in the first few steps. However when I was waiting for everything to install, I began reading the upcoming steps and felt like even if I finished installing everything I would be unable to complete step `8. Set up Firestore authentication:` due to not having the auth file. I decided to try to build and run the web app without the backend and it appeared to build and run successfully. I then ran their tests with the provided `pnpm test` command, and all tests passed (The ![WS1_REPRODUCIBLE_ENVIRONMENTS_FOR_GROUP_2.png](WS1_REPRODUCIBLE_ENVIRONMENTS_FOR_GROUP_2.png) image is said command's execution)
+
+If I remove the time I spend working on the backend (which I never finished), then the time from downloading the repo to when the tests finished running would be under 10 minutes.
+
+Other things to note:
+
+- I never ran the GitHub workflow tests that would have been run automatically I believe when Pushing & Pulling to & from the repo with Husky. Checking the Actions tab in the repo does show that these workflows are running when commits are made.
+- I found it difficult to know if I was running the tests correctly. Either a document or heading in the readme; dedicated to summarizing the tests for the project would have been useful to me (I could not find a wiki on the repo or link to the testing plan that would serve the same purpose)
+
+Despite my critiques, if I were a new developer joining their team, I would be content with their documentation. Many of my concerns would have been resolved instantly over a hypothetical team chat, and their app appears to be well structured and stable.
+
