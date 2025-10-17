@@ -5,7 +5,7 @@
   "scripts": {
     "test": "vitest run",
     "test:unit": "vitest run --exclude \"**/*.int.test.ts\"",
-    "test:integration": "vitest run -t \"Supabase auth adapter (integration)\""
+    "test:integration": "vitest run src/index.int.test.ts"
   },
   "exports": {
     ".": "./src/index.ts"

@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { Hono } from "hono";
 import { authMiddleware } from "./auth";
@@ -13,9 +14,13 @@ vi.mock("jose", () => {
 // Import mocked symbols after vi.mock so we can control behavior
 import { jwtVerify } from "jose";
 
-const ENV = { SUPABASE_URL: "https://example.supabase.co" };
+const jwtSecret = process.env.SUPABASE_JWT_SECRET;
 
-describe("auth middleware", () => {
+describe.skipIf(!jwtSecret)("auth middleware", () => {
+  const ENV = {
+    SUPABASE_URL: "https://example.supabase.co",
+    SUPABASE_JWT_SECRET: jwtSecret!,
+  };
   beforeEach(() => {
     vi.clearAllMocks();
   });
