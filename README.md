@@ -82,7 +82,7 @@ For more on the folder structure and rationale, see [DESIGN.md](DESIGN.md#packag
 
 - [Node.js](https://nodejs.org/) (v18+ recommended)
 - [pnpm](https://pnpm.io/) (monorepo package manager)
-- [Cloudflare account](https://cloudflare.com) (for local API)
+- [Cloudflare account](https://cloudflare.com) (optional, for deployment)
 - [Supabase](https://supabase.com/) account (for authentication)
 
 ### 1. Clone and Install
