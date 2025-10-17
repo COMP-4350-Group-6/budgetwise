@@ -26,8 +26,13 @@
 
 ### Frontend
 
-> [!WARNING]
-> {MISSING_TODO}
+> We test the logic layer with unit tests and simple use case tests. We run pure domain rules without outside services and check totals, ownership, and validation. We drive the use cases with lightweight fakes for data and a fixed clock and id so results are repeatable. We assert outcomes like correct sums, over budget flags, alert thresholds, and keeping each user’s data separate. Our coverage focuses on key flows. Creating categories and budgets, adding transactions, updating the dashboard totals and remaining, and aggregating multiple budgets in one category. We also run one integration path that links categories, budgets, and transactions to make sure the rules still hold when pieces work together.
+
+> We test the UI with React Testing Library and Vitest. We render real pages and components, interact like a user by typing, clicking, and submitting, and assert what is visible on screen such as text, roles and labels, error messages, and loading or disabled states. We mock Next.js useRouter and modules like authService so there is no real navigation or network, which lets us control success and failure paths. Our coverage focuses on key flows. The login page with its fields, show or hide password, and success or failure cases, and the sidebar navigation with its links, collapse behavior, and logout redirect.
+
+> We skip unit tests where there isn’t real logic to test. We leave out thin glue files that just plug pieces together and don’t make decisions, simple presentational UI that only shows text or icons, tiny mappers or serializers that only pass data through, wiring and factory setup that just connects parts, and adapter methods that only call an SDK. These spots change often and unit tests there add noise without finding real bugs, while higher-level tests already cover the behavior users see.
+
+> We run the Supabase auth adapter tests only when the right environment variables are present so they can hit a real project, use a fixed clock and id generator to keep use case results repeatable, drive full API flows through real HTTP handlers instead of stubbing everything, and keep UI tests lightweight by mocking Next.js routing and services rather than spinning up a real browser or network.
 
 <!--
 - Logic layer (if present): ≥80% coverage.
