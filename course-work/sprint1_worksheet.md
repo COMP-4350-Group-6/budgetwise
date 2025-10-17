@@ -120,7 +120,7 @@ Top 3 tests for each category:
 
 Test Location: Primary test suite: [`apps/api/src/routes/categories.test.ts`](https://github.com/COMP-4350-Group-6/budgetwise/apps/api/src/routes/categories.test.ts)
 
-**What's Covered**
+**What's Covered In the Final Usage**
 
 Core CRUD Operations
 - **Creation**: Minimal and full payloads validated
