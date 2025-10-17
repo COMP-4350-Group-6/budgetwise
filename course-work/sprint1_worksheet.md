@@ -5,8 +5,11 @@
 
 ## 1. Testing Plan
 
+Link: [TESTING_PLAN.md](TESTING_PLAN.md)
+
 > [!WARNING]
 > {MISSING_TODO}
+> - The testing file is linked, but IT IS NOT COMPLETE!
 
 ## 2. Unit / Integration / Acceptance Testing
 
