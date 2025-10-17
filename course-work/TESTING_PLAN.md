@@ -68,7 +68,42 @@ pnpm run test:auth:integration  # supabase adapter integration
 ```
 ---
 
-## Reporting and Results  
+## Reporting and Results 
+Where to find reports locally
+- Run tests and read the console summary
+  - pnpm test
+
+Generate coverage and open the HTML report for a package
+  - Usecases
+    - pnpm --filter @budget/usecases vitest run --coverage
+    - open packages/usecases/coverage/index.html
+
+  - Domain
+    - pnpm --filter @budget/domain vitest run --coverage
+    - open packages/domain/coverage/index.html
+
+  - API
+    - pnpm --filter api vitest run --coverage
+    - open apps/api/coverage/index.html
+
+  - Frontend
+    - cd apps/frontend
+    - pnpm vitest run --coverage
+    - open coverage/index.html
+
+How to read the reports
+- The console shows total tests passed and failed plus a short coverage table
+- The HTML report shows lines, branches, functions, and statements per file and per package
+- Green means the file meets the threshold
+- Red means the file is below the threshold and needs more tests
+- Click a file in the HTML report to see covered and missed lines
+
+What to look for
+- Usecases and Domain should meet their coverage targets first since they hold core rules
+- Frontend should cover key logic like hooks and services and the login and sidebar flows
+- API routes should show that all key endpoints are exercised and that both success and validation paths are tested
+
+
 <!--
 Explain where to find test reports (HTML, console, CI output) and how to interpret them.  
 Include screenshots or links if applicable (e.g., `/coverage/index.html`).
