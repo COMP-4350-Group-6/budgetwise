@@ -140,6 +140,31 @@ Data Integrity
 - Concurrency handling (parallel category creation)
 - Active status toggling
 
+> 2. Transaction Acceptance Test Coverage
+
+Test Location: Primary test suite: [`apps/api/src/routes/transactions.int.test.ts`](https://github.com/COMP-4350-Group-6/budgetwise/apps/api/src/routes/transactions.int.test.ts)
+
+###  Covered
+
+- **Access point:** User can open the “Add Transaction” form from the dashboard or Transactions page.  
+- **Form fields:** Amount, Date, Category, and Description (notes).  
+- **Categories source:** User can select from existing categories.  
+- **Validation:**  
+  - Amount accepts only numbers/decimals.  
+  - Date defaults to today and can be changed.  
+- **Budget rule enforced:**  
+  - Adding a transaction **succeeds** when the selected category has a budget.  
+  - Attempting to add a transaction for a category **without a budget** is rejected (clear error message shown).  
+- **Feedback:** On success, the user sees a confirmation (toast/snackbar/success state).  
+- **Immediate reflect:** Newly added transaction appears instantly in the Recent Transactions list.  
+- **Form reset:** Form clears automatically after a successful submission for consecutive entries.  
+- **Cancel:** User can cancel entry without saving and return to the previous state. 
+
+### Not Covered
+
+- **Custom category creation** from the transaction form (handled separately in Category Management).  
+- **Advanced filters** such as search or date range (basic render implemented; full behavior planned).  
+- **Multi-budget allocation** within a single category.  
 
 ## 4. Reproducible Environments
 
