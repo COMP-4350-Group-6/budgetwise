@@ -55,8 +55,28 @@ Top 3 tests for each category:
 
 ### Unit Tests
 
-> [!WARNING]
-> {MISSING_TODO}
+1.  https://github.com/COMP-4350-Group-6/budgetwise/blob/main/packages/domain/src/budget.test.ts
+- checks Budget domain behavior in isolation (no I/O/framework)
+- verifies constructor validation: non-negative integer amountCents, non-empty name, valid date window
+- verifies alert logic at boundaries: thresholds 0%, 80%, zero budgets
+- verifies time-window activation via isActive
+- ensures domain invariants/business rules for thresholds, totals, and alerts before API/use cases
+
+2.  https://github.com/COMP-4350-Group-6/budgetwise/blob/main/packages/domain/src/category.test.ts
+- checks Category domain validation in isolation
+- verifies name rules: non-empty, not whitespace-only, max length, reject digits/special chars/emoji (as specified)
+- verifies optional fields: description, icon, color
+- verifies immutability expectations
+- verifies timestamp preservation
+- ensures consistent categorization logic for downstream budgets/transactions/dashboards
+
+3. https://github.com/COMP-4350-Group-6/budgetwise/blob/main/packages/domain/src/user.test.ts
+- checks User domain validation in isolation
+- verifies robust email validation across numerous edge cases
+- verifies name validation, including international/Unicode scenarios
+- verifies currency handling
+- verifies immutability and timestamp integrity
+- ensures user data integrity independent of the auth adapter for signup/login/profile flows
 
 ### Integration Tests
 
