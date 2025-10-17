@@ -108,8 +108,6 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY="your-publishable-key"
 **API env vars:**  
 See [`apps/api/wrangler.jsonc`](apps/api/wrangler.jsonc) and `.dev.vars.example` for local secrets.
 
-For more on environment setup, see [BUDGET_IMPLEMENTATION_GUIDE.md](BUDGET_IMPLEMENTATION_GUIDE.md#backend-implementation).
-
 ---
 
 ## Running the App
