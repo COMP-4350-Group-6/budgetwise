@@ -50,12 +50,17 @@ Link: [TESTING_PLAN.md](TESTING_PLAN.md)
 
 ### Coverage Report
 
-> [!WARNING]
-> {MISSING_TODO}
 
-<!--
-- Provide class and line coverage reports (link or screenshot).
--->
+![API](../test-coverage/api.png)
+
+![Auth adapter supabase](../test-coverage/auth-adapter-supabase.png)
+
+![Domain](../test-coverage/domain.png)
+
+![Frontend](../test-coverage/frontend.png)
+
+![Usecase](../test-coverage/usecase.png)
+
 
 ## 3. Testing Importance
 
@@ -108,10 +113,36 @@ Top 3 tests for each category:
 - verifies getMe returns null when not signed in
 - verifies login with valid test credentials creates a session and logout clears it
 
+
 ### Acceptance Tests
 
-> [!WARNING]
-> {MISSING_TODO}
+> 1. Category Acceptance Test Coverage
+
+Test Location: Primary test suite: [`apps/api/src/routes/categories.test.ts`](https://github.com/COMP-4350-Group-6/budgetwise/apps/api/src/routes/categories.test.ts)
+
+**What's Covered**
+
+Core CRUD Operations
+- **Creation**: Minimal and full payloads validated
+- **Listing & Filtering**: Active-only filtering works correctly
+- **Updates**: Partial updates supported (only modified fields change)
+- **Deletion**: Protected deletion (blocked when budgets exist)
+
+Security & Validation
+- Authentication enforcement (401 when missing)
+- Cross-user protection (users can't modify others' categories)
+- Input validation:
+  - Required fields enforced
+  - Invalid inputs rejected (numbers, punctuation, emojis in names)
+  - Unicode icons allowed
+  - Maximum name length validated
+
+Data Integrity
+- Default category seeding (idempotent, no duplicates)
+- Duplicate names allowed across different users (tenant isolation)
+- Concurrency handling (parallel category creation)
+- Active status toggling
+
 
 ## 4. Reproducible Environments
 
