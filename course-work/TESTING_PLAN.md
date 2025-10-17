@@ -95,7 +95,15 @@ Include screenshots or links if applicable (e.g., `/coverage/index.html`).
 ---
 
 ## Continuous Integration [Once set up]
-<!--
-Note if your tests run automatically in a CI pipeline (GitHub Actions, GitLab CI, etc.) and how that helps maintain consistency.
--->
 
+Multiple tests are automatically run using GitHub Actions & Workflows
+
+- Super-Linter for (Markdown, YAML, XML, and GitLeaks)
+  - Linters support proper adhearance to a unified format across workers (Our Markdown linter is oversensitive and needs to be toned down)  
+  - The GitLeaks linter helps with idenfiying leaked keys
+
+- Cloudflare Workers and Pages for building the app.
+
+
+NOTE:
+- Current CI is not stable and should not be relied upon until next sprint
