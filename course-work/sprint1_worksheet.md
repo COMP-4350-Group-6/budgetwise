@@ -16,16 +16,13 @@ Link: [TESTING_PLAN.md](TESTING_PLAN.md)
 
 ### Backend
 
-> [!WARNING]
-> {MISSING_TODO}
+> We test the core business and application layers with unit and acceptance-style tests. Domain tests enforce invariants and value objects without any dependencies. Usecase tests drive real flows such as creating categories and budgets, adding transactions, computing period status, and rolling up category dashboards—using in-memory repositories and deterministic system ports (fixed clock and ID) so results are repeatable. We assert exact edge semantics like duplicate name rules per user, active/inactive filtering, budget amount bounds, 0%/>= alert thresholds, and the idempotency of seeding defaults. We also run a single end-to-end acceptance path that links Category → Budget → Transaction → Dashboard to ensure the same rules hold when pieces work together.
 
-<!--
-- API layer: 100% method coverage (every method has at least 1 tested line).
+> At the HTTP layer, we run API integration tests directly against the Hono app. We exercise all key endpoints end-to-end—create/list/update/delete for categories and budgets, adding transactions, filtering active-only lists, preventing category deletion when budgets exist, and verifying that duplicate category names are allowed across different users but not within the same user. We parse responses with typed helpers to keep DTOs strict, and assert status codes, payload shapes, and validation errors rather than over-mocking internals. This gives us contract-level confidence while staying fast and deterministic.
 
-- Logic classes: ≥80% line coverage.
+> Authentication and adapters are tested thoughtfully. Route tests set SUPABASE_JWT_SECRET in the worker env and mock jose to map bearer tokens to user IDs, avoiding real network calls while still exercising the auth middleware (missing/invalid header, invalid token, wrong user access). The Supabase auth adapter runs only when the right environment variables are present, so it can hit a real project in controlled environments. We keep usecase and API tests deterministic with a fixed clock and ID generator, ensuring period math and aggregation calculations don’t flake.
 
-- Integration tests: 100% class coverage, with strong line & method coverage.
--->
+> We skip unit tests where there isn’t meaningful backend logic. We leave out thin composition/DI wiring that just connects parts, barrel re-exports, trivial mappers/serializers, and glue code that simply forwards calls. These change frequently and add noise without catching real defects. The higher-level API and usecase tests already cover observable behavior and contracts users and clients rely on.
 
 ### Frontend
 
