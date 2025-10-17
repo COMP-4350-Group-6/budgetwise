@@ -60,8 +60,25 @@ Top 3 tests for each category:
 
 ### Integration Tests
 
-> [!WARNING]
-> {MISSING_TODO}
+> 1. https://github.com/COMP-4350-Group-6/budgetwise/blob/main/packages/usecases/src/integration/category-budget-transaction.integration.test.ts  
+- checks the orchestration across categories, budgets, and transactions. then links records, aggregates spending into category and budget totals, and checks domain rules with integrated repositories 
+- verifies you can create a category and one or more monthly budgets tied to it
+- verifies adding transactions to that budget increases spent for the correct category/budget
+- verifies the dashboard totals are correct (totalBudgetCents = sum of budgets, totalSpentCents = sum of relevant transactions, totalRemainingCents = budget − spent)
+- verifies over-budget/alert thresholds flip when spend passes the limit
+- verifies only the requesting user’s data is included and multiple budgets in one category are aggregated together
+
+> 2. https://github.com/COMP-4350-Group-6/budgetwise/blob/main/apps/api/src/routes/transactions.int.test.ts 
+- checks the transactions HTTP endpoint end to end through request validation, use case execution, and persistence, asserting status codes, response structure, and correct updates to stored data and aggregates 
+- verifies POST /transactions with a valid body returns 201 and JSON including a generated id
+- verifies the transaction is actually persisted and linked to the given budget/category
+- verifies bad input is rejected with the right status code
+- verifies downstream aggregates update, fetching data after the POST shows the new spent totals
+
+> 3. https://github.com/COMP-4350-Group-6/budgetwise/blob/main/packages/adapters/auth-supabase/src/index.int.test.ts 
+- validates the Supabase auth adapter against domain auth ports, covering session and token handling, error mapping, and overall adapter-domain contract compliance
+- verifies getMe returns null when not signed in
+- verifies login with valid test credentials creates a session and logout clears it
 
 ### Acceptance Tests
 
