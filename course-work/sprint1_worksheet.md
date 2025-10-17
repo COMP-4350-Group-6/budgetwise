@@ -115,7 +115,7 @@ Top 3 tests for each category:
 
 > 1. Category Acceptance Test Coverage
 
-Test Location: Primary test suite: [`apps/api/src/routes/categories.test.ts`](https://github.com/COMP-4350-Group-6/budgetwise/apps/api/src/routes/categories.test.ts)
+Test Location: Related test suite: [`apps/api/src/routes/categories.test.ts`](https://github.com/COMP-4350-Group-6/budgetwise/apps/api/src/routes/categories.test.ts)
 
 **What's Covered**
 
@@ -142,7 +142,7 @@ Data Integrity
 
 > 2. Transaction Acceptance Test Coverage
 
-Test Location: Primary test suite: [`apps/api/src/routes/transactions.int.test.ts`](https://github.com/COMP-4350-Group-6/budgetwise/apps/api/src/routes/transactions.int.test.ts)
+Test Location: Related test suite: [`apps/api/src/routes/transactions.int.test.ts`](https://github.com/COMP-4350-Group-6/budgetwise/apps/api/src/routes/transactions.int.test.ts)
 
 ###  Covered
 
