@@ -82,7 +82,7 @@ For more on the folder structure and rationale, see [DESIGN.md](DESIGN.md#packag
 
 - [Node.js](https://nodejs.org/) (v18+ recommended)
 - [pnpm](https://pnpm.io/) (monorepo package manager)
-- [Docker](https://www.docker.com/) (optional, for local API)
+- [Cloudflare account](https://cloudflare.com) (for local API)
 - [Supabase](https://supabase.com/) account (for authentication)
 
 ### 1. Clone and Install
@@ -97,7 +97,7 @@ pnpm install
 
 Copy example env files and fill in values:
 
-**Frontend `.env.local` example:**
+**Frontend `.dev.vars` example:**
 
 ```
 NEXT_PUBLIC_API_URL="http://localhost:8787"
@@ -106,7 +106,7 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY="your-publishable-key"
 ```
 
 **API env vars:**  
-See [`apps/api/wrangler.jsonc`](apps/api/wrangler.jsonc) and `.dev.vars` for local secrets.
+See [`apps/api/wrangler.jsonc`](apps/api/wrangler.jsonc) and `.dev.vars.example` for local secrets.
 
 For more on environment setup, see [BUDGET_IMPLEMENTATION_GUIDE.md](BUDGET_IMPLEMENTATION_GUIDE.md#backend-implementation).
 
@@ -179,7 +179,7 @@ pnpm test --filter @budget/usecases -- --coverage
 
 - Some bugs and edge cases are tracked in the [GitHub Issues](https://github.com/COMP-4350-Group-6/budgetwise/issues) tab.
 - Please check issues before reporting new bugs.
-- API integration tests may fail if environment variables are missing—see [test-coverage/test-summary.md](test-coverage/test-summary.md) for troubleshooting.
+- API integration tests may fail if environment variables are missing
 
 ---
 
