@@ -10,7 +10,7 @@ export function makeAddTransaction(deps: {
 }) {
   return async (input: {
     userId: string;
-    budgetId: string;
+    budgetId?: string;
     amountCents: number;
     categoryId?: string;
     note?: string;
