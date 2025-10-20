@@ -6,6 +6,10 @@ COMP 4350 - Project Code
 
 Sprint 1 Worksheet: [Sprint 1 Worksheet](course-work/sprint1_worksheet.md)
 
+Sprint 2 Worksheet: [Sprint 2 Worksheet](course-work/sprint2_worksheet.md)
+
+Sprint 3 Worksheet: [Sprint 3 Worksheet](course-work/sprint3_worksheet.md)
+
 Testing Plan: [Testing Plan](course-work/TESTING_PLAN.md)
 
 ## Overview
