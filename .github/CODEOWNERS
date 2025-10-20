@@ -2,9 +2,12 @@
 
 # Frontends
 
-/src/web-app-react/ @chinch02 @nene2004
-/src/web-app-vue/ @chinch02 @nene2004
+/apps/frontend/ @chinch02 @nene2004
 
 # Backend
 
-/src/backend/ @ahnafaf @RamatjyotSingh @sidfer
+/apps/api/ @ahnafaf @RamatjyotSingh @sidfer
+
+# Repo
+
+/.github/ @Von-Seth
