@@ -1,7 +1,8 @@
 export interface TransactionProps {
   id: string;
   userId: string;
-  budgetId: string;
+  // Allow unbudgeted transactions
+  budgetId?: string;
   amountCents: number;
   categoryId?: string;
   note?: string;
