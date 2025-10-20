@@ -1,4 +1,19 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, beforeAll, vi } from 'vitest';
+
+// Hoist a mock for 'jose' so auth middleware sees a valid user
+vi.mock('jose', () => {
+  return {
+    createRemoteJWKSet: vi.fn(() => ({})),
+    jwtVerify: vi.fn(async (token: string) => {
+      let sub = token;
+      if (token.includes('user-1')) sub = 'user-1';
+      else if (token.includes('user-2')) sub = 'user-2';
+      else if (token.includes('different-user')) sub = 'different-user';
+      return { payload: { sub } } as any;
+    }),
+  };
+});
+
 import { app } from '../app';
 
 interface BudgetDTO {
@@ -46,6 +61,13 @@ async function parseJson<T>(res: Response): Promise<T> {
 }
 
 describe('Budgets API Integration Tests', () => {
+  let testCounter = 0;
+  // Ensure SUPABASE_JWT_SECRET is available to the app in tests
+  beforeAll(() => {
+    const originalFetch = app.fetch.bind(app);
+    (app as any).fetch = (req: Request, env?: any, event?: any) =>
+      originalFetch(req, { ...(env || {}), SUPABASE_JWT_SECRET: process.env.SUPABASE_JWT_SECRET }, event);
+  });
   let authToken: string;
   let userId: string;
   let categoryId: string;
@@ -53,8 +75,8 @@ describe('Budgets API Integration Tests', () => {
   beforeEach(async () => {
     // Note: In a real scenario, you'd set up test authentication
     // For now, we'll mock the auth token
-    authToken = 'test-token';
-    userId = 'test-user-123';
+    authToken = `test-token-${++testCounter}`;
+    userId = `user-${testCounter}`;
     
     // Create a category for budget tests
     const categoryRes = await app.request('/categories', {
