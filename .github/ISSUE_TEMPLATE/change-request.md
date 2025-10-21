@@ -7,7 +7,7 @@ assignees: ''
 
 ---
 
-**What do you think should be changed, and how does it currently fuction?:**
+**What do you think should be changed, and how does it currently function?:**
 
 
 
