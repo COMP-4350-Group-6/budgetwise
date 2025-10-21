@@ -12,7 +12,7 @@ id = "generic-api-key"
 
     [[rules.allowlists]]
     # This is to suppress the false possitive occuring in TESTING-RATIONALE.md:generic-api-key:166
+    paths = ['''TESTING-RATIONALE\.md''']
     condition = "AND"
-    # paths = ['''TESTING-RATIONALE\.md''']
-    regexTarget = "match"
+    regexTarget = "line"
     regexes = ['''(?:budgetwise\/apps\/api\/src\/middleware\/auth\.ts:17)''']
