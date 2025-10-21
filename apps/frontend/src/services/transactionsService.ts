@@ -29,31 +29,20 @@ function ulid(): string {
 
 export const transactionsService = {
   async addTransaction(input: AddTransactionInput): Promise<TransactionDTO> {
-    // Use the same auth pattern as apiClient: get current user via auth client
-    const me = await authClient.getMe();
-    const userId = (me as { id?: string } | null)?.id;
-    if (!userId) {
-      throw new Error("Not authenticated");
-    }
-
-    const nowIso = new Date().toISOString();
-    const dto = {
-      id: ulid(),
-      userId,
-      budgetId: input.budgetId,
+    // Send only the fields that the API expects
+    const payload = {
+      budgetId: input.budgetId || undefined,
+      categoryId: input.categoryId || undefined,
       amountCents: input.amountCents,
-      categoryId: input.categoryId,
       note: input.note,
       occurredAt: input.occurredAt.toISOString(),
-      createdAt: nowIso,
-      updatedAt: nowIso,
     };
 
     const response = await apiFetch<{ transaction: TransactionDTO }>(
       "/transactions",
       {
         method: "POST",
-        body: JSON.stringify(dto),
+        body: JSON.stringify(payload),
       },
       true // send Authorization header
     );

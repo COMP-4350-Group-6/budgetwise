@@ -33,6 +33,12 @@ export function makeGetBudgetDashboard(deps: {
   return async (userId: string): Promise<BudgetDashboard> => {
     const categories = await deps.categoriesRepo.listActiveByUser(userId);
     const allBudgets = await deps.budgetsRepo.listActiveByUser(userId);
+    
+    // Fetch all transactions for a wide period to calculate category spending
+    const now = deps.clock.now();
+    const startDate = new Date(now.getFullYear() - 10, 0, 1); // 10 years back
+    const endDate = new Date(now.getFullYear() + 1, 11, 31); // 1 year forward
+    const allTransactions = await deps.transactionsRepo.listByUserInPeriod(userId, startDate, endDate);
 
     const getBudgetStatus = makeGetBudgetStatus(deps);
     
@@ -47,12 +53,11 @@ export function makeGetBudgetDashboard(deps: {
         b => b.props.categoryId === category.id
       );
 
-      if (categoryBudgets.length === 0) continue;
-
       const budgetStatuses: BudgetStatus[] = [];
       let categoryBudgetTotal = 0;
       let categorySpentTotal = 0;
 
+      // Calculate spending from budgets if they exist
       for (const budget of categoryBudgets) {
         const status = await getBudgetStatus(budget.id, userId);
         if (status) {
@@ -66,7 +71,20 @@ export function makeGetBudgetDashboard(deps: {
         }
       }
 
-      if (budgetStatuses.length > 0) {
+      // If no budgets, calculate spending from transactions
+      if (categoryBudgets.length === 0) {
+        const categoryTransactions = allTransactions.filter(
+          (tx) => tx.props.categoryId === category.id
+        );
+        categorySpentTotal = categoryTransactions.reduce(
+          (sum: number, tx) => sum + Math.abs(tx.props.amountCents),
+          0
+        );
+        totalSpent += categorySpentTotal;
+      }
+
+      // Include category if it has budgets OR spending
+      if (budgetStatuses.length > 0 || categorySpentTotal > 0) {
         categorySummaries.push({
           categoryId: category.id,
           categoryName: category.props.name,
@@ -76,7 +94,9 @@ export function makeGetBudgetDashboard(deps: {
           totalBudgetCents: categoryBudgetTotal,
           totalSpentCents: categorySpentTotal,
           totalRemainingCents: categoryBudgetTotal - categorySpentTotal,
-          overallPercentageUsed: (categorySpentTotal / categoryBudgetTotal) * 100,
+          overallPercentageUsed: categoryBudgetTotal > 0
+            ? (categorySpentTotal / categoryBudgetTotal) * 100
+            : 0,
           hasOverBudget: budgetStatuses.some(b => b.isOverBudget),
         });
       }
