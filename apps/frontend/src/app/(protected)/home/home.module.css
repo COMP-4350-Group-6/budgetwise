@@ -183,3 +183,47 @@
   padding: 2rem 0;
   font-size: 0.875rem;
 }
+
+/* Pie chart styles */
+.pieChartContainer {
+  display: flex;
+  justify-content: center;
+  margin: 1.5rem 0;
+}
+
+.pieChart {
+  width: 200px;
+  height: 200px;
+  max-width: 100%;
+}
+
+.legendContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.legendColor {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 0.25rem;
+  flex-shrink: 0;
+}
+
+.legendText {
+  flex: 1;
+  color: #374151;
+}
+
+.legendValue {
+  font-weight: 600;
+  color: #111827;
+}
