@@ -259,11 +259,23 @@ export default function HomePage() {
     };
   }, [dashboard]);
 
-  // Aggregate transactions by date for trend chart
+  // Aggregate transactions by date for trend chart - current month only
   const trendData = useMemo(() => {
     const dailyTotals = new Map<string, number>();
     
-    transactions.forEach(tx => {
+    // Filter transactions for current month only
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+    const monthStart = new Date(currentYear, currentMonth, 1).getTime();
+    const monthEnd = new Date(currentYear, currentMonth + 1, 0, 23, 59, 59).getTime();
+    
+    const currentMonthTransactions = transactions.filter(tx => {
+      const txDate = new Date(tx.occurredAt).getTime();
+      return txDate >= monthStart && txDate <= monthEnd;
+    });
+    
+    currentMonthTransactions.forEach(tx => {
       const date = new Date(tx.occurredAt).toISOString().split('T')[0];
       const current = dailyTotals.get(date) || 0;
       dailyTotals.set(date, current + Math.abs(tx.amountCents));
@@ -283,12 +295,24 @@ export default function HomePage() {
     });
   }, [transactions]);
 
-  // Aggregate by day of week for weekly chart
+  // Aggregate by day of week for weekly chart - current month only
   const weeklyData: WeeklyDataPoint[] = useMemo(() => {
     const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const weekTotals = new Map<string, number>();
     
-    transactions.forEach(tx => {
+    // Filter transactions for current month only
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+    const monthStart = new Date(currentYear, currentMonth, 1).getTime();
+    const monthEnd = new Date(currentYear, currentMonth + 1, 0, 23, 59, 59).getTime();
+    
+    const currentMonthTransactions = transactions.filter(tx => {
+      const txDate = new Date(tx.occurredAt).getTime();
+      return txDate >= monthStart && txDate <= monthEnd;
+    });
+    
+    currentMonthTransactions.forEach(tx => {
       const day = dayNames[new Date(tx.occurredAt).getDay()];
       const current = weekTotals.get(day) || 0;
       weekTotals.set(day, current + Math.abs(tx.amountCents));
@@ -402,7 +426,15 @@ export default function HomePage() {
           ) : (
             <div className={styles.smoothChartWrapper}>
               <ResponsiveContainer width="100%" height={220}>
-                <LineChart data={trendData} margin={{ top: 20, right: 20, bottom: 5, left: 0 }}>
+                <LineChart data={trendData} margin={{ top: 20, right: 20, bottom: 5, left: 50 }}>
+                  <YAxis
+                    stroke="#CBD5E1"
+                    style={{ fontSize: '0.75rem', fontWeight: '500' }}
+                    axisLine={false}
+                    tickLine={false}
+                    tickFormatter={(value) => `$${(value / 100).toFixed(2)}`}
+                    width={40}
+                  />
                   <XAxis
                     dataKey="formattedDate"
                     stroke="#CBD5E1"
