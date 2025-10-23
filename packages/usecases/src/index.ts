@@ -15,6 +15,7 @@ export * from "./budgets/get-budget-dashboard";
 
 // Transactions
 export * from "./transactions/add-transaction";
+export * from "./transactions/update-transaction";
 export * from "./transactions/categorize-transaction";
 export * from "./transactions/parse-invoice";
 
