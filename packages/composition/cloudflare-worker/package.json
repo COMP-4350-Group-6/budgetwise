@@ -5,6 +5,7 @@
   "exports": { ".": "./src/index.ts" },
   "dependencies": {
     "@budget/adapters-persistence-local": "workspace:*",
+    "@budget/adapters-openrouter": "workspace:*",
     "@budget/usecases": "workspace:*"
   }
 }

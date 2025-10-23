@@ -4,6 +4,7 @@ import {
   makeInMemCategoriesRepo,
   makeInMemBudgetsRepo
 } from "@budget/adapters-persistence-local";
+import { OpenRouterCategorization } from "@budget/adapters-openrouter";
 import {
   makeCreateCategory,
   makeListCategories,
@@ -17,9 +18,14 @@ import {
   makeGetBudgetStatus,
   makeGetBudgetDashboard,
   makeAddTransaction,
+  makeCategorizeTransaction,
 } from "@budget/usecases";
 
-export function makeContainer(/* env: Env */) {
+interface Env {
+  OPENROUTER_API_KEY?: string;
+}
+
+export function makeContainer(env?: Env) {
   const clock = makeSystemClock();
   const id = makeUlid();
   
@@ -27,6 +33,11 @@ export function makeContainer(/* env: Env */) {
   const categoriesRepo = makeInMemCategoriesRepo();
   const budgetsRepo = makeInMemBudgetsRepo();
   const txRepo = makeInMemTransactionsRepo();
+  
+  // Optional categorization service (only if API key is provided)
+  const categorization = env?.OPENROUTER_API_KEY
+    ? new OpenRouterCategorization(env.OPENROUTER_API_KEY)
+    : undefined;
   
   return {
     repos: {
@@ -57,6 +68,14 @@ export function makeContainer(/* env: Env */) {
       
       // Transaction use cases
       addTransaction: makeAddTransaction({ clock, id, txRepo }),
+      categorizeTransaction: categorization
+        ? makeCategorizeTransaction({
+            clock,
+            txRepo,
+            categoriesRepo,
+            categorization
+          })
+        : undefined,
     }
   };
 }

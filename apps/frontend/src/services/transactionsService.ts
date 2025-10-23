@@ -28,7 +28,7 @@ function ulid(): string {
 }
 
 export const transactionsService = {
-  async addTransaction(input: AddTransactionInput): Promise<TransactionDTO> {
+  async addTransaction(input: AddTransactionInput): Promise<{ transaction: TransactionDTO }> {
     // Send only the fields that the API expects
     const payload = {
       budgetId: input.budgetId || undefined,
@@ -46,7 +46,30 @@ export const transactionsService = {
       },
       true // send Authorization header
     );
-    return response.transaction;
+    return response;
+  },
+  
+  async categorizeTransaction(id: string): Promise<{ categoryId: string; reasoning: string } | null> {
+    try {
+      const response = await apiFetch<{ categoryId?: string; reasoning?: string; message?: string }>(
+        `/transactions/${id}/categorize`,
+        {
+          method: "POST",
+        },
+        true
+      );
+      
+      if (response.categoryId && response.reasoning) {
+        return {
+          categoryId: response.categoryId,
+          reasoning: response.reasoning
+        };
+      }
+      return null;
+    } catch (error) {
+      console.error("Categorization failed:", error);
+      return null;
+    }
   },
   
   async updateTransaction(id: string, updates: Partial<AddTransactionInput>): Promise<TransactionDTO> {

@@ -49,6 +49,45 @@ transactions.post(
   }
 );
 
+// POST /transactions/:id/categorize - Auto-categorize an uncategorized transaction
+transactions.post("/transactions/:id/categorize", async (c) => {
+  const userId = c.get("userId") as string;
+  const transactionId = c.req.param("id");
+  const { usecases } = container;
+
+  console.log('Categorization request for transaction:', transactionId);
+
+  // Check if categorization is available
+  if (!usecases.categorizeTransaction) {
+    console.log('Categorization service not available');
+    return c.json({ error: "Auto-categorization not available" }, 503);
+  }
+
+  console.log('Categorization service available, calling use case...');
+
+  try {
+    const result = await usecases.categorizeTransaction({
+      transactionId,
+      userId,
+    });
+
+    console.log('Categorization result:', result);
+
+    if (!result) {
+      console.log('Categorization returned null - no category suggested');
+      return c.json({ message: "Could not categorize transaction" }, 200);
+    }
+
+    return c.json({
+      categoryId: result.categoryId,
+      reasoning: result.reasoning,
+    }, 200);
+  } catch (error) {
+    console.error("Categorization error:", error);
+    return c.json({ error: (error as Error).message }, 400);
+  }
+});
+
 // GET /transactions - list recent transactions for the authenticated user
 // Query params:
 //   - days?: number (default 30) - time window ending now

@@ -16,6 +16,7 @@ export default function TransactionsPage() {
   const [budgets, setBudgets] = useState<Budget[]>([]);
   const [transactions, setTransactions] = useState<TransactionDTO[]>([]);
   const [loading, setLoading] = useState(false);
+  const [categorizingId, setCategorizingId] = useState<string | null>(null);
 
   // ===== Add Modal State =====
   const [showAddModal, setShowAddModal] = useState(false);
@@ -85,26 +86,51 @@ export default function TransactionsPage() {
   const handleAddTransaction = async (e: React.FormEvent) => {
     e.preventDefault();
     const cents = Math.round(parseFloat(amount || "0") * 100);
-    if (!selectedCategoryId || cents <= 0) {
-      setMessage("Please fill all required fields.");
+    if (cents <= 0 || (!description && !note)) {
+      setMessage("Please provide amount and description.");
       return;
     }
     try {
       setSubmitting(true);
-      await transactionsService.addTransaction({
+      
+      // Create transaction (with or without category)
+      const result = await transactionsService.addTransaction({
         budgetId: selectedBudgetId || undefined,
-        categoryId: selectedCategoryId,
+        categoryId: selectedCategoryId || undefined,
         amountCents: cents,
         note: note || description || undefined,
         occurredAt: new Date(date),
       });
+      
+      // Clear form
       setDescription("");
       setAmount("");
       setNote("");
       setSelectedCategoryId("");
       setSelectedBudgetId("");
-      await loadTransactions();
       setShowAddModal(false);
+      
+      // Reload to show the new transaction
+      await loadTransactions();
+      
+      // If no category was selected, try to auto-categorize
+      if (!selectedCategoryId && result.transaction.id && (note || description)) {
+        const txId = result.transaction.id;
+        setCategorizingId(txId);
+        
+        // Call categorization endpoint asynchronously
+        transactionsService.categorizeTransaction(txId)
+          .then(async () => {
+            // Reload transactions to show the categorized result
+            await loadTransactions();
+          })
+          .catch((err) => {
+            console.error("Auto-categorization failed:", err);
+          })
+          .finally(() => {
+            setCategorizingId(null);
+          });
+      }
     } catch {
       setMessage("Failed to add transaction.");
     } finally {
@@ -365,7 +391,11 @@ export default function TransactionsPage() {
                   </div>
                   <div className={styles.transactionMeta}>
                     <span className={styles.categoryBadge}>
-                      {cat?.name || "Uncategorized"}
+                      {categorizingId === tx.id ? (
+                        <>⏳ Categorizing...</>
+                      ) : (
+                        cat?.name || "Uncategorized"
+                      )}
                     </span>
                     <span className={styles.transactionDate}>
                       {new Date(tx.occurredAt).toLocaleDateString()}
@@ -597,13 +627,15 @@ export default function TransactionsPage() {
               </div>
 
               <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Category</label>
+                <label className={styles.formLabel}>
+                  Category <span style={{ fontSize: '0.85em', color: '#666', fontWeight: 'normal' }}>(optional - AI will suggest if empty)</span>
+                </label>
                 <select
                   className={styles.formInput}
                   value={selectedCategoryId}
                   onChange={(e) => setSelectedCategoryId(e.target.value)}
                 >
-                  <option value="">Select category</option>
+                  <option value="">Auto-categorize with AI</option>
                   {categories.map((c) => (
                     <option key={c.id} value={c.id}>
                       {c.name}
