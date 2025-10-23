@@ -5,6 +5,7 @@ import { makeCreateBudget } from '../budgets/create-budget';
 import { makeGetBudgetDashboard } from '../budgets/get-budget-dashboard';
 import { makeAddTransaction } from '../transactions/add-transaction';
 import { makeUpdateTransaction } from '../transactions/update-transaction';
+import { makeDeleteTransaction } from '../transactions/delete-transaction';
 
 import { makeInMemCategoriesRepo, makeInMemBudgetsRepo, makeInMemTransactionsRepo } from '@budget/adapters-persistence-local';
 import { makeUlid } from '@budget/adapters-system';
@@ -23,6 +24,7 @@ describe('Usecases Integration: Category + Budget + Transaction -> Dashboard', (
   let createBudget: ReturnType<typeof makeCreateBudget>;
   let addTransaction: ReturnType<typeof makeAddTransaction>;
   let updateTransaction: ReturnType<typeof makeUpdateTransaction>;
+  let deleteTransaction: ReturnType<typeof makeDeleteTransaction>;
   let getBudgetDashboard: ReturnType<typeof makeGetBudgetDashboard>;
 
   beforeEach(() => {
@@ -35,6 +37,7 @@ describe('Usecases Integration: Category + Budget + Transaction -> Dashboard', (
     createBudget = makeCreateBudget({ budgetsRepo, clock, id });
     addTransaction = makeAddTransaction({ txRepo: transactionsRepo, clock, id });
     updateTransaction = makeUpdateTransaction({ txRepo: transactionsRepo, clock });
+    deleteTransaction = makeDeleteTransaction({ txRepo: transactionsRepo });
     getBudgetDashboard = makeGetBudgetDashboard({ categoriesRepo, budgetsRepo, transactionsRepo, clock });
   });
 
@@ -139,5 +142,54 @@ describe('Usecases Integration: Category + Budget + Transaction -> Dashboard', (
     const status = cat!.budgets.find(b => b.budget.id === budget.props.id);
     expect(status).toBeDefined();
     expect(status!.spentCents).toBe(60_000);
+  });
+
+  it('allows deleting a transaction and updates dashboard totals', async () => {
+    const category = await createCategory({
+      userId,
+      name: 'Dining',
+      isActive: true,
+    });
+
+    const budget = await createBudget({
+      userId,
+      categoryId: category.props.id,
+      name: 'Restaurants',
+      amountCents: 80_000,
+      currency: 'USD',
+      period: 'MONTHLY',
+      startDate: new Date('2025-01-01'),
+      alertThreshold: 80,
+    });
+
+    const tx = await addTransaction({
+      userId,
+      budgetId: budget.props.id,
+      categoryId: category.props.id,
+      amountCents: 30_000,
+      note: 'Dinner out',
+      occurredAt: new Date('2025-01-05'),
+    });
+
+    const initialDashboard = await getBudgetDashboard(userId);
+    const initialCat = initialDashboard.categories.find(c => c.categoryId === category.props.id);
+    expect(initialCat).toBeDefined();
+    expect(initialCat!.totalSpentCents).toBe(30_000);
+
+    const deleted = await deleteTransaction({
+      transactionId: tx.props.id,
+      userId,
+    });
+
+    expect(deleted).toBe(true);
+
+    const dashboard = await getBudgetDashboard(userId);
+    const cat = dashboard.categories.find(c => c.categoryId === category.props.id);
+    expect(cat).toBeDefined();
+    expect(cat!.totalSpentCents).toBe(0);
+
+    const status = cat!.budgets.find(b => b.budget.id === budget.props.id);
+    expect(status).toBeDefined();
+    expect(status!.spentCents).toBe(0);
   });
 });

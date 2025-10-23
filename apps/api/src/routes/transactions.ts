@@ -107,6 +107,23 @@ transactions.patch(
   }
 );
 
+transactions.delete("/transactions/:id", async (c) => {
+  const transactionId = c.req.param("id");
+  const userId = c.get("userId") as string;
+  const { usecases } = container;
+
+  const deleted = await usecases.deleteTransaction({
+    transactionId,
+    userId,
+  });
+
+  if (!deleted) {
+    return c.json({ error: "Transaction not found" }, 404);
+  }
+
+  return c.body(null, 204);
+});
+
 // POST /transactions/:id/categorize - Auto-categorize an uncategorized transaction
 transactions.post("/transactions/:id/categorize", async (c) => {
   const userId = c.get("userId") as string;

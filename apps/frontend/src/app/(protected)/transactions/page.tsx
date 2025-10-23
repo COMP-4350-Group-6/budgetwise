@@ -28,6 +28,7 @@ export default function TransactionsPage() {
   const [note, setNote] = useState("");
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   
   // ===== Invoice Upload State =====
   const [showUploadModal, setShowUploadModal] = useState(false);
@@ -44,6 +45,7 @@ export default function TransactionsPage() {
   const [editNote, setEditNote] = useState("");
   const [editSubmitting, setEditSubmitting] = useState(false);
   const [editMessage, setEditMessage] = useState("");
+  const [deleting, setDeleting] = useState(false);
 
   // ===== Filters =====
   const [searchQuery, setSearchQuery] = useState("");
@@ -170,6 +172,9 @@ export default function TransactionsPage() {
     setEditCategoryId(tx.categoryId || "");
     setEditDate(tx.occurredAt.split("T")[0]);
     setEditNote(tx.note || "");
+    setEditMessage("");
+    setDeleting(false);
+    setShowDeleteConfirm(false);
     setShowEditModal(true);
   };
 
@@ -195,6 +200,24 @@ export default function TransactionsPage() {
       setEditMessage("Failed to update transaction.");
     } finally {
       setEditSubmitting(false);
+    }
+  };
+
+  const handleDeleteTransaction = async () => {
+    if (!editTx) return;
+    try {
+      setDeleting(true);
+      await transactionsService.deleteTransaction(editTx.id);
+      setTransactions((prev) => prev.filter((tx) => tx.id !== editTx.id));
+      setShowDeleteConfirm(false);
+      setShowEditModal(false);
+      setEditTx(null);
+    } catch (err) {
+      console.error("Failed to delete transaction", err);
+      setEditMessage("Failed to delete transaction.");
+      setShowDeleteConfirm(false);
+    } finally {
+      setDeleting(false);
     }
   };
   
@@ -681,6 +704,17 @@ export default function TransactionsPage() {
                   Cancel
                 </button>
                 <button
+                  type="button"
+                  className={`${styles.btn} ${styles.btnDanger}`}
+                  onClick={() => {
+                    setEditMessage("");
+                    setShowDeleteConfirm(true);
+                  }}
+                  disabled={deleting || editSubmitting}
+                >
+                  Delete
+                </button>
+                <button
                   type="submit"
                   className={`${styles.btn} ${styles.btnPrimary}`}
                   disabled={editSubmitting}
@@ -689,6 +723,40 @@ export default function TransactionsPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {showDeleteConfirm && editTx && (
+        <div className={styles.modal} onClick={() => setShowDeleteConfirm(false)}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalHeader}
+              ><h2 className={styles.modalTitle}>Delete Transaction</h2>
+              <button className={styles.closeBtn} onClick={() => setShowDeleteConfirm(false)}>
+                ✕
+              </button>
+            </div>
+            <p className={styles.confirmText}>
+              Are you sure you want to delete this transaction? This action cannot be undone.
+            </p>
+            <div className={styles.confirmActions}>
+              <button
+                type="button"
+                className={`${styles.btn} ${styles.btnSecondary}`}
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={deleting}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className={`${styles.btn} ${styles.btnDanger}`}
+                onClick={handleDeleteTransaction}
+                disabled={deleting}
+              >
+                {deleting ? "Deleting..." : "Delete"}
+              </button>
+            </div>
           </div>
         </div>
       )}
