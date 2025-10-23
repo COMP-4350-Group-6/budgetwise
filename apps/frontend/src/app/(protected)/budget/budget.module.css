@@ -180,4 +180,130 @@
   }
 }
 
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(247, 248, 252, 0.75); /* subtle background tint */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
 
+.modalContent {
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 32px 28px;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  position: relative;
+  animation: fadeInScale 0.25s ease-out;
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.modalTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e1e2f;
+}
+
+.closeBtn {
+  background: #f4f6fa;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  color: #555;
+  cursor: pointer;
+  padding: 4px 8px;
+  transition: all 0.2s ease;
+}
+
+.closeBtn:hover {
+  background: #e9ecf5;
+}
+
+
+.formGroup {
+  margin-bottom: 16px;
+}
+
+.formLabel {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #1e1e2f;
+  margin-bottom: 6px;
+}
+
+.formInput {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #f8f9fd;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+}
+
+.formInput:focus {
+  background: #fff;
+  border-color: #4318ff;
+  box-shadow: 0 0 0 2px rgba(67, 24, 255, 0.15);
+  outline: none;
+}
+
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.btn {
+  font-size: 0.95rem;
+  font-weight: 600;
+  border-radius: 12px;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btnPrimary {
+  background: linear-gradient(135deg, #4318ff 0%, #868cff 100%);
+  color: white;
+  border: none;
+  box-shadow: 0 4px 12px rgba(67, 24, 255, 0.25);
+}
+
+.btnPrimary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(67, 24, 255, 0.3);
+}
+
+.btnSecondary {
+  background: #f4f7fe;
+  border: 1px solid #d9dbe9;
+  color: #2b3674;
+}
+
+.btnSecondary:hover {
+  background: #eef1fb;
+}

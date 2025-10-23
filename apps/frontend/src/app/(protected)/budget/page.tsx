@@ -9,7 +9,6 @@ import { CreateBudgetInput, Currency } from "@budget/schemas";
 import { transactionsService } from "@/services/transactionsService";
 import SavingsGoalsSection from "@/components/budgets/savingsGoals";
 
-
 export default function BudgetPage() {
   const [dashboard, setDashboard] = useState<BudgetDashboard | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -26,6 +25,7 @@ export default function BudgetPage() {
     startDate: new Date().toISOString().split("T")[0],
     alertThreshold: "80",
   });
+  const [showAddModal, setShowAddModal] = useState(false);
   const [categoryFormData, setCategoryFormData] = useState({
     name: "",
     description: "",
@@ -41,7 +41,7 @@ export default function BudgetPage() {
     try {
       setLoading(true);
       const cats = await categoryService.listCategories(true);
-      setCategories(cats.length ? cats : await categoryService.seedDefaultCategories());
+      setCategories(cats);
 
       const [dash, transactions] = await Promise.all([
         budgetService.getDashboard(),
@@ -62,18 +62,30 @@ export default function BudgetPage() {
       const categorySpentMap: Record<string, number> = {};
       for (const t of monthlyTx) {
         if (t.categoryId) {
-          categorySpentMap[t.categoryId] = (categorySpentMap[t.categoryId] || 0) + t.amountCents;
+          categorySpentMap[t.categoryId] =
+            (categorySpentMap[t.categoryId] || 0) + t.amountCents;
         }
       }
 
       const updatedCats = dash.categories.map((c) => {
         const spent = categorySpentMap[c.categoryId] || 0;
         const remaining = c.totalBudgetCents - spent;
-        const percent = c.totalBudgetCents > 0 ? (spent / c.totalBudgetCents) * 100 : 0;
-        return { ...c, totalSpentCents: spent, totalRemainingCents: remaining, overallPercentageUsed: percent, hasOverBudget: remaining < 0 };
+        const percent =
+          c.totalBudgetCents > 0 ? (spent / c.totalBudgetCents) * 100 : 0;
+        return {
+          ...c,
+          totalSpentCents: spent,
+          totalRemainingCents: remaining,
+          overallPercentageUsed: percent,
+          hasOverBudget: remaining < 0,
+        };
       });
 
-      setDashboard({ ...dash, categories: updatedCats, totalSpentCents });
+      setDashboard({
+        ...dash,
+        categories: updatedCats,
+        totalSpentCents,
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load budget data");
       console.error(err);
@@ -83,9 +95,11 @@ export default function BudgetPage() {
   };
 
   const formatMoney = (cents: number, currency = "USD"): string =>
-    new Intl.NumberFormat("en-US", { style: "currency", currency }).format(cents / 100);
+    new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency,
+    }).format(cents / 100);
 
-  // === Handlers ===
   const handleAddBudgetToCategory = (categoryId: string) => {
     setAddingBudgetForCategory(categoryId);
     setFormData({
@@ -147,7 +161,27 @@ export default function BudgetPage() {
     loadDashboard();
   };
 
-  // === UI Rendering ===
+  const handleCreateCategory = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await categoryService.createCategory({
+        name: categoryFormData.name,
+        description: categoryFormData.description,
+        icon: categoryFormData.icon || "💰",
+        color: categoryFormData.color || "#4ECDC4",
+        isActive: true,
+      });
+
+      setShowAddModal(false);
+      setCategoryFormData({ name: "", description: "", icon: "", color: "#4ECDC4" });
+      await loadDashboard();
+    } catch (err) {
+      console.error("Failed to create category:", err);
+      alert("Error creating category.");
+    }
+  };
+
+
   if (loading) return <div className={styles.loading}>Loading budget data...</div>;
   if (error) return <div className={styles.error}>Error: {error}</div>;
 
@@ -156,7 +190,6 @@ export default function BudgetPage() {
       <h1 className={styles.title}>Budget</h1>
 
       <section className={styles.section}>
-
         <div className={styles.unifiedCard}>
           <div className={styles.topSection}>
             <h3 className={styles.label}>Budget Adherence</h3>
@@ -165,7 +198,10 @@ export default function BudgetPage() {
             </p>
             <p className={styles.description}>
               Spent out of{" "}
-              {dashboard ? formatMoney(dashboard.totalBudgetCents, "CAD") : "--"} total budget (this month).
+              {dashboard
+                ? formatMoney(dashboard.totalBudgetCents, "CAD")
+                : "--"}{" "}
+              total budget (this month).
             </p>
 
             <div className={styles.progressBar}>
@@ -175,7 +211,12 @@ export default function BudgetPage() {
                   style={{
                     width:
                       dashboard.totalBudgetCents > 0
-                        ? `${Math.min((dashboard.totalSpentCents / dashboard.totalBudgetCents) * 100, 100)}%`
+                        ? `${Math.min(
+                            (dashboard.totalSpentCents /
+                              dashboard.totalBudgetCents) *
+                              100,
+                            100
+                          )}%`
                         : "0%",
                   }}
                 />
@@ -196,11 +237,19 @@ export default function BudgetPage() {
           <div className={styles.bottomActions}>
             <div className={styles.actionBox}>
               <h4 className={styles.actionTitle}>New Spending Category</h4>
-              <p className={styles.actionText}>Create a new expense category.</p>
-              <button onClick={() => setShowCategoryForm(true)} className={styles.primaryBtn}>
+              <p className={styles.actionText}>
+                Create a new expense category.
+              </p>
+              <button
+                onClick={() => setShowCategoryForm(true)}
+                className={styles.primaryBtn}
+              >
                 Add Category
               </button>
-              <button onClick={handleSeedDefaults} className={`${styles.primaryBtn} ${styles.gradientAlt}`}>
+              <button
+                onClick={handleSeedDefaults}
+                className={`${styles.primaryBtn} ${styles.gradientAlt}`}
+              >
                 Add Default Categories
               </button>
             </div>
@@ -209,12 +258,113 @@ export default function BudgetPage() {
 
             <div className={styles.actionBox}>
               <h4 className={styles.actionTitle}>Create New Savings Goal</h4>
-              <p className={styles.actionText}>Plan for future goals or purchases.</p>
+              <p className={styles.actionText}>
+                Plan for future goals or purchases.
+              </p>
               <button className={styles.secondaryBtn}>Set Goal</button>
             </div>
           </div>
         </div>
       </section>
+
+      
+      {showCategoryForm && (
+        <div className={styles.modal} onClick={() => setShowCategoryForm(false)}>
+          <div
+            className={styles.modalContent}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className={styles.modalHeader}>
+              <h2 className={styles.modalTitle}>Add New Category</h2>
+              <button
+                className={styles.closeBtn}
+                onClick={() => setShowCategoryForm(false)}
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateCategory}>
+              <div className={styles.formGroup}>
+                <label className={styles.formLabel}>Category Name</label>
+                <input
+                  type="text"
+                  className={styles.formInput}
+                  value={categoryFormData.name}
+                  onChange={(e) =>
+                    setCategoryFormData({
+                      ...categoryFormData,
+                      name: e.target.value,
+                    })
+                  }
+                  placeholder="e.g. Groceries"
+                  required
+                />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label className={styles.formLabel}>Description</label>
+                <input
+                  type="text"
+                  className={styles.formInput}
+                  value={categoryFormData.description}
+                  onChange={(e) =>
+                    setCategoryFormData({
+                      ...categoryFormData,
+                      description: e.target.value,
+                    })
+                  }
+                  placeholder="Optional description"
+                />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label className={styles.formLabel}>Emoji/Icon</label>
+                <input
+                  type="text"
+                  className={styles.formInput}
+                  value={categoryFormData.icon}
+                  onChange={(e) =>
+                    setCategoryFormData({
+                      ...categoryFormData,
+                      icon: e.target.value,
+                    })
+                  }
+                  placeholder="e.g. 🍔"
+                />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label className={styles.formLabel}>Color</label>
+                <input
+                  type="color"
+                  className={styles.formInput}
+                  value={categoryFormData.color}
+                  onChange={(e) =>
+                    setCategoryFormData({
+                      ...categoryFormData,
+                      color: e.target.value,
+                    })
+                  }
+                />
+              </div>
+
+              <div className={styles.formActions}>
+                <button
+                  type="button"
+                  className={`${styles.btn} ${styles.btnSecondary}`}
+                  onClick={() => setShowCategoryForm(false)}
+                >
+                  Cancel
+                </button>
+                <button type="submit" className={`${styles.btn} ${styles.btnPrimary}`}>
+                  Save Category
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       <CategorySpendingSection
         categories={categories}
@@ -228,11 +378,12 @@ export default function BudgetPage() {
         handleCancelBudgetForm={handleCancelBudgetForm}
         formatMoney={formatMoney}
       />
-      
+
       <SavingsGoalsSection
         goals={dashboard?.savingsGoals || []}
         formatMoney={formatMoney}
       />
     </div>
   );
+
 }

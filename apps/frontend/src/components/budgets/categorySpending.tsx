@@ -2,10 +2,7 @@
 
 import React from "react";
 import styles from "./categorySpending.module.css";
-import type {
-  Category,
-  BudgetDashboard,
-} from "@/services/budgetService";
+import type { Category, BudgetDashboard } from "@/services/budgetService";
 import type { BudgetPeriod } from "@budget/schemas";
 
 interface Props {
@@ -51,19 +48,29 @@ export default function CategorySpendingSection({
   handleCancelBudgetForm,
   formatMoney,
 }: Props) {
+  // Empty State
   if (categories.length === 0) {
     return (
-      <div className={styles.section}>
-        <h2 className={styles.subheading}>
-          Category Spending Limits (This Month)
-        </h2>
-        <div className={styles.emptyText}>
-          No spending categories available yet.
+      <section className={styles.section}>
+        <h2 className={styles.subheading}>Category Spending Limits (This Month)</h2>
+
+        <div className={styles.emptyContainer}>
+          <div className={styles.emptyCard}>
+            <h3 className={styles.emptyTitle}>No Categories Yet</h3>
+            <p className={styles.emptySubtitle}>
+              Click{" "}
+              <span className={styles.highlight}>
+                “Add Default Categories”
+              </span>{" "}
+              above to get started.
+            </p>
+          </div>
         </div>
-      </div>
+      </section>
     );
   }
 
+  // Normal Category Grid
   return (
     <section className={styles.section}>
       <h2 className={styles.subheading}>Category Spending Limits (This Month)</h2>
@@ -110,7 +117,7 @@ export default function CategorySpendingSection({
                 </p>
               )}
 
-              {/* Budget form */}
+              {/* Budget Form */}
               {addingBudgetForCategory === category.id ? (
                 <form
                   onSubmit={handleSubmitBudget}

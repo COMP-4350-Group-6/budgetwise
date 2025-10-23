@@ -196,3 +196,36 @@
     padding: 20px;
   }
 }
+
+
+.emptyContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #f9fafb;
+  border: 2px dashed #d1d5db;
+  border-radius: 16px;
+  padding: 60px 20px;
+  margin-top: 10px;
+}
+
+.emptyCard {
+  text-align: center;
+}
+
+.emptyTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 6px;
+}
+
+.emptySubtitle {
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.highlight {
+  color: #16a34a;
+  font-weight: 600;
+}
