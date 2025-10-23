@@ -1,0 +1,231 @@
+.section {
+  margin-top: 40px;
+}
+
+.subheading {
+  font-size: 22px;
+  font-weight: 600;
+  color: #1e1e2f;
+  margin-bottom: 20px;
+}
+
+.emptyText {
+  background: white;
+  padding: 40px;
+  border-radius: 16px;
+  text-align: center;
+  font-size: 14px;
+  color: #a3aed0;
+  border: 1px solid #f1f2f6;
+  box-shadow: 0 3px 10px rgba(67, 24, 255, 0.05);
+}
+
+/* ---- Category Grid ---- */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
+}
+
+/* ---- Category Card ---- */
+.card {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(67, 24, 255, 0.05);
+  border: 1px solid #f1f2f6;
+  transition: all 0.25s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(67, 24, 255, 0.1);
+}
+
+/* ---- Header ---- */
+.card h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1e1e2f;
+}
+
+.card p {
+  color: #6b7280;
+}
+
+/* ---- Icon Buttons ---- */
+.card button {
+  transition: all 0.2s ease;
+}
+
+.card button:hover {
+  transform: translateY(-1px);
+}
+
+/* ---- Inputs ---- */
+.input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #e0e5f2;
+  border-radius: 10px;
+  font-size: 14px;
+  background: #fafbfc;
+  transition: all 0.2s ease;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #4318ff;
+  box-shadow: 0 0 0 3px rgba(67, 24, 255, 0.15);
+}
+
+/* ---- Buttons ---- */
+.primaryBtn {
+  background: linear-gradient(135deg, #4318FF 0%, #868CFF 100%);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(67, 24, 255, 0.2);
+  transition: all 0.2s ease;
+}
+
+.primaryBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(67, 24, 255, 0.25);
+}
+
+.secondaryBtn {
+  background: white;
+  color: #2b3674;
+  border: 1px solid #e0e5f2;
+  border-radius: 12px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.secondaryBtn:hover {
+  background: #f4f7fe;
+}
+
+/* ---- Progress Bar ---- */
+.progressBar {
+  background: #eef2ff;
+  border-radius: 10px;
+  height: 8px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 8px;
+  border-radius: 10px;
+  transition: width 0.3s ease;
+}
+
+.progressFill.red {
+  background-color: #ef4444;
+}
+
+.progressFill.yellow {
+  background-color: #facc15;
+}
+
+.progressFill.green {
+  background-color: #22c55e;
+}
+
+/* ---- Text Colors ---- */
+.textGray {
+  color: #6b7280;
+}
+
+.textLight {
+  color: #9ca3af;
+}
+
+/* ---- Form ---- */
+.form {
+  background: #fafbff;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid #eef1f8;
+  margin-top: 12px;
+  transition: all 0.3s ease-in-out;
+}
+
+.formActions {
+  display: flex;
+  gap: 10px;
+}
+
+/* ---- Category Stats ---- */
+.statRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.positive {
+  color: #059669;
+}
+
+.negative {
+  color: #dc2626;
+}
+
+.budgetNote {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 6px;
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .card {
+    padding: 20px;
+  }
+}
+
+
+.emptyContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #f9fafb;
+  border: 2px dashed #d1d5db;
+  border-radius: 16px;
+  padding: 60px 20px;
+  margin-top: 10px;
+}
+
+.emptyCard {
+  text-align: center;
+}
+
+.emptyTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 6px;
+}
+
+.emptySubtitle {
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.highlight {
+  color: #16a34a;
+  font-weight: 600;
+}

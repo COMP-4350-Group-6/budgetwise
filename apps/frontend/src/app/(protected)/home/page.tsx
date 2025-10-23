@@ -382,7 +382,7 @@ export default function HomePage() {
           </div>
           
           <div className={styles.trendStats}>
-            <h2 className={styles.trendValue}>${(stats.totalSpent / 100).toFixed(1)}K</h2>
+            <h2 className={styles.trendValue}>${(stats.totalSpent / 100).toFixed(2)}</h2>
             <div className={styles.trendMeta}>
               <span className={styles.trendLabel}>Total Spent</span>
               <span className={`${styles.trendChange} ${stats.percentageUsed > 0 ? styles.trendUp : ''}`}>

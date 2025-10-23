@@ -48,4 +48,29 @@ export const transactionsService = {
     );
     return response.transaction;
   },
+  
+  async updateTransaction(id: string, updates: Partial<AddTransactionInput>): Promise<TransactionDTO> {
+    const payload = {
+      ...updates,
+      occurredAt: updates.occurredAt ? updates.occurredAt.toISOString() : undefined,
+    };
+    const response = await apiFetch<{ transaction: TransactionDTO }>(
+      `/transactions/${id}`,
+      {
+        method: "PATCH",
+        body: JSON.stringify(payload),
+      },
+      true
+    );
+    return response.transaction;
+  },
+
+  async listTransactions(): Promise<TransactionDTO[]> {
+    const response = await apiFetch<{ transactions: TransactionDTO[] }>(
+      "/transactions",
+      {},
+      true // include auth
+    );
+    return response.transactions;
+  },
 };

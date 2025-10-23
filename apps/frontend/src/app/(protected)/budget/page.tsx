@@ -4,34 +4,33 @@ import React, { useState, useEffect } from "react";
 import styles from "./budget.module.css";
 import { budgetService, categoryService } from "@/services/budgetService";
 import type { BudgetDashboard, Category } from "@/services/budgetService";
-import { 
-  CreateBudgetInput, 
-  BudgetPeriod, 
-  Currency
-} from "@budget/schemas";
+import CategorySpendingSection from "@/components/budgets/categorySpending";
+import { CreateBudgetInput, Currency } from "@budget/schemas";
+import { transactionsService } from "@/services/transactionsService";
+import SavingsGoalsSection from "@/components/budgets/savingsGoals";
 
 export default function BudgetPage() {
   const [dashboard, setDashboard] = useState<BudgetDashboard | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  // const [showCreateForm, setShowCreateForm] = useState(false);
   const [showCategoryForm, setShowCategoryForm] = useState(false);
   const [addingBudgetForCategory, setAddingBudgetForCategory] = useState<string | null>(null);
   const [formData, setFormData] = useState({
-    categoryId: '',
-    name: '',
-    amount: '',
-    currency: 'CAD',
-    period: 'MONTHLY' as 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY',
-    startDate: new Date().toISOString().split('T')[0],
-    alertThreshold: '80',
+    categoryId: "",
+    name: "",
+    amount: "",
+    currency: "CAD",
+    period: "MONTHLY" as "DAILY" | "WEEKLY" | "MONTHLY" | "YEARLY",
+    startDate: new Date().toISOString().split("T")[0],
+    alertThreshold: "80",
   });
+  const [showAddModal, setShowAddModal] = useState(false);
   const [categoryFormData, setCategoryFormData] = useState({
-    name: '',
-    description: '',
-    icon: '',
-    color: '#4ECDC4',
+    name: "",
+    description: "",
+    icon: "",
+    color: "#4ECDC4",
   });
 
   useEffect(() => {
@@ -41,151 +40,89 @@ export default function BudgetPage() {
   const loadDashboard = async () => {
     try {
       setLoading(true);
-      setError(null);
-      
-      // Load categories first
       const cats = await categoryService.listCategories(true);
       setCategories(cats);
-      
-      // If no categories, seed defaults
-      if (cats.length === 0) {
-        const seeded = await categoryService.seedDefaultCategories();
-        setCategories(seeded);
+
+      const [dash, transactions] = await Promise.all([
+        budgetService.getDashboard(),
+        transactionsService.listTransactions(),
+      ]);
+
+      const now = new Date();
+      const month = now.getMonth();
+      const year = now.getFullYear();
+
+      const monthlyTx = transactions.filter((t) => {
+        const d = new Date(t.occurredAt);
+        return d.getMonth() === month && d.getFullYear() === year;
+      });
+
+      const totalSpentCents = monthlyTx.reduce((sum, t) => sum + t.amountCents, 0);
+
+      const categorySpentMap: Record<string, number> = {};
+      for (const t of monthlyTx) {
+        if (t.categoryId) {
+          categorySpentMap[t.categoryId] =
+            (categorySpentMap[t.categoryId] || 0) + t.amountCents;
+        }
       }
-      
-      // Load dashboard
-      const dash = await budgetService.getDashboard();
-      setDashboard(dash);
+
+      const updatedCats = dash.categories.map((c) => {
+        const spent = categorySpentMap[c.categoryId] || 0;
+        const remaining = c.totalBudgetCents - spent;
+        const percent =
+          c.totalBudgetCents > 0 ? (spent / c.totalBudgetCents) * 100 : 0;
+        return {
+          ...c,
+          totalSpentCents: spent,
+          totalRemainingCents: remaining,
+          overallPercentageUsed: percent,
+          hasOverBudget: remaining < 0,
+        };
+      });
+
+      setDashboard({
+        ...dash,
+        categories: updatedCats,
+        totalSpentCents,
+      });
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to load budget data';
-      setError(errorMessage);
-      console.error('Error loading dashboard:', err);
+      setError(err instanceof Error ? err.message : "Failed to load budget data");
+      console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  const formatMoney = (cents: number, currency = 'USD'): string => {
-    const amount = cents / 100;
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
+  const formatMoney = (cents: number, currency = "USD"): string =>
+    new Intl.NumberFormat("en-US", {
+      style: "currency",
       currency,
-    }).format(amount);
-  };
-
-  // const getStatusColor = (percentageUsed: number, isOverBudget: boolean): string => {
-  //   if (isOverBudget) return 'bg-red-600';
-  //   if (percentageUsed >= 80) return 'bg-yellow-500';
-  //   return 'bg-green-600';
-  // };
-
-  // const handleCreateBudget = async (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   try {
-  //     const budgetData = {
-  //       categoryId: formData.categoryId,
-  //       name: formData.name,
-  //       amountCents: Math.round(parseFloat(formData.amount) * 100),
-  //       currency: formData.currency,
-  //       period: formData.period,
-  //       startDate: formData.startDate, // Send as ISO string
-  //       alertThreshold: parseInt(formData.alertThreshold),
-  //     };
-      
-  //     console.log('Creating budget with data:', budgetData);
-  //     await budgetService.createBudget(budgetData as any);
-      
-  //     // Reset form and reload
-  //     setShowCreateForm(false);
-  //     setFormData({
-  //       categoryId: '',
-  //       name: '',
-  //       amount: '',
-  //       currency: 'CAD',
-  //       period: 'MONTHLY',
-  //       startDate: new Date().toISOString().split('T')[0],
-  //       alertThreshold: '80',
-  //     });
-  //     loadDashboard();
-  //   } catch (err) {
-  //     console.error('Budget creation error:', err);
-  //     alert('Failed to create budget: ' + (err instanceof Error ? err.message : 'Unknown error'));
-  //   }
-  // };
-
-  const handleCreateCategory = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      await categoryService.createCategory({
-        name: categoryFormData.name,
-        description: categoryFormData.description || undefined,
-        icon: categoryFormData.icon || undefined,
-        color: categoryFormData.color,
-        isActive: true,
-      });
-      
-      // Reset form and reload
-      setShowCategoryForm(false);
-      setCategoryFormData({
-        name: '',
-        description: '',
-        icon: '',
-        color: '#4ECDC4',
-      });
-      loadDashboard();
-    } catch (err) {
-      console.error('Category creation error:', err);
-      alert('Failed to create category: ' + (err instanceof Error ? err.message : 'Unknown error'));
-    }
-  };
-
-  const handleSeedDefaults = async () => {
-    try {
-      await categoryService.seedDefaultCategories();
-      loadDashboard();
-    } catch (err) {
-      console.error('Seed defaults error:', err);
-      alert('Failed to seed default categories: ' + (err instanceof Error ? err.message : 'Unknown error'));
-    }
-  };
-
-  const handleDeleteCategory = async (categoryId: string, categoryName: string) => {
-    if (!confirm(`Are you sure you want to delete "${categoryName}"? This will fail if the category has active budgets.`)) {
-      return;
-    }
-    
-    try {
-      await categoryService.deleteCategory(categoryId);
-      loadDashboard();
-    } catch (err) {
-      console.error('Category deletion error:', err);
-      alert('Failed to delete category: ' + (err instanceof Error ? err.message : 'Unknown error'));
-    }
-  };
+    }).format(cents / 100);
 
   const handleAddBudgetToCategory = (categoryId: string) => {
     setAddingBudgetForCategory(categoryId);
     setFormData({
-      categoryId: categoryId,
-      name: '',
-      amount: '',
-      currency: 'CAD',
-      period: 'MONTHLY',
-      startDate: new Date().toISOString().split('T')[0],
-      alertThreshold: '80',
+      categoryId,
+      name: "",
+      amount: "",
+      currency: "CAD",
+      period: "MONTHLY",
+      startDate: new Date().toISOString().split("T")[0],
+      alertThreshold: "80",
     });
   };
 
   const handleCancelBudgetForm = () => {
     setAddingBudgetForCategory(null);
     setFormData({
-      categoryId: '',
-      name: '',
-      amount: '',
-      currency: 'CAD',
-      period: 'MONTHLY',
-      startDate: new Date().toISOString().split('T')[0],
-      alertThreshold: '80',
+      categoryId: "",
+      name: "",
+      amount: "",
+      currency: "CAD",
+      period: "MONTHLY",
+      startDate: new Date().toISOString().split("T")[0],
+      alertThreshold: "80",
     });
   };
 
@@ -196,162 +133,130 @@ export default function BudgetPage() {
         categoryId: formData.categoryId,
         name: formData.name,
         amountCents: Math.round(parseFloat(formData.amount) * 100),
-        currency: formData.currency as Currency, 
+        currency: formData.currency as Currency,
         period: formData.period,
         startDate: new Date(formData.startDate),
         alertThreshold: parseInt(formData.alertThreshold),
       };
-
       await budgetService.createBudget(budgetData);
       handleCancelBudgetForm();
       loadDashboard();
     } catch (err) {
-      console.error('Budget creation error:', err);
-      alert('Failed to create budget: ' + (err instanceof Error ? err.message : 'Unknown error'));
+      alert("Failed to create budget: " + (err instanceof Error ? err.message : "Unknown error"));
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex flex-col w-full h-full bg-gray-50 p-6">
-        <div className="flex items-center justify-center h-64">
-          <div className="text-gray-500">Loading budget data...</div>
-        </div>
-      </div>
-    );
-  }
+  const handleDeleteCategory = async (categoryId: string, categoryName: string) => {
+    if (!confirm(`Delete "${categoryName}"? This will fail if it has active budgets.`)) return;
+    try {
+      await categoryService.deleteCategory(categoryId);
+      loadDashboard();
+    } catch (err) {
+      alert("Failed to delete category: " + (err instanceof Error ? err.message : "Unknown error"));
+    }
+  };
 
-  if (error) {
-    return (
-      <div className="flex flex-col w-full h-full bg-gray-50 p-6">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-red-800">Error: {error}</p>
-          <button
-            onClick={loadDashboard}
-            className="mt-2 text-sm text-red-600 hover:text-red-800 underline"
-          >
-            Try again
-          </button>
-        </div>
-      </div>
-    );
-  }
+  const handleSeedDefaults = async () => {
+    await categoryService.seedDefaultCategories();
+    loadDashboard();
+  };
+
+  const handleCreateCategory = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await categoryService.createCategory({
+        name: categoryFormData.name,
+        description: categoryFormData.description,
+        icon: categoryFormData.icon || "💰",
+        color: categoryFormData.color || "#4ECDC4",
+        isActive: true,
+      });
+
+      setShowAddModal(false);
+      setCategoryFormData({ name: "", description: "", icon: "", color: "#4ECDC4" });
+      await loadDashboard();
+    } catch (err) {
+      console.error("Failed to create category:", err);
+      alert("Error creating category.");
+    }
+  };
+
+
+  if (loading) return <div className={styles.loading}>Loading budget data...</div>;
+  if (error) return <div className={styles.error}>Error: {error}</div>;
 
   return (
-    <div className={styles.shell}>
-      <h1 className={styles.heading}>Budget</h1>
+    <div className={styles.page}>
+      <h1 className={styles.title}>Budget</h1>
 
       <section className={styles.section}>
-        <h2 className={styles.subheading}>Budget Overview</h2>
-
-        <div className={styles.grid}>
-          {/* --- Monthly Income --- */}
-          <div className={styles.card}>
-            <h3 className={styles.label}>Monthly Income</h3>
-            <p className={styles.amount}>--</p>
-
-            <ul className={styles.list}>
-              <li>No income sources added yet</li>
-            </ul>
-
-            <div className={styles.inputRow}>
-              <input
-                type="number"
-                placeholder="Amount"
-                className={styles.input}
-              />
-              <button className={styles.primaryBtn}>Add Income</button>
-            </div>
-          </div>
-
-          {/* --- Budget Adherence --- */}
-          <div className={styles.progressCard}>
-            <div>
-              <h3 className={styles.label}>Budget Adherence</h3>
-              <p className={styles.amount}>--</p>
-              <p className={styles.description}>
-                Budget performance details will appear here.
-              </p>
-            </div>
+        <div className={styles.unifiedCard}>
+          <div className={styles.topSection}>
+            <h3 className={styles.label}>Budget Adherence</h3>
+            <p className={styles.amount}>
+              {dashboard ? formatMoney(dashboard.totalSpentCents, "CAD") : "--"}
+            </p>
+            <p className={styles.description}>
+              Spent out of{" "}
+              {dashboard
+                ? formatMoney(dashboard.totalBudgetCents, "CAD")
+                : "--"}{" "}
+              total budget (this month).
+            </p>
 
             <div className={styles.progressBar}>
-              <div className={styles.progressFill} />
+              {dashboard ? (
+                <div
+                  className={styles.progressFill}
+                  style={{
+                    width:
+                      dashboard.totalBudgetCents > 0
+                        ? `${Math.min(
+                            (dashboard.totalSpentCents /
+                              dashboard.totalBudgetCents) *
+                              100,
+                            100
+                          )}%`
+                        : "0%",
+                  }}
+                />
+              ) : (
+                <div className={styles.progressPlaceholder} />
+              )}
             </div>
+
+            <p className={styles.note}>
+              {dashboard?.totalSpentCents
+                ? "Tracking current month's spending"
+                : "No spending yet this month"}
+            </p>
 
             <button className={styles.linkBtn}>View Insights →</button>
           </div>
 
-          {/* --- Quick Actions --- */}
-          <div className={styles.actionsCol}>
-            <div className={styles.card}>
+          <div className={styles.bottomActions}>
+            <div className={styles.actionBox}>
               <h4 className={styles.actionTitle}>New Spending Category</h4>
               <p className={styles.actionText}>
                 Create a new expense category.
               </p>
-              {!showCategoryForm ? (
-                <>
-                  <button
-                    onClick={() => setShowCategoryForm(true)}
-                    className={styles.primaryBtn}
-                  >
-                    Add Category
-                  </button>
-                  <button
-                    onClick={handleSeedDefaults}
-                    className="mt-2 w-full bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium py-1.5 px-3 rounded transition-colors"
-                  >
-                    Add Default Categories
-                  </button>
-                </>
-              ) : (
-                <form onSubmit={handleCreateCategory} className="mt-4 space-y-3">
-                  <input
-                    type="text"
-                    placeholder="Category Name (A-Z only)"
-                    value={categoryFormData.name}
-                    onChange={(e) => setCategoryFormData({ ...categoryFormData, name: e.target.value })}
-                    className={styles.input}
-                    required
-                    pattern="[a-zA-Z\s]+"
-                    title="Category name can only contain letters A-Z and spaces"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Icon (emoji)"
-                    value={categoryFormData.icon}
-                    onChange={(e) => setCategoryFormData({ ...categoryFormData, icon: e.target.value })}
-                    className={styles.input}
-                  />
-                  <input
-                    type="text"
-                    placeholder="Description (optional)"
-                    value={categoryFormData.description}
-                    onChange={(e) => setCategoryFormData({ ...categoryFormData, description: e.target.value })}
-                    className={styles.input}
-                  />
-                  <input
-                    type="color"
-                    value={categoryFormData.color}
-                    onChange={(e) => setCategoryFormData({ ...categoryFormData, color: e.target.value })}
-                    className="w-full h-10 rounded"
-                  />
-                  <div className="flex gap-2">
-                    <button type="submit" className={styles.primaryBtn}>
-                      Create
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setShowCategoryForm(false)}
-                      className={styles.secondaryBtn}
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </form>
-              )}
+              <button
+                onClick={() => setShowCategoryForm(true)}
+                className={styles.primaryBtn}
+              >
+                Add Category
+              </button>
+              <button
+                onClick={handleSeedDefaults}
+                className={`${styles.primaryBtn} ${styles.gradientAlt}`}
+              >
+                Add Default Categories
+              </button>
             </div>
 
-            <div className={styles.card}>
+            <div className={styles.divider} />
+
+            <div className={styles.actionBox}>
               <h4 className={styles.actionTitle}>Create New Savings Goal</h4>
               <p className={styles.actionText}>
                 Plan for future goals or purchases.
@@ -362,164 +267,123 @@ export default function BudgetPage() {
         </div>
       </section>
 
-      {/* --- Category Spending --- */}
-      <section className={styles.section}>
-        <h2 className={styles.subheading}>Category Spending Limits</h2>
-        {categories.length === 0 ? (
-          <div className={styles.emptyText}>
-            No spending categories available yet.
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {categories.map((category) => {
-              const categorySummary = dashboard?.categories.find(
-                (c) => c.categoryId === category.id
-              );
-              
-              return (
-                <div key={category.id} className={styles.card}>
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      {category.icon && <span className="text-2xl">{category.icon}</span>}
-                      <h3 className="font-semibold text-lg">{category.name}</h3>
-                    </div>
-                    <div className="flex gap-1">
-                      <button
-                        onClick={() => handleAddBudgetToCategory(category.id)}
-                        className="text-blue-500 hover:text-blue-700 text-lg px-2 py-1 rounded hover:bg-blue-50"
-                        title="Add budget to this category"
-                      >
-                        ➕
-                      </button>
-                      <button
-                        onClick={() => handleDeleteCategory(category.id, category.name)}
-                        className="text-red-500 hover:text-red-700 text-sm px-2 py-1 rounded hover:bg-red-50"
-                        title="Delete category"
-                      >
-                        🗑️
-                      </button>
-                    </div>
-                  </div>
-                  
-                  {category.description && (
-                    <p className="text-sm text-gray-600 mb-3">{category.description}</p>
-                  )}
-                  
-                  {addingBudgetForCategory === category.id ? (
-                    <form onSubmit={handleSubmitBudget} className="mt-4 space-y-3 border-t pt-3">
-                      <input
-                        type="text"
-                        placeholder="Budget Name"
-                        value={formData.name}
-                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                        className={styles.input}
-                        required
-                      />
-                      <input
-                        type="number"
-                        step="0.01"
-                        placeholder="Amount"
-                        value={formData.amount}
-                        onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                        className={styles.input}
-                        required
-                      />
-                      <select
-                        value={formData.period}
-                        onChange={(e) => setFormData({ ...formData, period: e.target.value as BudgetPeriod})}
-                        className={styles.input}
-                      >
-                        <option value="DAILY">Daily</option>
-                        <option value="WEEKLY">Weekly</option>
-                        <option value="MONTHLY">Monthly</option>
-                        <option value="YEARLY">Yearly</option>
-                      </select>
-                      <input
-                        type="date"
-                        value={formData.startDate}
-                        onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                        className={styles.input}
-                        required
-                      />
-                      <input
-                        type="number"
-                        min="0"
-                        max="100"
-                        placeholder="Alert Threshold (%)"
-                        value={formData.alertThreshold}
-                        onChange={(e) => setFormData({ ...formData, alertThreshold: e.target.value })}
-                        className={styles.input}
-                      />
-                      <div className="flex gap-2">
-                        <button type="submit" className={styles.primaryBtn}>
-                          Create Budget
-                        </button>
-                        <button
-                          type="button"
-                          onClick={handleCancelBudgetForm}
-                          className={styles.secondaryBtn}
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    </form>
-                  ) : categorySummary ? (
-                    <>
-                      <div className="mb-3">
-                        <div className="flex justify-between text-sm mb-1">
-                          <span>Budgeted:</span>
-                          <span className="font-semibold">
-                            {formatMoney(categorySummary.totalBudgetCents, 'CAD')}
-                          </span>
-                        </div>
-                        <div className="flex justify-between text-sm mb-1">
-                          <span>Spent:</span>
-                          <span className="font-semibold">
-                            {formatMoney(categorySummary.totalSpentCents, 'CAD')}
-                          </span>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                          <span>Remaining:</span>
-                          <span className={`font-semibold ${categorySummary.totalRemainingCents < 0 ? 'text-red-600' : 'text-green-600'}`}>
-                            {formatMoney(categorySummary.totalRemainingCents, 'CAD')}
-                          </span>
-                        </div>
-                      </div>
-                      
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div
-                          className={`h-2 rounded-full transition-all ${
-                            categorySummary.hasOverBudget
-                              ? 'bg-red-600'
-                              : categorySummary.overallPercentageUsed >= 80
-                              ? 'bg-yellow-500'
-                              : 'bg-green-600'
-                          }`}
-                          style={{ width: `${Math.min(categorySummary.overallPercentageUsed, 100)}%` }}
-                        />
-                      </div>
-                      
-                      <p className="text-xs text-gray-500 mt-2">
-                        {categorySummary.budgets.length} budget(s) • {categorySummary.overallPercentageUsed.toFixed(1)}% used
-                      </p>
-                    </>
-                  ) : (
-                    <p className="text-sm text-gray-500">No budgets in this category yet</p>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </section>
+      
+      {showCategoryForm && (
+        <div className={styles.modal} onClick={() => setShowCategoryForm(false)}>
+          <div
+            className={styles.modalContent}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className={styles.modalHeader}>
+              <h2 className={styles.modalTitle}>Add New Category</h2>
+              <button
+                className={styles.closeBtn}
+                onClick={() => setShowCategoryForm(false)}
+              >
+                ✕
+              </button>
+            </div>
 
-      {/* --- Savings Goals --- */}
-      <section className={styles.section}>
-        <h2 className={styles.subheading}>Savings Goals</h2>
-        <div className={styles.emptyText}>
-          No savings goals have been created yet.
+            <form onSubmit={handleCreateCategory}>
+              <div className={styles.formGroup}>
+                <label className={styles.formLabel}>Category Name</label>
+                <input
+                  type="text"
+                  className={styles.formInput}
+                  value={categoryFormData.name}
+                  onChange={(e) =>
+                    setCategoryFormData({
+                      ...categoryFormData,
+                      name: e.target.value,
+                    })
+                  }
+                  placeholder="e.g. Groceries"
+                  required
+                />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label className={styles.formLabel}>Description</label>
+                <input
+                  type="text"
+                  className={styles.formInput}
+                  value={categoryFormData.description}
+                  onChange={(e) =>
+                    setCategoryFormData({
+                      ...categoryFormData,
+                      description: e.target.value,
+                    })
+                  }
+                  placeholder="Optional description"
+                />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label className={styles.formLabel}>Emoji/Icon</label>
+                <input
+                  type="text"
+                  className={styles.formInput}
+                  value={categoryFormData.icon}
+                  onChange={(e) =>
+                    setCategoryFormData({
+                      ...categoryFormData,
+                      icon: e.target.value,
+                    })
+                  }
+                  placeholder="e.g. 🍔"
+                />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label className={styles.formLabel}>Color</label>
+                <input
+                  type="color"
+                  className={styles.formInput}
+                  value={categoryFormData.color}
+                  onChange={(e) =>
+                    setCategoryFormData({
+                      ...categoryFormData,
+                      color: e.target.value,
+                    })
+                  }
+                />
+              </div>
+
+              <div className={styles.formActions}>
+                <button
+                  type="button"
+                  className={`${styles.btn} ${styles.btnSecondary}`}
+                  onClick={() => setShowCategoryForm(false)}
+                >
+                  Cancel
+                </button>
+                <button type="submit" className={`${styles.btn} ${styles.btnPrimary}`}>
+                  Save Category
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-      </section>
+      )}
+
+      <CategorySpendingSection
+        categories={categories}
+        dashboard={dashboard}
+        addingBudgetForCategory={addingBudgetForCategory}
+        formData={formData}
+        setFormData={setFormData}
+        handleSubmitBudget={handleSubmitBudget}
+        handleAddBudgetToCategory={handleAddBudgetToCategory}
+        handleDeleteCategory={handleDeleteCategory}
+        handleCancelBudgetForm={handleCancelBudgetForm}
+        formatMoney={formatMoney}
+      />
+
+      <SavingsGoalsSection
+        goals={dashboard?.savingsGoals || []}
+        formatMoney={formatMoney}
+      />
     </div>
   );
+
 }
