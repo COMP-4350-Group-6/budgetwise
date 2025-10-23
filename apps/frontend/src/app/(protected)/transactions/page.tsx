@@ -98,6 +98,8 @@ export default function TransactionsPage() {
     }
     try {
       setSubmitting(true);
+      const hadCategorySelected = Boolean(selectedCategoryId);
+      const hadNoteOrDescription = Boolean(note || description);
       
       // Create transaction (with or without category)
       const result = await transactionsService.addTransaction({
@@ -106,6 +108,16 @@ export default function TransactionsPage() {
         amountCents: cents,
         note: note || description || undefined,
         occurredAt: new Date(date),
+      });
+
+      const newTx = result.transaction;
+      setTransactions((prev) => {
+        const withoutCurrent = prev.filter((tx) => tx.id !== newTx.id);
+        const merged = [newTx, ...withoutCurrent];
+        return merged.sort(
+          (a, b) =>
+            new Date(b.occurredAt).getTime() - new Date(a.occurredAt).getTime()
+        );
       });
       
       // Clear form
@@ -116,19 +128,27 @@ export default function TransactionsPage() {
       setSelectedBudgetId("");
       setShowAddModal(false);
       
-      // Reload to show the new transaction
-      await loadTransactions();
-      
       // If no category was selected, try to auto-categorize
-      if (!selectedCategoryId && result.transaction.id && (note || description)) {
-        const txId = result.transaction.id;
+      if (!hadCategorySelected && newTx.id && hadNoteOrDescription) {
+        const txId = newTx.id;
         setCategorizingId(txId);
         
         // Call categorization endpoint asynchronously
         transactionsService.categorizeTransaction(txId)
-          .then(async () => {
-            // Reload transactions to show the categorized result
-            await loadTransactions();
+          .then((response) => {
+            if (response) {
+              setTransactions((prev) =>
+                prev.map((tx) =>
+                  tx.id === txId
+                    ? {
+                        ...tx,
+                        categoryId: response.categoryId,
+                        updatedAt: new Date().toISOString(),
+                      }
+                    : tx
+                )
+              );
+            }
           })
           .catch((err) => {
             console.error("Auto-categorization failed:", err);
