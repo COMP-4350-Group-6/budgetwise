@@ -7,6 +7,8 @@ import type { BudgetDashboard, Category } from "@/services/budgetService";
 import CategorySpendingSection from "@/components/budgets/categorySpending";
 import { CreateBudgetInput, Currency } from "@budget/schemas";
 import { transactionsService } from "@/services/transactionsService";
+import SavingsGoalsSection from "@/components/budgets/savingsGoals";
+
 
 export default function BudgetPage() {
   const [dashboard, setDashboard] = useState<BudgetDashboard | null>(null);
@@ -224,6 +226,11 @@ export default function BudgetPage() {
         handleAddBudgetToCategory={handleAddBudgetToCategory}
         handleDeleteCategory={handleDeleteCategory}
         handleCancelBudgetForm={handleCancelBudgetForm}
+        formatMoney={formatMoney}
+      />
+      
+      <SavingsGoalsSection
+        goals={dashboard?.savingsGoals || []}
         formatMoney={formatMoney}
       />
     </div>
