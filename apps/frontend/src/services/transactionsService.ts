@@ -63,5 +63,14 @@ export const transactionsService = {
       true
     );
     return response.transaction;
-  }
+  },
+
+  async listTransactions(): Promise<TransactionDTO[]> {
+    const response = await apiFetch<{ transactions: TransactionDTO[] }>(
+      "/transactions",
+      {},
+      true // include auth
+    );
+    return response.transactions;
+  },
 };
