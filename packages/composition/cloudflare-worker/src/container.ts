@@ -4,6 +4,7 @@ import {
   makeInMemCategoriesRepo,
   makeInMemBudgetsRepo
 } from "@budget/adapters-persistence-local";
+import { OpenRouterCategorization, OpenRouterInvoiceParser } from "@budget/adapters-openrouter";
 import {
   makeCreateCategory,
   makeListCategories,
@@ -17,9 +18,15 @@ import {
   makeGetBudgetStatus,
   makeGetBudgetDashboard,
   makeAddTransaction,
+  makeCategorizeTransaction,
+  makeParseInvoice,
 } from "@budget/usecases";
 
-export function makeContainer(/* env: Env */) {
+interface Env {
+  OPENROUTER_API_KEY?: string;
+}
+
+export function makeContainer(env?: Env) {
   const clock = makeSystemClock();
   const id = makeUlid();
   
@@ -27,6 +34,15 @@ export function makeContainer(/* env: Env */) {
   const categoriesRepo = makeInMemCategoriesRepo();
   const budgetsRepo = makeInMemBudgetsRepo();
   const txRepo = makeInMemTransactionsRepo();
+  
+  // Optional AI services (only if API key is provided)
+  const categorization = env?.OPENROUTER_API_KEY
+    ? new OpenRouterCategorization(env.OPENROUTER_API_KEY)
+    : undefined;
+  
+  const invoiceParser = env?.OPENROUTER_API_KEY
+    ? new OpenRouterInvoiceParser(env.OPENROUTER_API_KEY)
+    : undefined;
   
   return {
     repos: {
@@ -57,6 +73,20 @@ export function makeContainer(/* env: Env */) {
       
       // Transaction use cases
       addTransaction: makeAddTransaction({ clock, id, txRepo }),
+      categorizeTransaction: categorization
+        ? makeCategorizeTransaction({
+            clock,
+            txRepo,
+            categoriesRepo,
+            categorization
+          })
+        : undefined,
+      parseInvoice: invoiceParser
+        ? makeParseInvoice({
+            categoriesRepo,
+            invoiceParser
+          })
+        : undefined,
     }
   };
 }

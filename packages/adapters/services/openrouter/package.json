@@ -1,0 +1,9 @@
+{
+  "name": "@budget/adapters-openrouter",
+  "version": "0.0.0",
+  "type": "module",
+  "exports": { ".": "./src/index.ts" },
+  "dependencies": { 
+    "@budget/ports": "workspace:*"
+  }
+}

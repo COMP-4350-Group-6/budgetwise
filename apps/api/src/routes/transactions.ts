@@ -49,6 +49,90 @@ transactions.post(
   }
 );
 
+// POST /transactions/:id/categorize - Auto-categorize an uncategorized transaction
+transactions.post("/transactions/:id/categorize", async (c) => {
+  const userId = c.get("userId") as string;
+  const transactionId = c.req.param("id");
+  const { usecases } = container;
+
+  console.log('Categorization request for transaction:', transactionId);
+
+  // Check if categorization is available
+  if (!usecases.categorizeTransaction) {
+    console.log('Categorization service not available');
+    return c.json({ error: "Auto-categorization not available" }, 503);
+  }
+
+  console.log('Categorization service available, calling use case...');
+
+  try {
+    const result = await usecases.categorizeTransaction({
+      transactionId,
+      userId,
+    });
+
+    console.log('Categorization result:', result);
+
+    if (!result) {
+      console.log('Categorization returned null - no category suggested');
+      return c.json({ message: "Could not categorize transaction" }, 200);
+    }
+
+    return c.json({
+      categoryId: result.categoryId,
+      reasoning: result.reasoning,
+    }, 200);
+  } catch (error) {
+    console.error("Categorization error:", error);
+    return c.json({ error: (error as Error).message }, 400);
+  }
+});
+
+// POST /transactions/parse-invoice - Parse an invoice image
+transactions.post("/transactions/parse-invoice", async (c) => {
+  const userId = c.get("userId") as string;
+  const { usecases } = container;
+
+  console.log('Invoice parsing request from user:', userId);
+
+  // Check if invoice parser is available
+  if (!usecases.parseInvoice) {
+    console.log('Invoice parser not available');
+    return c.json({ error: "Invoice parsing not available" }, 503);
+  }
+
+  try {
+    const body = await c.req.json<{ imageBase64: string }>();
+    
+    if (!body.imageBase64) {
+      return c.json({ error: "Missing image data" }, 400);
+    }
+
+    console.log('Parsing invoice image...');
+
+    const result = await usecases.parseInvoice({
+      userId,
+      imageBase64: body.imageBase64,
+    });
+
+    if (!result) {
+      console.log('Invoice parsing returned null');
+      return c.json({ error: "Could not parse invoice" }, 400);
+    }
+
+    console.log('Invoice parsed successfully:', {
+      merchant: result.merchant,
+      total: result.total,
+      confidence: result.confidence
+    });
+
+    return c.json({ invoice: result }, 200);
+  } catch (error) {
+    console.error("Invoice parsing error:", error);
+    return c.json({ error: (error as Error).message }, 500);
+  }
+});
+
 // GET /transactions - list recent transactions for the authenticated user
 // Query params:
 //   - days?: number (default 30) - time window ending now

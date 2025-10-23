@@ -60,6 +60,14 @@ export interface BudgetDashboard {
   totalSpentCents: number;
   overBudgetCount: number;
   alertCount: number;
+
+  // new field . frontend only for now
+  savingsGoals?: {
+    id: string;
+    name: string;
+    targetCents: number;
+    savedCents: number;
+  }[];
 }
 
 export interface CreateCategoryInput {
