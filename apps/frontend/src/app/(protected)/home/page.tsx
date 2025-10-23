@@ -432,7 +432,7 @@ export default function HomePage() {
                     style={{ fontSize: '0.75rem', fontWeight: '500' }}
                     axisLine={false}
                     tickLine={false}
-                    tickFormatter={(value) => `$${value}`}
+                    tickFormatter={(value) => `$${(value / 100).toFixed(2)}`}
                     width={40}
                   />
                   <XAxis
