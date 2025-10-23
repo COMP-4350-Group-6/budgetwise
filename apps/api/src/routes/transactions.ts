@@ -88,6 +88,51 @@ transactions.post("/transactions/:id/categorize", async (c) => {
   }
 });
 
+// POST /transactions/parse-invoice - Parse an invoice image
+transactions.post("/transactions/parse-invoice", async (c) => {
+  const userId = c.get("userId") as string;
+  const { usecases } = container;
+
+  console.log('Invoice parsing request from user:', userId);
+
+  // Check if invoice parser is available
+  if (!usecases.parseInvoice) {
+    console.log('Invoice parser not available');
+    return c.json({ error: "Invoice parsing not available" }, 503);
+  }
+
+  try {
+    const body = await c.req.json<{ imageBase64: string }>();
+    
+    if (!body.imageBase64) {
+      return c.json({ error: "Missing image data" }, 400);
+    }
+
+    console.log('Parsing invoice image...');
+
+    const result = await usecases.parseInvoice({
+      userId,
+      imageBase64: body.imageBase64,
+    });
+
+    if (!result) {
+      console.log('Invoice parsing returned null');
+      return c.json({ error: "Could not parse invoice" }, 400);
+    }
+
+    console.log('Invoice parsed successfully:', {
+      merchant: result.merchant,
+      total: result.total,
+      confidence: result.confidence
+    });
+
+    return c.json({ invoice: result }, 200);
+  } catch (error) {
+    console.error("Invoice parsing error:", error);
+    return c.json({ error: (error as Error).message }, 500);
+  }
+});
+
 // GET /transactions - list recent transactions for the authenticated user
 // Query params:
 //   - days?: number (default 30) - time window ending now

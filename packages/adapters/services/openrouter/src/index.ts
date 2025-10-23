@@ -1,4 +1,10 @@
-import type { CategorizationPort, CategoryInfo, CategorizationResult } from '@budget/ports';
+import type {
+  CategorizationPort,
+  CategoryInfo,
+  CategorizationResult,
+  InvoiceParserPort,
+  ParsedInvoice
+} from '@budget/ports';
 
 interface OpenRouterMessage {
   role: 'system' | 'user' | 'assistant';
@@ -19,6 +25,134 @@ interface OpenRouterResponse {
     completion_tokens: number;
     total_tokens: number;
   };
+}
+
+/**
+ * OpenRouter adapter for invoice parsing using Claude Sonnet 4.5 with vision
+ */
+export class OpenRouterInvoiceParser implements InvoiceParserPort {
+  private apiKey: string;
+  private baseUrl = 'https://openrouter.ai/api/v1/chat/completions';
+
+  constructor(apiKey: string) {
+    this.apiKey = apiKey;
+  }
+
+  async parseInvoice(
+    imageBase64: string,
+    userCategories: Array<{ id: string; name: string; icon?: string }>
+  ): Promise<ParsedInvoice | null> {
+    // Remove data URI prefix if present
+    const base64Data = imageBase64.replace(/^data:image\/\w+;base64,/, '');
+    
+    // Build category list for suggestion
+    const categoryList = userCategories
+      .map(cat => `- ${cat.name} (ID: ${cat.id})`)
+      .join('\n');
+
+    const systemPrompt = `You are an invoice/receipt parser. Analyze the image and extract transaction details in JSON format.
+
+CRITICAL RULES:
+1. Return ONLY a JSON object, no other text
+2. All monetary amounts must be in CENTS (multiply by 100)
+3. Date must be in ISO format (YYYY-MM-DD)
+4. If you can't find a field, omit it or use null
+5. Suggest a category from the available list if possible
+6. Include a confidence score (0-1) for the overall parse quality
+
+Required JSON format:
+{
+  "merchant": "string",
+  "date": "YYYY-MM-DD",
+  "total": number (in cents),
+  "tax": number (in cents, optional),
+  "subtotal": number (in cents, optional),
+  "invoiceNumber": "string (optional)",
+  "items": [
+    {
+      "description": "string",
+      "quantity": number (optional),
+      "price": number (in cents, optional)
+    }
+  ],
+  "paymentMethod": "string (optional)",
+  "suggestedCategory": "category name or null",
+  "confidence": number (0-1)
+}
+
+Available categories for suggestion:
+${categoryList}`;
+
+    try {
+      const response = await fetch(this.baseUrl, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${this.apiKey}`,
+          'Content-Type': 'application/json',
+          'HTTP-Referer': 'https://budgetwise.app',
+          'X-Title': 'BudgetWise'
+        },
+        body: JSON.stringify({
+          model: 'google/gemini-2.0-flash-lite-001', // Fast vision-capable model
+          messages: [
+            {
+              role: 'user',
+              content: [
+                { type: 'text', text: systemPrompt },
+                {
+                  type: 'image_url',
+                  image_url: {
+                    url: `data:image/jpeg;base64,${base64Data}`
+                  }
+                }
+              ]
+            }
+          ],
+          temperature: 0.1, // Very low for consistent parsing
+          max_tokens: 800 // Enough for detailed invoice data
+        })
+      });
+
+      if (!response.ok) {
+        const error = await response.text();
+        console.error('OpenRouter invoice parsing error:', error);
+        return null;
+      }
+
+      const data = await response.json() as OpenRouterResponse;
+      const content = data.choices[0]?.message?.content?.trim();
+
+      if (!content) {
+        return null;
+      }
+
+      // Parse the JSON response (handle markdown code blocks)
+      try {
+        // Remove markdown code blocks if present
+        let jsonContent = content;
+        const codeBlockMatch = content.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+        if (codeBlockMatch) {
+          jsonContent = codeBlockMatch[1];
+        }
+        
+        const parsed = JSON.parse(jsonContent) as ParsedInvoice;
+        
+        // Validate required fields
+        if (!parsed.merchant || !parsed.date || !parsed.total) {
+          console.error('Missing required invoice fields');
+          return null;
+        }
+
+        return parsed;
+      } catch (parseError) {
+        console.error('Failed to parse invoice JSON:', content);
+        return null;
+      }
+    } catch (error) {
+      console.error('Error calling OpenRouter for invoice parsing:', error);
+      return null;
+    }
+  }
 }
 
 /**

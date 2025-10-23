@@ -21,6 +21,23 @@ export interface TransactionDTO {
   updatedAt: string;
 }
 
+export interface ParsedInvoiceData {
+  merchant: string;
+  date: string;
+  total: number;
+  tax?: number;
+  subtotal?: number;
+  invoiceNumber?: string;
+  items?: Array<{
+    description: string;
+    quantity?: number;
+    price?: number;
+  }>;
+  paymentMethod?: string;
+  suggestedCategory?: string;
+  confidence: number;
+}
+
 function ulid(): string {
   // Simple ULID-ish ID generator (not fully spec-compliant, but unique enough for client gen)
   // If you prefer, swap this to a proper ULID generator.
@@ -95,5 +112,23 @@ export const transactionsService = {
       true // include auth
     );
     return response.transactions;
+  },
+
+  async parseInvoice(imageBase64: string): Promise<ParsedInvoiceData | null> {
+    try {
+      const response = await apiFetch<{ invoice: ParsedInvoiceData }>(
+        "/transactions/parse-invoice",
+        {
+          method: "POST",
+          body: JSON.stringify({ imageBase64 }),
+        },
+        true
+      );
+      
+      return response.invoice;
+    } catch (error) {
+      console.error("Invoice parsing failed:", error);
+      return null;
+    }
   },
 };

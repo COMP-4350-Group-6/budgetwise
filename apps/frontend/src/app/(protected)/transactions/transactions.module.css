@@ -442,3 +442,58 @@
   border-color: #4f46e5;
   box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
 }
+/* Invoice Upload */
+.uploadSection {
+  margin: 24px 0;
+}
+
+.uploadArea {
+  border: 2px dashed #e0e5f2;
+  border-radius: 16px;
+  padding: 48px 24px;
+  text-align: center;
+  background: #fafbfc;
+  transition: all 0.2s;
+}
+
+.uploadArea:hover {
+  border-color: #4318FF;
+  background: #f4f7fe;
+}
+
+.fileInput {
+  display: none;
+}
+
+.uploadLabel {
+  cursor: pointer;
+  display: block;
+}
+
+.uploadIcon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.uploadLabel p {
+  color: #2b3674;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.uploadHint {
+  color: #a3aed0;
+  font-size: 13px;
+}
+
+.imagePreview {
+  text-align: center;
+}
+
+.previewImage {
+  max-width: 100%;
+  max-height: 400px;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}

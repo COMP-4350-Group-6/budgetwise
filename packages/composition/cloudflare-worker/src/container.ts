@@ -4,7 +4,7 @@ import {
   makeInMemCategoriesRepo,
   makeInMemBudgetsRepo
 } from "@budget/adapters-persistence-local";
-import { OpenRouterCategorization } from "@budget/adapters-openrouter";
+import { OpenRouterCategorization, OpenRouterInvoiceParser } from "@budget/adapters-openrouter";
 import {
   makeCreateCategory,
   makeListCategories,
@@ -19,6 +19,7 @@ import {
   makeGetBudgetDashboard,
   makeAddTransaction,
   makeCategorizeTransaction,
+  makeParseInvoice,
 } from "@budget/usecases";
 
 interface Env {
@@ -34,9 +35,13 @@ export function makeContainer(env?: Env) {
   const budgetsRepo = makeInMemBudgetsRepo();
   const txRepo = makeInMemTransactionsRepo();
   
-  // Optional categorization service (only if API key is provided)
+  // Optional AI services (only if API key is provided)
   const categorization = env?.OPENROUTER_API_KEY
     ? new OpenRouterCategorization(env.OPENROUTER_API_KEY)
+    : undefined;
+  
+  const invoiceParser = env?.OPENROUTER_API_KEY
+    ? new OpenRouterInvoiceParser(env.OPENROUTER_API_KEY)
     : undefined;
   
   return {
@@ -74,6 +79,12 @@ export function makeContainer(env?: Env) {
             txRepo,
             categoriesRepo,
             categorization
+          })
+        : undefined,
+      parseInvoice: invoiceParser
+        ? makeParseInvoice({
+            categoriesRepo,
+            invoiceParser
           })
         : undefined,
     }

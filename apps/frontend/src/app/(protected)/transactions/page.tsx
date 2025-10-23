@@ -28,6 +28,12 @@ export default function TransactionsPage() {
   const [note, setNote] = useState("");
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  
+  // ===== Invoice Upload State =====
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [parsingInvoice, setParsingInvoice] = useState(false);
+  const [uploadMessage, setUploadMessage] = useState("");
 
   // ===== Edit Modal State =====
   const [showEditModal, setShowEditModal] = useState(false);
@@ -171,6 +177,82 @@ export default function TransactionsPage() {
       setEditSubmitting(false);
     }
   };
+  
+  // ===== Handle Invoice Upload =====
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      setUploadMessage('Please select an image file');
+      return;
+    }
+    
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setUploadMessage('Image must be less than 5MB');
+      return;
+    }
+    
+    // Convert to base64
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setUploadedImage(reader.result as string);
+      setUploadMessage('');
+    };
+    reader.onerror = () => {
+      setUploadMessage('Failed to read image');
+    };
+    reader.readAsDataURL(file);
+  };
+  
+  const handleParseInvoice = async () => {
+    if (!uploadedImage) {
+      setUploadMessage('Please upload an image first');
+      return;
+    }
+    
+    try {
+      setParsingInvoice(true);
+      setUploadMessage('Parsing invoice with AI...');
+      
+      const parsed = await transactionsService.parseInvoice(uploadedImage);
+      
+      if (!parsed) {
+        setUploadMessage('Could not parse invoice. Please try again or enter manually.');
+        return;
+      }
+      
+      // Pre-fill the add transaction form with parsed data
+      setDescription(parsed.merchant);
+      setAmount((parsed.total / 100).toFixed(2));
+      setNote(parsed.invoiceNumber ? `Invoice #${parsed.invoiceNumber}` : '');
+      setDate(parsed.date);
+      
+      // Try to match suggested category
+      if (parsed.suggestedCategory) {
+        const matchedCat = categories.find(c =>
+          c.name.toLowerCase() === parsed.suggestedCategory?.toLowerCase()
+        );
+        if (matchedCat) {
+          setSelectedCategoryId(matchedCat.id);
+        }
+      }
+      
+      // Close upload modal and open add modal
+      setShowUploadModal(false);
+      setUploadedImage(null);
+      setShowAddModal(true);
+      setUploadMessage('');
+      
+    } catch (error) {
+      console.error('Invoice parsing error:', error);
+      setUploadMessage('Failed to parse invoice. Please try again.');
+    } finally {
+      setParsingInvoice(false);
+    }
+  };
 
   // ===== Filter + Search =====
   const filteredTransactions = transactions.filter((tx) => {
@@ -309,6 +391,12 @@ export default function TransactionsPage() {
             onClick={handleExport}
           >
             📥 Export CSV
+          </button>
+          <button
+            className={`${styles.btn} ${styles.btnSecondary}`}
+            onClick={() => setShowUploadModal(true)}
+          >
+            📸 Upload Invoice
           </button>
           <button
             className={`${styles.btn} ${styles.btnPrimary}`}
@@ -684,6 +772,85 @@ export default function TransactionsPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* ===== UPLOAD INVOICE MODAL ===== */}
+      {showUploadModal && (
+        <div className={styles.modal} onClick={() => setShowUploadModal(false)}>
+          <div
+            className={styles.modalContent}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className={styles.modalHeader}>
+              <h2 className={styles.modalTitle}>Upload Invoice</h2>
+              <button
+                className={styles.closeBtn}
+                onClick={() => {
+                  setShowUploadModal(false);
+                  setUploadedImage(null);
+                  setUploadMessage('');
+                }}
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className={styles.uploadSection}>
+              {!uploadedImage ? (
+                <div className={styles.uploadArea}>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className={styles.fileInput}
+                    id="invoice-upload"
+                  />
+                  <label htmlFor="invoice-upload" className={styles.uploadLabel}>
+                    <div className={styles.uploadIcon}>📸</div>
+                    <p>Click to upload invoice image</p>
+                    <p className={styles.uploadHint}>PNG, JPG up to 5MB</p>
+                  </label>
+                </div>
+              ) : (
+                <div className={styles.imagePreview}>
+                  <img src={uploadedImage} alt="Invoice preview" className={styles.previewImage} />
+                  <button
+                    className={`${styles.btn} ${styles.btnSecondary}`}
+                    onClick={() => setUploadedImage(null)}
+                  >
+                    Change Image
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {uploadMessage && (
+              <div className={styles.message}>{uploadMessage}</div>
+            )}
+
+            <div className={styles.formActions}>
+              <button
+                type="button"
+                className={`${styles.btn} ${styles.btnSecondary}`}
+                onClick={() => {
+                  setShowUploadModal(false);
+                  setUploadedImage(null);
+                  setUploadMessage('');
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className={`${styles.btn} ${styles.btnPrimary}`}
+                onClick={handleParseInvoice}
+                disabled={!uploadedImage || parsingInvoice}
+              >
+                {parsingInvoice ? "Parsing..." : "Parse Invoice"}
+              </button>
+            </div>
           </div>
         </div>
       )}
