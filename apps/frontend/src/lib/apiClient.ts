@@ -37,5 +37,9 @@ export async function apiFetch<T = Record<string, unknown>>(
     throw new Error(error?.error || `Request failed with status ${res.status}`);
   }
 
-  return res.json() as Promise<T>;
+  if (res.status === 204) {
+    return undefined as T;
+  }
+
+  return res.json().catch(() => undefined) as Promise<T>;
 }

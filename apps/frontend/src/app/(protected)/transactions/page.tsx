@@ -28,6 +28,7 @@ export default function TransactionsPage() {
   const [note, setNote] = useState("");
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   
   // ===== Invoice Upload State =====
   const [showUploadModal, setShowUploadModal] = useState(false);
@@ -44,6 +45,7 @@ export default function TransactionsPage() {
   const [editNote, setEditNote] = useState("");
   const [editSubmitting, setEditSubmitting] = useState(false);
   const [editMessage, setEditMessage] = useState("");
+  const [deleting, setDeleting] = useState(false);
 
   // ===== Filters =====
   const [searchQuery, setSearchQuery] = useState("");
@@ -98,6 +100,8 @@ export default function TransactionsPage() {
     }
     try {
       setSubmitting(true);
+      const hadCategorySelected = Boolean(selectedCategoryId);
+      const hadNoteOrDescription = Boolean(note || description);
       
       // Create transaction (with or without category)
       const result = await transactionsService.addTransaction({
@@ -106,6 +110,16 @@ export default function TransactionsPage() {
         amountCents: cents,
         note: note || description || undefined,
         occurredAt: new Date(date),
+      });
+
+      const newTx = result.transaction;
+      setTransactions((prev) => {
+        const withoutCurrent = prev.filter((tx) => tx.id !== newTx.id);
+        const merged = [newTx, ...withoutCurrent];
+        return merged.sort(
+          (a, b) =>
+            new Date(b.occurredAt).getTime() - new Date(a.occurredAt).getTime()
+        );
       });
       
       // Clear form
@@ -116,19 +130,27 @@ export default function TransactionsPage() {
       setSelectedBudgetId("");
       setShowAddModal(false);
       
-      // Reload to show the new transaction
-      await loadTransactions();
-      
       // If no category was selected, try to auto-categorize
-      if (!selectedCategoryId && result.transaction.id && (note || description)) {
-        const txId = result.transaction.id;
+      if (!hadCategorySelected && newTx.id && hadNoteOrDescription) {
+        const txId = newTx.id;
         setCategorizingId(txId);
         
         // Call categorization endpoint asynchronously
         transactionsService.categorizeTransaction(txId)
-          .then(async () => {
-            // Reload transactions to show the categorized result
-            await loadTransactions();
+          .then((response) => {
+            if (response) {
+              setTransactions((prev) =>
+                prev.map((tx) =>
+                  tx.id === txId
+                    ? {
+                        ...tx,
+                        categoryId: response.categoryId,
+                        updatedAt: new Date().toISOString(),
+                      }
+                    : tx
+                )
+              );
+            }
           })
           .catch((err) => {
             console.error("Auto-categorization failed:", err);
@@ -150,6 +172,9 @@ export default function TransactionsPage() {
     setEditCategoryId(tx.categoryId || "");
     setEditDate(tx.occurredAt.split("T")[0]);
     setEditNote(tx.note || "");
+    setEditMessage("");
+    setDeleting(false);
+    setShowDeleteConfirm(false);
     setShowEditModal(true);
   };
 
@@ -175,6 +200,24 @@ export default function TransactionsPage() {
       setEditMessage("Failed to update transaction.");
     } finally {
       setEditSubmitting(false);
+    }
+  };
+
+  const handleDeleteTransaction = async () => {
+    if (!editTx) return;
+    try {
+      setDeleting(true);
+      await transactionsService.deleteTransaction(editTx.id);
+      setTransactions((prev) => prev.filter((tx) => tx.id !== editTx.id));
+      setShowDeleteConfirm(false);
+      setShowEditModal(false);
+      setEditTx(null);
+    } catch (err) {
+      console.error("Failed to delete transaction", err);
+      setEditMessage("Failed to delete transaction.");
+      setShowDeleteConfirm(false);
+    } finally {
+      setDeleting(false);
     }
   };
   
@@ -661,6 +704,17 @@ export default function TransactionsPage() {
                   Cancel
                 </button>
                 <button
+                  type="button"
+                  className={`${styles.btn} ${styles.btnDanger}`}
+                  onClick={() => {
+                    setEditMessage("");
+                    setShowDeleteConfirm(true);
+                  }}
+                  disabled={deleting || editSubmitting}
+                >
+                  Delete
+                </button>
+                <button
                   type="submit"
                   className={`${styles.btn} ${styles.btnPrimary}`}
                   disabled={editSubmitting}
@@ -669,6 +723,40 @@ export default function TransactionsPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {showDeleteConfirm && editTx && (
+        <div className={styles.modal} onClick={() => setShowDeleteConfirm(false)}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalHeader}
+              ><h2 className={styles.modalTitle}>Delete Transaction</h2>
+              <button className={styles.closeBtn} onClick={() => setShowDeleteConfirm(false)}>
+                ✕
+              </button>
+            </div>
+            <p className={styles.confirmText}>
+              Are you sure you want to delete this transaction? This action cannot be undone.
+            </p>
+            <div className={styles.confirmActions}>
+              <button
+                type="button"
+                className={`${styles.btn} ${styles.btnSecondary}`}
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={deleting}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className={`${styles.btn} ${styles.btnDanger}`}
+                onClick={handleDeleteTransaction}
+                disabled={deleting}
+              >
+                {deleting ? "Deleting..." : "Delete"}
+              </button>
+            </div>
           </div>
         </div>
       )}
