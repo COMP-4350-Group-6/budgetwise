@@ -3,8 +3,8 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./home.module.css";
-import { budgetService } from "@/services/budgetService";
-import type { BudgetDashboard } from "@/services/budgetService";
+import { budgetService, categoryService } from "@/services/budgetService";
+import type { BudgetDashboard, Category } from "@/services/budgetService";
 import { apiFetch } from "@/lib/apiClient";
 import type { TransactionDTO } from "@/services/transactionsService";
 import {
@@ -73,7 +73,7 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, icon, change, isPosit
   </div>
 );
 
-const CalendarCard: React.FC<{ transactions: TransactionDTO[] }> = ({ transactions }) => {
+const CalendarCard: React.FC<{ transactions: TransactionDTO[]; categories: Category[] }> = ({ transactions, categories }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
@@ -97,7 +97,7 @@ const CalendarCard: React.FC<{ transactions: TransactionDTO[] }> = ({ transactio
       return txDate >= monthStart && txDate <= monthEnd;
     });
     
-    const days: CalendarDay[] = [];
+    const days: (CalendarDay & { categoryEmojis?: string[] })[] = [];
     
     // Previous month days
     const prevMonthDays = new Date(year, month, 0).getDate();
@@ -110,6 +110,7 @@ const CalendarCard: React.FC<{ transactions: TransactionDTO[] }> = ({ transactio
         hasTransactions: false,
         transactionCount: 0,
         totalAmount: 0,
+        categoryEmojis: [],
       });
     }
     
@@ -122,6 +123,15 @@ const CalendarCard: React.FC<{ transactions: TransactionDTO[] }> = ({ transactio
       );
       const totalAmount = dayTx.reduce((sum, tx) => sum + Math.abs(tx.amountCents), 0);
       
+      // Get unique category emojis for this day (limit to 3)
+      const categoryEmojis = dayTx
+        .map(tx => {
+          const category = categories.find(c => c.id === tx.categoryId);
+          return category?.icon;
+        })
+        .filter((icon, index, self) => icon && self.indexOf(icon) === index) // unique emojis only
+        .slice(0, 3) as string[];
+      
       days.push({
         date,
         dayNumber: day,
@@ -129,6 +139,7 @@ const CalendarCard: React.FC<{ transactions: TransactionDTO[] }> = ({ transactio
         hasTransactions: dayTx.length > 0,
         transactionCount: dayTx.length,
         totalAmount,
+        categoryEmojis,
       });
     }
     
@@ -143,11 +154,12 @@ const CalendarCard: React.FC<{ transactions: TransactionDTO[] }> = ({ transactio
         hasTransactions: false,
         transactionCount: 0,
         totalAmount: 0,
+        categoryEmojis: [],
       });
     }
     
     return days;
-  }, [currentDate, transactions]);
+  }, [currentDate, transactions, categories]);
 
   const selectedDateTransactions = useMemo(() => {
     if (!selectedDate) return [];
@@ -193,8 +205,15 @@ const CalendarCard: React.FC<{ transactions: TransactionDTO[] }> = ({ transactio
               onClick={() => setSelectedDate(day.date)}
             >
               <span className={styles.dayNumber}>{day.dayNumber}</span>
-              {day.hasTransactions && (
-                <span className={styles.activityDot} />
+              {day.categoryEmojis && day.categoryEmojis.length > 0 && (
+                <div className={styles.emojiRow}>
+                  {day.categoryEmojis.map((emoji, idx) => (
+                    <span key={idx} className={styles.categoryEmoji}>{emoji}</span>
+                  ))}
+                  {day.transactionCount > day.categoryEmojis.length && (
+                    <span className={styles.moreIndicator}>...</span>
+                  )}
+                </div>
               )}
             </button>
           ))}
@@ -206,12 +225,18 @@ const CalendarCard: React.FC<{ transactions: TransactionDTO[] }> = ({ transactio
           <h4 className={styles.previewTitle}>
             {selectedDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}
           </h4>
-          {selectedDateTransactions.map((tx, i) => (
-            <div key={i} className={styles.txPreviewItem}>
-              <span>{tx.note || 'Transaction'}</span>
-              <span className={styles.txAmount}>${(Math.abs(tx.amountCents) / 100).toFixed(2)}</span>
-            </div>
-          ))}
+          {selectedDateTransactions.map((tx, i) => {
+            const category = categories.find(c => c.id === tx.categoryId);
+            return (
+              <div key={i} className={styles.txPreviewItem}>
+                <span>
+                  {category?.icon && <span style={{ marginRight: '0.5rem' }}>{category.icon}</span>}
+                  {tx.note || 'Transaction'}
+                </span>
+                <span className={styles.txAmount}>${(Math.abs(tx.amountCents) / 100).toFixed(2)}</span>
+              </div>
+            );
+          })}
         </div>
       )}
     </div>
@@ -222,17 +247,20 @@ export default function HomePage() {
   const router = useRouter();
   const [dashboard, setDashboard] = useState<BudgetDashboard | null>(null);
   const [transactions, setTransactions] = useState<TransactionDTO[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [dashboardData, txResponse] = await Promise.all([
+        const [dashboardData, txResponse, categoriesData] = await Promise.all([
           budgetService.getDashboard(),
-          apiFetch<{ transactions: TransactionDTO[] }>('/transactions?days=90', {}, true)
+          apiFetch<{ transactions: TransactionDTO[] }>('/transactions?days=90', {}, true),
+          categoryService.listCategories(true)
         ]);
         setDashboard(dashboardData);
         setTransactions(txResponse.transactions || []);
+        setCategories(categoriesData);
       } catch (error) {
         console.error("Failed to load dashboard:", error);
       } finally {
@@ -597,7 +625,7 @@ export default function HomePage() {
         </div>
 
         {/* Interactive Calendar */}
-        <CalendarCard transactions={transactions} />
+        <CalendarCard transactions={transactions} categories={categories} />
       </div>
 
       {/* Bottom Row */}

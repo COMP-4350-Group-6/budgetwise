@@ -33,6 +33,7 @@ export interface ParsedInvoiceData {
     quantity?: number;
     price?: number;
   }>;
+  itemsSummary?: string;
   paymentMethod?: string;
   suggestedCategory?: string;
   confidence: number;

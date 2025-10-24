@@ -55,10 +55,11 @@ export class OpenRouterInvoiceParser implements InvoiceParserPort {
 CRITICAL RULES:
 1. Return ONLY a JSON object, no other text
 2. All monetary amounts must be in CENTS (multiply by 100)
-3. Date must be in ISO format (YYYY-MM-DD)
+3. Date must be in ISO format (YYYY-MM-DD) - EXTRACT THE ACTUAL DATE FROM THE INVOICE, DO NOT USE TODAY'S DATE
 4. If you can't find a field, omit it or use null
 5. Suggest a category from the available list if possible
 6. Include a confidence score (0-1) for the overall parse quality
+7. Create a nicely formatted markdown summary of the invoice items with ### headers
 
 Required JSON format:
 {
@@ -68,17 +69,14 @@ Required JSON format:
   "tax": number (in cents, optional),
   "subtotal": number (in cents, optional),
   "invoiceNumber": "string (optional)",
-  "items": [
-    {
-      "description": "string",
-      "quantity": number (optional),
-      "price": number (in cents, optional)
-    }
-  ],
+  "itemsSummary": "markdown formatted string with ### headers for items",
   "paymentMethod": "string (optional)",
   "suggestedCategory": "category name or null",
   "confidence": number (0-1)
 }
+
+Example itemsSummary format:
+"### Items Purchased\n- 4x Kumho SOLUS 4S HA32 Tires - $514.96\n- Road Hazard Protection (12 months) - Included\n\n### Payment\nPaypal (Payflow)"
 
 Available categories for suggestion:
 ${categoryList}`;
@@ -138,9 +136,15 @@ ${categoryList}`;
         const parsed = JSON.parse(jsonContent) as ParsedInvoice;
         
         // Validate required fields
-        if (!parsed.merchant || !parsed.date || !parsed.total) {
-          console.error('Missing required invoice fields');
+        if (!parsed.merchant || !parsed.total) {
+          console.error('Missing required invoice fields (merchant or total)');
           return null;
+        }
+
+        // If date is missing, use today's date as fallback
+        if (!parsed.date) {
+          console.warn('Invoice date not found, using today\'s date');
+          parsed.date = new Date().toISOString().split('T')[0];
         }
 
         return parsed;

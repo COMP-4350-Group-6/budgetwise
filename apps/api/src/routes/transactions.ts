@@ -12,7 +12,7 @@ const CreateTransactionInput = z.object({
   budgetId: z.string().ulid().optional(),
   categoryId: z.string().ulid().optional(),
   amountCents: z.number().int(),
-  note: z.string().max(280).optional(),
+  note: z.string().max(2000).optional(), // Increased for markdown invoice summaries
   occurredAt: z.coerce.date(),
 });
 
@@ -21,7 +21,7 @@ const UpdateTransactionInput = z
     budgetId: z.string().ulid().optional(),
     categoryId: z.string().ulid().optional(),
     amountCents: z.number().int().optional(),
-    note: z.string().max(280).optional(),
+    note: z.string().max(2000).optional(), // Increased for markdown invoice summaries
     occurredAt: z.coerce.date().optional(),
   })
   .refine(
@@ -46,6 +46,15 @@ transactions.post(
     const input = c.req.valid("json");
     const userId = c.get("userId") as string;
     const { usecases } = container;
+
+    console.log('[API] Creating transaction with input:', {
+      userId,
+      budgetId: input.budgetId,
+      categoryId: input.categoryId,
+      amountCents: input.amountCents,
+      noteLength: input.note?.length,
+      occurredAt: input.occurredAt
+    });
 
     const tx = await usecases.addTransaction({
       userId,

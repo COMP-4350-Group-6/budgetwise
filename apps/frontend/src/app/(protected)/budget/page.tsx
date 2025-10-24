@@ -320,8 +320,7 @@ export default function BudgetPage() {
 
               <div className={styles.formGroup}>
                 <label className={styles.formLabel}>Emoji/Icon</label>
-                <input
-                  type="text"
+                <select
                   className={styles.formInput}
                   value={categoryFormData.icon}
                   onChange={(e) =>
@@ -330,8 +329,35 @@ export default function BudgetPage() {
                       icon: e.target.value,
                     })
                   }
-                  placeholder="e.g. 🍔"
-                />
+                  required
+                >
+                  <option value="">Select an emoji</option>
+                  <option value="🏠">🏠 Housing</option>
+                  <option value="🍔">🍔 Food & Dining</option>
+                  <option value="🛒">🛒 Groceries</option>
+                  <option value="🚗">🚗 Transportation</option>
+                  <option value="⛽">⛽ Gas & Fuel</option>
+                  <option value="💊">💊 Healthcare</option>
+                  <option value="🎓">🎓 Education</option>
+                  <option value="🎬">🎬 Entertainment</option>
+                  <option value="👕">👕 Clothing</option>
+                  <option value="💰">💰 Savings</option>
+                  <option value="💳">💳 Bills & Utilities</option>
+                  <option value="📱">📱 Phone & Internet</option>
+                  <option value="🎁">🎁 Gifts</option>
+                  <option value="✈️">✈️ Travel</option>
+                  <option value="🏋️">🏋️ Fitness & Sports</option>
+                  <option value="🐕">🐕 Pets</option>
+                  <option value="🔧">🔧 Maintenance</option>
+                  <option value="📚">📚 Books & Learning</option>
+                  <option value="☕">☕ Coffee & Snacks</option>
+                  <option value="🎮">🎮 Gaming</option>
+                  <option value="💅">💅 Personal Care</option>
+                  <option value="🏥">🏥 Insurance</option>
+                  <option value="💼">💼 Business</option>
+                  <option value="🎨">🎨 Hobbies</option>
+                  <option value="📦">📦 Shopping</option>
+                </select>
               </div>
 
               <div className={styles.formGroup}>

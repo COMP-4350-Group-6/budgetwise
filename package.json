@@ -27,6 +27,7 @@
     "zod": "^4.1.12"
   },
   "dependencies": {
+    "react-markdown": "^10.1.0",
     "recharts": "^3.3.0"
   }
 }

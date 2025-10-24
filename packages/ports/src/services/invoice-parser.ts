@@ -13,6 +13,7 @@ export interface ParsedInvoice {
     quantity?: number;
     price?: number; // in cents
   }>;
+  itemsSummary?: string; // Markdown formatted summary of items
   paymentMethod?: string;
   suggestedCategory?: string;
   confidence: number; // 0-1, how confident the parser is

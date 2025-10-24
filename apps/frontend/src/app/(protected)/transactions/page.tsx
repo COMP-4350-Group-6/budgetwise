@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import ReactMarkdown from "react-markdown";
 import styles from "./transactions.module.css";
 import { categoryService, budgetService } from "@/services/budgetService";
 import { transactionsService } from "@/services/transactionsService";
@@ -46,6 +47,7 @@ export default function TransactionsPage() {
   const [editSubmitting, setEditSubmitting] = useState(false);
   const [editMessage, setEditMessage] = useState("");
   const [deleting, setDeleting] = useState(false);
+  const [editingNote, setEditingNote] = useState(false);
 
   // ===== Filters =====
   const [searchQuery, setSearchQuery] = useState("");
@@ -98,18 +100,33 @@ export default function TransactionsPage() {
       setMessage("Please provide amount and description.");
       return;
     }
+    
+    // Convert positive amount to negative (expense)
+    const amountCents = cents > 0 ? -cents : cents;
     try {
       setSubmitting(true);
       const hadCategorySelected = Boolean(selectedCategoryId);
       const hadNoteOrDescription = Boolean(note || description);
       
       // Create transaction (with or without category)
+      // Parse date in local timezone to avoid timezone conversion issues
+      const [year, month, day] = date.split('-').map(Number);
+      const localDate = new Date(year, month - 1, day, 12, 0, 0);
+      
+      // Combine description and note: "Description\n\nNote" or just one if the other is empty
+      let combinedNote = description;
+      if (note && description) {
+        combinedNote = `${description}\n\n${note}`;
+      } else if (note) {
+        combinedNote = note;
+      }
+      
       const result = await transactionsService.addTransaction({
         budgetId: selectedBudgetId || undefined,
         categoryId: selectedCategoryId || undefined,
-        amountCents: cents,
-        note: note || description || undefined,
-        occurredAt: new Date(date),
+        amountCents: amountCents,
+        note: combinedNote || undefined,
+        occurredAt: localDate,
       });
 
       const newTx = result.transaction;
@@ -168,13 +185,15 @@ export default function TransactionsPage() {
 
   const openEditModal = (tx: TransactionDTO) => {
     setEditTx(tx);
-    setEditAmount((tx.amountCents / 100).toFixed(2));
+    // Display as positive amount (stored as negative)
+    setEditAmount((Math.abs(tx.amountCents) / 100).toFixed(2));
     setEditCategoryId(tx.categoryId || "");
     setEditDate(tx.occurredAt.split("T")[0]);
     setEditNote(tx.note || "");
     setEditMessage("");
     setDeleting(false);
     setShowDeleteConfirm(false);
+    setEditingNote(false);
     setShowEditModal(true);
   };
 
@@ -182,14 +201,18 @@ export default function TransactionsPage() {
     e.preventDefault();
     if (!editTx) return;
     const cents = Math.round(parseFloat(editAmount || "0") * 100);
-    if (!editCategoryId || cents <= 0) {
+    if (!editCategoryId || cents === 0) {
       setEditMessage("Please fill all required fields.");
       return;
     }
+    
+    // Convert positive amount to negative (expense)
+    const amountCents = cents > 0 ? -cents : cents;
+    
     try {
       setEditSubmitting(true);
       await transactionsService.updateTransaction(editTx.id, {
-        amountCents: cents,
+        amountCents: amountCents,
         categoryId: editCategoryId,
         note: editNote,
         occurredAt: new Date(editDate),
@@ -269,11 +292,19 @@ export default function TransactionsPage() {
       
       // Pre-fill the add transaction form with parsed data
       setDescription(parsed.merchant);
-      // Invoices are expenses, so negate the amount
-      setAmount((-(parsed.total / 100)).toFixed(2));
-      setNote(parsed.invoiceNumber ? `Invoice #${parsed.invoiceNumber}` : '');
-      // Use today's date instead of the invoice date to ensure it shows in the default filter
-      setDate(new Date().toISOString().split("T")[0]);
+      // Display as positive amount (will be converted to negative on submit)
+      setAmount((parsed.total / 100).toFixed(2));
+      
+      // Build note from invoice number and items summary (without merchant name)
+      let noteText = '';
+      if (parsed.invoiceNumber) {
+        noteText = `Invoice #${parsed.invoiceNumber}`;
+      }
+      if (parsed.itemsSummary) {
+        noteText = noteText ? `${noteText}\n\n${parsed.itemsSummary}` : parsed.itemsSummary;
+      }
+      setNote(noteText);
+      setDate(parsed.date);
       
       // Try to match suggested category
       if (parsed.suggestedCategory) {
@@ -323,19 +354,24 @@ export default function TransactionsPage() {
   });
 
   // ===== Recently Added vs Recent Transactions =====
-  // Recently Added: sorted by createdAt (when added to system)
+  // Recently Added: sorted by createdAt (when added to system) - limit to 3
   const recentlyAdded = [...filteredTransactions]
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-    .slice(0, 5);
+    .slice(0, 3);
 
-  // Recent Transactions: sorted by occurredAt (when they actually happened)
+  // Recent Transactions: sorted by occurredAt (when they actually happened) - limit to 5
   const recentByOccurrence = [...filteredTransactions]
     .sort((a, b) => new Date(b.occurredAt).getTime() - new Date(a.occurredAt).getTime())
     .slice(0, 5);
 
   // ===== Pagination Logic with Ellipses =====
   const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
-  const currentTransactions = filteredTransactions.slice(
+  
+  // Sort all transactions by latest (occurredAt) for the main list
+  const sortedTransactions = [...filteredTransactions]
+    .sort((a, b) => new Date(b.occurredAt).getTime() - new Date(a.occurredAt).getTime());
+  
+  const currentTransactions = sortedTransactions.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
@@ -546,7 +582,7 @@ export default function TransactionsPage() {
                 </div>
                 <div className={styles.transactionContent}>
                   <div className={styles.transactionMerchant}>
-                    {tx.note || "Transaction"}
+                    {tx.note?.split('\n')[0] || "Transaction"}
                   </div>
                   <div className={styles.transactionMeta}>
                     <span className={styles.categoryBadge}>
@@ -614,7 +650,7 @@ export default function TransactionsPage() {
                 </div>
                 <div className={styles.transactionContent}>
                   <div className={styles.transactionMerchant}>
-                    {tx.note || "Transaction"}
+                    {tx.note?.split('\n')[0] || "Transaction"}
                   </div>
                   <div className={styles.transactionMeta}>
                     <span className={styles.categoryBadge}>
@@ -668,7 +704,7 @@ export default function TransactionsPage() {
                 </div>
                 <div className={styles.transactionContent}>
                   <div className={styles.transactionMerchant}>
-                    {tx.note || "Transaction"}
+                    {tx.note?.split('\n')[0] || "Transaction"}
                   </div>
                   <div className={styles.transactionMeta}>
                     <span className={styles.categoryBadge}>
@@ -832,13 +868,42 @@ export default function TransactionsPage() {
               </div>
 
               <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Notes</label>
-                <input
-                  type="text"
-                  className={styles.formInput}
-                  value={editNote}
-                  onChange={(e) => setEditNote(e.target.value)}
-                />
+                <label className={styles.formLabel}>
+                  Notes
+                  {!editingNote && editNote && (
+                    <button
+                      type="button"
+                      onClick={() => setEditingNote(true)}
+                      className={styles.editNoteBtn}
+                      style={{ marginLeft: '0.5rem', fontSize: '0.85rem', padding: '0.25rem 0.5rem' }}
+                    >
+                      ✏️ Edit
+                    </button>
+                  )}
+                </label>
+                {editingNote || !editNote ? (
+                  <textarea
+                    className={styles.formInput}
+                    value={editNote}
+                    onChange={(e) => setEditNote(e.target.value)}
+                    rows={6}
+                    placeholder="Enter notes (supports markdown)"
+                    style={{ fontFamily: 'monospace', fontSize: '0.9rem' }}
+                  />
+                ) : (
+                  <div
+                    className={styles.markdownPreview}
+                    style={{
+                      padding: '1rem',
+                      border: '1px solid #e0e5f2',
+                      borderRadius: '12px',
+                      backgroundColor: '#fafbfc',
+                      minHeight: '100px'
+                    }}
+                  >
+                    <ReactMarkdown>{editNote}</ReactMarkdown>
+                  </div>
+                )}
               </div>
 
               {editMessage && (
