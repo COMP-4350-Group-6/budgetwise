@@ -94,7 +94,7 @@ export default function TransactionsPage() {
   const handleAddTransaction = async (e: React.FormEvent) => {
     e.preventDefault();
     const cents = Math.round(parseFloat(amount || "0") * 100);
-    if (cents <= 0 || (!description && !note)) {
+    if (cents === 0 || (!description && !note)) {
       setMessage("Please provide amount and description.");
       return;
     }
@@ -269,9 +269,11 @@ export default function TransactionsPage() {
       
       // Pre-fill the add transaction form with parsed data
       setDescription(parsed.merchant);
-      setAmount((parsed.total / 100).toFixed(2));
+      // Invoices are expenses, so negate the amount
+      setAmount((-(parsed.total / 100)).toFixed(2));
       setNote(parsed.invoiceNumber ? `Invoice #${parsed.invoiceNumber}` : '');
-      setDate(parsed.date);
+      // Use today's date instead of the invoice date to ensure it shows in the default filter
+      setDate(new Date().toISOString().split("T")[0]);
       
       // Try to match suggested category
       if (parsed.suggestedCategory) {
@@ -319,6 +321,17 @@ export default function TransactionsPage() {
 
     return matchesCategory && matchesSearch && withinRange;
   });
+
+  // ===== Recently Added vs Recent Transactions =====
+  // Recently Added: sorted by createdAt (when added to system)
+  const recentlyAdded = [...filteredTransactions]
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, 5);
+
+  // Recent Transactions: sorted by occurredAt (when they actually happened)
+  const recentByOccurrence = [...filteredTransactions]
+    .sort((a, b) => new Date(b.occurredAt).getTime() - new Date(a.occurredAt).getTime())
+    .slice(0, 5);
 
   // ===== Pagination Logic with Ellipses =====
   const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
@@ -499,8 +512,145 @@ export default function TransactionsPage() {
         )}
       </div>
 
-      {/* ===== TRANSACTIONS LIST ===== */}
+      {/* ===== RECENTLY ADDED TRANSACTIONS ===== */}
+      {recentlyAdded.length > 0 && (
+        <div className={styles.card} style={{ marginBottom: '1.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem', padding: '0 1rem', paddingTop: '1rem' }}>
+            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '600' }}>Recently Added</h3>
+            <span
+              title="Sorted by when they were added to the system"
+              style={{
+                cursor: 'help',
+                fontSize: '0.9rem',
+                color: '#666',
+                border: '1px solid #ccc',
+                borderRadius: '50%',
+                width: '18px',
+                height: '18px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontStyle: 'italic'
+              }}
+            >i</span>
+          </div>
+          {recentlyAdded.map((tx) => {
+            const cat = categories.find((c) => c.id === tx.categoryId);
+            const amount = (tx.amountCents / 100).toFixed(2);
+            const isExpense = tx.amountCents < 0;
+
+            return (
+              <div key={tx.id} className={styles.transactionItem}>
+                <div className={styles.transactionIcon}>
+                  {cat?.name?.[0] ?? "💸"}
+                </div>
+                <div className={styles.transactionContent}>
+                  <div className={styles.transactionMerchant}>
+                    {tx.note || "Transaction"}
+                  </div>
+                  <div className={styles.transactionMeta}>
+                    <span className={styles.categoryBadge}>
+                      {categorizingId === tx.id ? (
+                        <>⏳ Categorizing...</>
+                      ) : (
+                        cat?.name || "Uncategorized"
+                      )}
+                    </span>
+                    <span className={styles.transactionDate}>
+                      {new Date(tx.occurredAt).toLocaleDateString()}
+                    </span>
+                  </div>
+                </div>
+                <div
+                  className={`${styles.transactionAmount} ${
+                    isExpense ? styles.expense : styles.income
+                  }`}
+                >
+                  {isExpense ? "-" : "+"}${amount}
+                </div>
+                <button
+                  className={styles.editBtn}
+                  onClick={() => openEditModal(tx)}
+                >
+                  ✏️
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* ===== RECENT TRANSACTIONS (BY OCCURRENCE) ===== */}
+      {recentByOccurrence.length > 0 && (
+        <div className={styles.card} style={{ marginBottom: '1.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem', padding: '0 1rem', paddingTop: '1rem' }}>
+            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '600' }}>Recent Transactions</h3>
+            <span
+              title="Sorted by when they actually occurred"
+              style={{
+                cursor: 'help',
+                fontSize: '0.9rem',
+                color: '#666',
+                border: '1px solid #ccc',
+                borderRadius: '50%',
+                width: '18px',
+                height: '18px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontStyle: 'italic'
+              }}
+            >i</span>
+          </div>
+          {recentByOccurrence.map((tx) => {
+            const cat = categories.find((c) => c.id === tx.categoryId);
+            const amount = (tx.amountCents / 100).toFixed(2);
+            const isExpense = tx.amountCents < 0;
+
+            return (
+              <div key={tx.id} className={styles.transactionItem}>
+                <div className={styles.transactionIcon}>
+                  {cat?.name?.[0] ?? "💸"}
+                </div>
+                <div className={styles.transactionContent}>
+                  <div className={styles.transactionMerchant}>
+                    {tx.note || "Transaction"}
+                  </div>
+                  <div className={styles.transactionMeta}>
+                    <span className={styles.categoryBadge}>
+                      {categorizingId === tx.id ? (
+                        <>⏳ Categorizing...</>
+                      ) : (
+                        cat?.name || "Uncategorized"
+                      )}
+                    </span>
+                    <span className={styles.transactionDate}>
+                      {new Date(tx.occurredAt).toLocaleDateString()}
+                    </span>
+                  </div>
+                </div>
+                <div
+                  className={`${styles.transactionAmount} ${
+                    isExpense ? styles.expense : styles.income
+                  }`}
+                >
+                  {isExpense ? "-" : "+"}${amount}
+                </div>
+                <button
+                  className={styles.editBtn}
+                  onClick={() => openEditModal(tx)}
+                >
+                  ✏️
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* ===== ALL TRANSACTIONS LIST ===== */}
       <div className={styles.card}>
+        <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '600', marginBottom: '1rem', padding: '1rem 1rem 0' }}>All Transactions</h3>
         {loading ? (
           <div className={styles.emptyState}>Loading...</div>
         ) : currentTransactions.length === 0 ? (
