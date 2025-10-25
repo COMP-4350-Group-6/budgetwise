@@ -16,6 +16,27 @@ const CreateTransactionInput = z.object({
   occurredAt: z.coerce.date(),
 });
 
+const UpdateTransactionInput = z
+  .object({
+    budgetId: z.string().ulid().optional(),
+    categoryId: z.string().ulid().optional(),
+    amountCents: z.number().int().optional(),
+    note: z.string().max(280).optional(),
+    occurredAt: z.coerce.date().optional(),
+  })
+  .refine(
+    (value) =>
+      value.budgetId !== undefined ||
+      value.categoryId !== undefined ||
+      value.amountCents !== undefined ||
+      value.note !== undefined ||
+      value.occurredAt !== undefined,
+    {
+      message: "At least one field must be provided",
+      path: [],
+    }
+  );
+
 transactions.use("*", authMiddleware);
 
 transactions.post(
@@ -48,6 +69,60 @@ transactions.post(
     );
   }
 );
+
+transactions.patch(
+  "/transactions/:id",
+  zValidator("json", UpdateTransactionInput),
+  async (c) => {
+    const transactionId = c.req.param("id");
+    const userId = c.get("userId") as string;
+    const input = c.req.valid("json");
+    const { usecases } = container;
+
+    const updated = await usecases.updateTransaction({
+      transactionId,
+      userId,
+      budgetId: input.budgetId,
+      categoryId: input.categoryId,
+      amountCents: input.amountCents,
+      note: input.note,
+      occurredAt: input.occurredAt,
+    });
+
+    if (!updated) {
+      return c.json({ error: "Transaction not found" }, 404);
+    }
+
+    return c.json(
+      {
+        transaction: {
+          ...updated.props,
+          occurredAt: updated.props.occurredAt.toISOString(),
+          createdAt: updated.props.createdAt.toISOString(),
+          updatedAt: updated.props.updatedAt.toISOString(),
+        },
+      },
+      200
+    );
+  }
+);
+
+transactions.delete("/transactions/:id", async (c) => {
+  const transactionId = c.req.param("id");
+  const userId = c.get("userId") as string;
+  const { usecases } = container;
+
+  const deleted = await usecases.deleteTransaction({
+    transactionId,
+    userId,
+  });
+
+  if (!deleted) {
+    return c.json({ error: "Transaction not found" }, 404);
+  }
+
+  return c.body(null, 204);
+});
 
 // POST /transactions/:id/categorize - Auto-categorize an uncategorized transaction
 transactions.post("/transactions/:id/categorize", async (c) => {

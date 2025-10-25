@@ -72,6 +72,15 @@
   background: #f4f7fe;
 }
 
+.btnDanger {
+  background: #ee5d50;
+  color: white;
+}
+
+.btnDanger:hover {
+  background: #d94a3d;
+}
+
 /* Filters */
 .filtersBar {
   display: flex;
@@ -272,6 +281,19 @@
   margin-bottom: 16px;
   font-size: 14px;
   color: #4318FF;
+}
+
+.confirmText {
+  font-size: 15px;
+  color: #475467;
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.confirmActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
 }
 
 .editBtn {

@@ -105,6 +105,16 @@ export const transactionsService = {
     return response.transaction;
   },
 
+  async deleteTransaction(id: string): Promise<void> {
+    await apiFetch<void>(
+      `/transactions/${id}`,
+      {
+        method: "DELETE",
+      },
+      true
+    );
+  },
+
   async listTransactions(): Promise<TransactionDTO[]> {
     const response = await apiFetch<{ transactions: TransactionDTO[] }>(
       "/transactions",

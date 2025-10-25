@@ -18,6 +18,8 @@ import {
   makeGetBudgetStatus,
   makeGetBudgetDashboard,
   makeAddTransaction,
+  makeUpdateTransaction,
+  makeDeleteTransaction,
   makeCategorizeTransaction,
   makeParseInvoice,
 } from "@budget/usecases";
@@ -73,6 +75,8 @@ export function makeContainer(env?: Env) {
       
       // Transaction use cases
       addTransaction: makeAddTransaction({ clock, id, txRepo }),
+      updateTransaction: makeUpdateTransaction({ clock, txRepo }),
+      deleteTransaction: makeDeleteTransaction({ txRepo }),
       categorizeTransaction: categorization
         ? makeCategorizeTransaction({
             clock,
