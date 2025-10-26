@@ -218,6 +218,8 @@ const CalendarCard: React.FC<{ transactions: TransactionDTO[] }> = ({ transactio
   );
 };
 
+const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
 export default function HomePage() {
   const router = useRouter();
   const [dashboard, setDashboard] = useState<BudgetDashboard | null>(null);

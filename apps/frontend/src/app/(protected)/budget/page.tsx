@@ -33,6 +33,13 @@ export default function BudgetPage() {
     color: "#4ECDC4",
   });
 
+  const parseDateInput = (value: string) => {
+    const [year, month, day] = value.split("-").map(Number);
+    const date = new Date(year, month - 1, day);
+    date.setHours(12, 0, 0, 0);
+    return date;
+  };
+
   useEffect(() => {
     loadDashboard();
   }, []);
@@ -135,7 +142,7 @@ export default function BudgetPage() {
         amountCents: Math.round(parseFloat(formData.amount) * 100),
         currency: formData.currency as Currency,
         period: formData.period,
-        startDate: new Date(formData.startDate),
+        startDate: parseDateInput(formData.startDate),
         alertThreshold: parseInt(formData.alertThreshold),
       };
       await budgetService.createBudget(budgetData);
