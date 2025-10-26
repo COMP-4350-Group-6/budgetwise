@@ -2,16 +2,17 @@
   "name": "@budget/usecases",
   "version": "0.0.0",
   "type": "module",
-  "scripts": {
-    "test": "vitest run"
+  "exports": {
+    ".": "./src/index.ts"
   },
-  "exports": { ".": "./src/index.ts" },
   "dependencies": {
     "@budget/domain": "workspace:*",
     "@budget/ports": "workspace:*"
   },
   "devDependencies": {
     "@budget/adapters-persistence-local": "workspace:*",
-    "@budget/adapters-system": "workspace:*"
+    "@budget/adapters-system": "workspace:*",
+    "@budget/tests": "workspace:*",
+    "vite-tsconfig-paths": "^5.1.4"
   }
 }

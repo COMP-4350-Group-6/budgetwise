@@ -7,16 +7,13 @@
     "dev": "wrangler dev",
     "build": "tsc -p tsconfig.json && wrangler deploy --dry-run",
     "typecheck": "tsc -p tsconfig.json",
-    "lint": "echo skip",
-    "test": "vitest run",
-    "test:auth": "vitest run src/middleware/auth.test.ts"
+    "lint": "echo skip"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20251011.0",
     "dotenv": "^17.2.3",
     "jose": "^5.10.0",
     "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "^3.2.4",
     "wrangler": "^4.42.2"
   },
   "dependencies": {

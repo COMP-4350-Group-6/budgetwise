@@ -3,5 +3,8 @@ import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
   plugins: [tsconfigPaths()],
-  test: { env: { SUPABASE_JWT_SECRET: "test-only" } },
+  test: { 
+    env: { SUPABASE_JWT_SECRET: "test-only" },
+    include: ["/home/darkness/budgetwise/tests/api/**/*.test.ts"],
+  },
 });

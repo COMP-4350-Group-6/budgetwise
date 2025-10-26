@@ -1,3 +1,6 @@
+// Auth
+export * from "./auth/index";
+
 // Categories
 export * from "./categories/create-category";
 export * from "./categories/list-categories";

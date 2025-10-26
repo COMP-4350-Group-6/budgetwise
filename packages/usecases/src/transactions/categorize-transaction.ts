@@ -1,5 +1,5 @@
 import type { TransactionsRepo, CategoriesRepo, CategorizationPort, ClockPort } from "@budget/ports";
-import { Transaction } from "@budget/domain/transaction";
+import { Transaction } from "@budget/domain";
 
 export function makeCategorizeTransaction(deps: {
   clock: ClockPort;

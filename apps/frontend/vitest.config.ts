@@ -7,8 +7,8 @@ export default defineConfig({
   test: {
     globals: true,
     environment: "jsdom",
-    setupFiles: ["./__tests__/setup/setupTests.ts"],
-    include: ["__tests__/**/*.test.{ts,tsx}"],
+    setupFiles: ["../../tests/frontend/setup/setupTests.ts"],
+    include: ["../../tests/frontend/**/*.test.{ts,tsx}"],
     exclude: [
       "**/node_modules/**",
       "**/vitest.setup.ts",
@@ -25,7 +25,7 @@ export default defineConfig({
       reportsDirectory: "./coverage", // use conventional dir name
       include: ["src/**/*.{ts,tsx}"], // focus on source code only
       exclude: [
-        "**/__tests__/**",
+        "**/tests/**",
         "**/*.config.*",
         "**/setupTests.ts",
         "**/node_modules/**",

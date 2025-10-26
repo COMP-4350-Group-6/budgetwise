@@ -1,7 +1,7 @@
-import { Transaction } from "@budget/domain/transaction";
+import { Transaction } from "@budget/domain";
 import type { TransactionsRepo } from "@budget/ports";
 import type { ClockPort, IdPort } from "@budget/ports";
-import type { Currency } from "@budget/domain/money";
+import type { Currency } from "@budget/domain";
 
 export function makeAddTransaction(deps: {
   clock: ClockPort;
