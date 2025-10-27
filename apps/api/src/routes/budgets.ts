@@ -18,7 +18,33 @@ budgets.get("/budgets/dashboard", async (c) => {
   
   const dashboard = await usecases.getBudgetDashboard(userId);
   
-  return c.json({ dashboard });
+  // Serialize domain objects into plain JSON expected by clients/tests
+  const serializable = {
+    categories: dashboard.categories.map((cat) => ({
+      categoryId: cat.categoryId,
+      categoryName: cat.categoryName,
+      categoryIcon: cat.categoryIcon,
+      categoryColor: cat.categoryColor,
+      budgets: cat.budgets.map((b) => ({
+        budget: {
+          id: b.budget.id,
+          amountCents: b.budget.props.amountCents,
+        },
+        spentCents: b.spentCents,
+      })),
+      totalBudgetCents: cat.totalBudgetCents,
+      totalSpentCents: cat.totalSpentCents,
+      totalRemainingCents: cat.totalRemainingCents,
+      overallPercentageUsed: cat.overallPercentageUsed,
+      hasOverBudget: cat.hasOverBudget,
+    })),
+    totalBudgetCents: dashboard.totalBudgetCents,
+    totalSpentCents: dashboard.totalSpentCents,
+    overBudgetCount: dashboard.overBudgetCount,
+    alertCount: dashboard.alertCount,
+  };
+
+  return c.json({ dashboard: serializable });
 });
 
 // GET /budgets/:id/status

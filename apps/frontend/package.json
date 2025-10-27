@@ -10,6 +10,8 @@
     "upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload",
     "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
     "test": "vitest run",
+    "test:unit": "vitest run src/**/*.test.ts src/**/*.test.tsx",
+    "test:int": "vitest run tests/integration/**/*.int.test.{ts,tsx}",
     "test:watch": "vitest",
     "lint": "eslint"
   },
@@ -22,7 +24,8 @@
     "next": "15.5.5",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "react-icons": "^5.5.0"
+    "react-icons": "^5.5.0",
+    "recharts": "^2.13.3"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
@@ -30,7 +33,6 @@
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
-    "@types/jest": "^30.0.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
@@ -40,13 +42,9 @@
     "dotenv": "^17.2.3",
     "eslint": "^9",
     "eslint-config-next": "15.5.5",
-    "identity-obj-proxy": "^3.0.0",
-    "jest": "^30.2.0",
-    "jest-environment-jsdom": "^30.2.0",
     "jsdom": "^27.0.0",
     "lightningcss": "1.25.1",
     "tailwindcss": "^4",
-    "ts-jest": "^29.4.5",
     "ts-node": "^10.9.2",
     "typescript": "^5",
     "vitest": "^3.2.4",

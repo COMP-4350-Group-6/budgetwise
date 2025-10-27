@@ -9,6 +9,8 @@
     "typecheck": "tsc -p tsconfig.json",
     "lint": "echo skip",
     "test": "vitest run",
+    "test:unit": "vitest run src/**/*.test.ts",
+    "test:int": "vitest run tests/integration/**/*.int.test.{ts,tsx}",
     "test:auth": "vitest run src/middleware/auth.test.ts"
   },
   "devDependencies": {

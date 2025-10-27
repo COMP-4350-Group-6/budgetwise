@@ -7,4 +7,5 @@ export interface TransactionsRepo {
   create(tx: Transaction): Promise<void>;
   update(tx: Transaction): Promise<void>;
   delete(id: string): Promise<void>;
+  clear?(): void; // For testing
 }
