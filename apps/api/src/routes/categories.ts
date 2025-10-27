@@ -33,16 +33,21 @@ categories.get("/categories", async (c) => {
 categories.post("/categories/seed", async (c) => {
   const userId = c.get("userId") as string;
   const { usecases } = container;
-  
+  // Get existing categories first so we can return only newly created ones
+  const before = await usecases.listCategories(userId, false);
+
   const seeded = await usecases.seedDefaultCategories(userId);
-  
+
+  // seeded may return existing categories when no new ones were added
+  const newly = seeded.filter((s) => !before.find((b) => b.id === s.id));
+
   return c.json({
-    categories: seeded.map(cat => ({
+    categories: newly.map((cat) => ({
       ...cat.props,
       createdAt: cat.props.createdAt.toISOString(),
       updatedAt: cat.props.updatedAt.toISOString(),
     })),
-    message: `Seeded ${seeded.length} default categories`
+    message: `Seeded ${newly.length} default categories`,
   }, 201);
 });
 
