@@ -93,6 +93,16 @@ export default function TransactionsPage() {
   // ===== Add & Edit Transactions =====
   const handleAddTransaction = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const selectedDate = new Date(date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (selectedDate > today) {
+      setMessage(" Transaction date cannot be in the future.");
+      return;
+    }
+
     const cents = Math.round(parseFloat(amount || "0") * 100);
     if (cents <= 0 || (!description && !note)) {
       setMessage("Please provide amount and description.");
@@ -827,6 +837,7 @@ export default function TransactionsPage() {
                   className={styles.formInput}
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
+                  max={new Date().toISOString().split("T")[0]}
                 />
               </div>
 

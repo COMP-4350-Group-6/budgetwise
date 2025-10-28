@@ -349,9 +349,15 @@
 }
 
 .message {
+  margin-top: 0.5rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 8px;
   font-size: 0.85rem;
+  font-weight: 500;
+  text-align: center;
+  transition: all 0.2s ease-in-out;
+  background: rgba(78, 124, 102, 0.1);
   color: #4E7C66;
-  margin-bottom: 0.5rem;
 }
 
 /* ===============================
