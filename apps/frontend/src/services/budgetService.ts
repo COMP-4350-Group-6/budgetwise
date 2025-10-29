@@ -1,4 +1,5 @@
 import { apiFetch } from "../lib/apiClient";
+import type { CreateBudgetInput, UpdateBudgetInput } from "@budget/schemas";
 
 // Types
 export interface Category {
@@ -86,28 +87,8 @@ export interface UpdateCategoryInput {
   isActive?: boolean;
 }
 
-export interface CreateBudgetInput {
-  categoryId: string;
-  name: string;
-  amountCents: number;
-  currency: string;
-  period: 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY';
-  startDate: Date;
-  endDate?: Date;
-  alertThreshold?: number;
-}
-
-export interface UpdateBudgetInput {
-  categoryId?: string;
-  name?: string;
-  amountCents?: number;
-  currency?: string;
-  period?: 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY';
-  startDate?: Date;
-  endDate?: Date;
-  isActive?: boolean;
-  alertThreshold?: number;
-}
+// Re-export schema types for convenience
+export type { CreateBudgetInput, UpdateBudgetInput } from "@budget/schemas";
 
 // Category API Functions
 export const categoryService = {

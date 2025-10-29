@@ -180,24 +180,35 @@ export class OpenRouterCategorization implements CategorizationPort {
 
     const amount = (Math.abs(amountCents) / 100).toFixed(2);
     
-    // Build the prompt with available categories
+    // Build the prompt with available categories - ID FIRST to emphasize UUID usage
     const categoryList = categories
-      .map(cat => `- ${cat.name} (ID: ${cat.id})${cat.icon ? ` ${cat.icon}` : ''}`)
+      .map(cat => `ID: ${cat.id} | Name: ${cat.name}${cat.icon ? ` ${cat.icon}` : ''}`)
       .join('\n');
 
     const systemPrompt = `You are a financial transaction categorization assistant. Your job is to analyze transaction descriptions and amounts, then assign them to the most appropriate category from the user's available categories.
 
-CRITICAL RULES:
+CRITICAL RULES - READ CAREFULLY:
 1. You MUST respond with ONLY a JSON object in this exact format:
-   {"categoryId": "CATEGORY_ID_HERE", "reasoning": "Brief explanation here"}
-2. The categoryId MUST be one of the IDs from the available categories list
-3. If none of the categories seem appropriate, use: {"categoryId": "NONE", "reasoning": "Explanation why"}
-4. Be confident - only use NONE if truly uncertain
-5. Consider both the description and amount when categorizing
-6. Keep reasoning brief (1-2 sentences)
-7. DO NOT include any text before or after the JSON object
+   {"categoryId": "UUID_HERE", "reasoning": "Brief explanation here"}
 
-Available categories:
+2. The categoryId MUST be the EXACT UUID from the "ID:" field in the category list below
+   - DO NOT use the category name (e.g., "Groceries")
+   - DO NOT use any variation of the name
+   - You MUST use the full UUID string exactly as shown (format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)
+   
+3. Example of CORRECT response:
+   {"categoryId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890", "reasoning": "Coffee purchase fits the Groceries category"}
+   
+4. Example of INCORRECT response (will be rejected):
+   {"categoryId": "Groceries", "reasoning": "..."}  ❌ WRONG - used name instead of UUID
+
+5. If none of the categories seem appropriate, use: {"categoryId": "NONE", "reasoning": "Explanation why"}
+6. Be confident - only use NONE if truly uncertain
+7. Consider both the description and amount when categorizing
+8. Keep reasoning brief (1-2 sentences)
+9. DO NOT include any text before or after the JSON object
+
+Available categories (format: ID | Name):
 ${categoryList}`;
 
     const userPrompt = `Categorize this transaction:
