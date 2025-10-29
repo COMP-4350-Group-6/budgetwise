@@ -129,6 +129,7 @@ export default function BudgetPage() {
   const handleSubmitBudget = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const alertThresholdValue = parseInt(formData.alertThreshold);
       const budgetData: CreateBudgetInput = {
         categoryId: formData.categoryId,
         name: formData.name,
@@ -136,7 +137,7 @@ export default function BudgetPage() {
         currency: formData.currency as Currency,
         period: formData.period,
         startDate: new Date(formData.startDate),
-        alertThreshold: parseInt(formData.alertThreshold),
+        ...(isNaN(alertThresholdValue) ? { alertThreshold: null } : { alertThreshold: alertThresholdValue }),
       };
       await budgetService.createBudget(budgetData);
       handleCancelBudgetForm();

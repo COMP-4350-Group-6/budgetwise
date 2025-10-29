@@ -37,6 +37,7 @@ export function makeGetBudgetStatus(deps: {
       endDate
     );
 
+    // Only count transactions explicitly linked to this budget
     const budgetTransactions = transactions.filter(
       tx => tx.props.budgetId === budget.id
     );

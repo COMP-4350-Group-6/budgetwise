@@ -193,6 +193,15 @@ importers:
         specifier: ^17.2.3
         version: 17.2.3
 
+  packages/adapters/persistence:
+    dependencies:
+      '@budget/domain':
+        specifier: workspace:*
+        version: link:../../domain
+      '@budget/ports':
+        specifier: workspace:*
+        version: link:../../ports
+
   packages/adapters/persistence/local:
     dependencies:
       '@budget/domain':
@@ -201,6 +210,18 @@ importers:
       '@budget/ports':
         specifier: workspace:*
         version: link:../../../ports
+
+  packages/adapters/persistence/supabase:
+    dependencies:
+      '@budget/domain':
+        specifier: workspace:*
+        version: link:../../../domain
+      '@budget/ports':
+        specifier: workspace:*
+        version: link:../../../ports
+      '@supabase/supabase-js':
+        specifier: ^2.45.4
+        version: 2.75.0
 
   packages/adapters/services/openrouter:
     dependencies:
@@ -225,6 +246,9 @@ importers:
       '@budget/adapters-persistence-local':
         specifier: workspace:*
         version: link:../../adapters/persistence/local
+      '@budget/adapters-persistence-supabase':
+        specifier: workspace:*
+        version: link:../../adapters/persistence/supabase
       '@budget/usecases':
         specifier: workspace:*
         version: link:../../usecases

@@ -14,6 +14,6 @@ export function makeDeleteBudget(deps: {
       throw new Error("Unauthorized");
     }
     
-    await deps.budgetsRepo.delete(id);
+    await deps.budgetsRepo.delete(id, userId);
   };
 }

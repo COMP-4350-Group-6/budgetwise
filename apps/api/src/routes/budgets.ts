@@ -72,6 +72,8 @@ budgets.post(
     
     const budget = await usecases.createBudget({
       ...input,
+      endDate: input.endDate ?? undefined,
+      alertThreshold: input.alertThreshold ?? undefined,
       userId,
     });
     
@@ -98,7 +100,15 @@ budgets.put(
     const { usecases } = container;
     
     try {
-      const budget = await usecases.updateBudget(id, userId, updates);
+      const budget = await usecases.updateBudget(
+        id,
+        userId,
+        {
+          ...updates,
+          endDate: updates.endDate ?? undefined,
+          alertThreshold: updates.alertThreshold ?? undefined,
+        }
+      );
       return c.json({
         budget: {
           ...budget.props,
