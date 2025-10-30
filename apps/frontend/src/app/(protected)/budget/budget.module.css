@@ -1,309 +1,247 @@
-.page {
-  padding: 32px;
-  background: #f4f7fe;
-  color: #2b3674;
-  font-family: "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+/* =============================
+   PAGE CONTAINER
+   ============================= */
+.pageContainer {
+  padding: 24px 32px;
+  background: linear-gradient(180deg, #FAF9F5 0%, #F3F2EE 100%);
+  font-family: "Inter", system-ui, sans-serif;
+  color: #1f1f1f;
+  min-height: 100vh;
 }
 
-.title {
-  font-size: 34px;
+/* =============================
+   HEADER
+   ============================= */
+.pageTitle {
+  font-size: 1.75rem;
   font-weight: 700;
-  margin-bottom: 24px;
+  margin-bottom: 1.25rem;
 }
 
-.subtitle {
-  font-size: 22px;
+/* =============================
+   CARD BASE
+   ============================= */
+.card {
+  background: #fff;
+  border: 1px solid rgba(0,0,0,0.05);
+  border-radius: 14px;
+  padding: 1.5rem;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+  transition: box-shadow .2s ease, transform .2s ease;
+}
+.card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+}
+
+/* =============================
+   SUMMARY BLOCK
+   ============================= */
+.sectionTitle {
+  font-size: 1.1rem;
   font-weight: 600;
-  margin-bottom: 16px;
-}
-
-/* Unified Budget Card */
-.unifiedCard {
-  background: #ffffff;
-  border-radius: 24px;
-  padding: 32px;
-  box-shadow: 0 4px 12px rgba(67, 24, 255, 0.05);
-  border: 1px solid #f1f2f6;
-  display: flex;
-  flex-direction: column;
-  gap: 32px;
-}
-
-.topSection {
-  text-align: center;
-  border-bottom: 1px solid #f3f4f6;
-  padding-bottom: 24px;
-}
-
-.label {
-  font-size: 16px;
-  font-weight: 600;
-  color: #2b3674;
+  margin-bottom: 0.35rem;
+  color: #1f1f1f;
 }
 
 .amount {
-  font-size: 28px;
-  font-weight: 700;
-  margin-top: 4px;
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: #1f1f1f;
+  margin-bottom: 0.25rem;
 }
 
-.description {
-  font-size: 14px;
-  color: #a3aed0;
-  margin-bottom: 10px;
+.subtext {
+  color: #4E7C66;
+  font-size: 0.9rem;
+  margin-bottom: 0.75rem;
 }
 
 .progressBar {
-  width: 100%;
   height: 8px;
-  background: #f1f2f6;
-  border-radius: 6px;
+  background: #f0efe9;
+  border-radius: 999px;
   overflow: hidden;
-  margin: 10px 0;
+  margin-bottom: 0.5rem;
 }
-
 .progressFill {
-  height: 8px;
-  background: #facc15;
+  height: 100%;
+  background: #4E7C66;
   transition: width 0.3s ease;
 }
-
 .note {
-  color: #2b3674;
-  font-size: 13px;
-  margin-top: 4px;
+  font-size: 0.85rem;
+  color: #6a6a5a;
 }
 
-.linkBtn {
-  color: #4318ff;
-  font-weight: 600;
-  font-size: 14px;
-  margin-top: 8px;
-  background: none;
-  border: none;
-  cursor: pointer;
-}
-
-.linkBtn:hover {
-  text-decoration: underline;
-}
-
-/* Bottom actions */
-.bottomActions {
+/* =============================
+   CATEGORY MANAGEMENT
+   ============================= */
+.actionRow {
   display: flex;
   justify-content: space-between;
-  gap: 24px;
-  align-items: flex-start;
-}
-
-.actionBox {
-  flex: 1;
-  text-align: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
 }
 
 .actionTitle {
-  font-size: 16px;
   font-weight: 600;
-  color: #1e1e2f;
+  font-size: 1rem;
+  color: #1f1f1f;
 }
 
 .actionText {
-  color: #a3aed0;
-  font-size: 14px;
-  margin: 8px 0 16px;
+  font-size: 0.85rem;
+  color: #6a6a5a;
+  margin-top: 0.25rem;
 }
 
-.divider {
-  width: 1px;
-  background: #f0f0f5;
-  height: auto;
-  align-self: stretch;
+.actionButtons {
+  display: flex;
+  gap: 0.6rem;
 }
 
-/* Buttons */
-.primaryBtn {
-  background: linear-gradient(135deg, #4318ff 0%, #868cff 100%);
-  color: white;
+/* =============================
+   BUTTONS
+   ============================= */
+.btn {
+  padding: 0.55rem 1rem;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease-in-out;
   border: none;
-  border-radius: 12px;
-  padding: 12px 24px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  box-shadow: 0 4px 12px rgba(67, 24, 255, 0.25);
-  transition: all 0.2s ease;
-  margin: 4px;
 }
 
-.primaryBtn:hover {
+.btnPrimary {
+  background: linear-gradient(90deg, #4E7C66 0%, #5E8F74 100%);
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(78,124,102,0.25);
+}
+
+.btnPrimary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(67, 24, 255, 0.35);
+  box-shadow: 0 4px 10px rgba(78,124,102,0.3);
 }
 
-.gradientAlt {
-  background: linear-gradient(135deg, #7b2ff7 0%, #f107a3 100%);
+.btnSecondary {
+  background: #fff;
+  color: #4E7C66;
+  border: 1px solid rgba(78,124,102,0.25);
 }
 
-.secondaryBtn {
-  background: white;
-  color: #2b3674;
-  border: 1px solid #e0e5f2;
-  border-radius: 12px;
-  padding: 12px 24px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
+.btnSecondary:hover {
+  background: #f3f6f2;
 }
 
-.secondaryBtn:hover {
-  background: #f4f7fe;
-}
-
-/* Loading/Error */
-.loading,
-.error {
-  padding: 32px;
-  text-align: center;
-  font-size: 16px;
-  color: #666;
-}
-
-/* Responsive layout */
-@media (max-width: 768px) {
-  .bottomActions {
-    flex-direction: column;
-    gap: 20px;
-  }
-  .divider {
-    display: none;
-  }
-}
-
+/* =============================
+   MODAL
+   ============================= */
 .modal {
   position: fixed;
   inset: 0;
-  background: rgba(247, 248, 252, 0.75); /* subtle background tint */
+  background: rgba(0,0,0,0.4);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
+  z-index: 100;
 }
 
 .modalContent {
-  background: #ffffff;
-  border-radius: 24px;
-  padding: 32px 28px;
-  width: 100%;
+  background: #fff;
+  border-radius: 14px;
+  padding: 2rem;
+  width: 90%;
   max-width: 480px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  position: relative;
-  animation: fadeInScale 0.25s ease-out;
-}
-
-@keyframes fadeInScale {
-  from {
-    opacity: 0;
-    transform: scale(0.96);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
 }
 
 .modalHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 1rem;
 }
 
 .modalTitle {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: 700;
-  color: #1e1e2f;
+  color: #1f1f1f;
 }
 
 .closeBtn {
-  background: #f4f6fa;
   border: none;
-  border-radius: 8px;
-  font-size: 1.1rem;
-  color: #555;
+  background: none;
+  font-size: 1.25rem;
   cursor: pointer;
-  padding: 4px 8px;
-  transition: all 0.2s ease;
+  color: #555;
 }
-
-.closeBtn:hover {
-  background: #e9ecf5;
-}
-
 
 .formGroup {
-  margin-bottom: 16px;
+  margin-bottom: 1rem;
 }
 
 .formLabel {
   display: block;
-  font-size: 0.9rem;
   font-weight: 600;
-  color: #1e1e2f;
-  margin-bottom: 6px;
+  font-size: 0.9rem;
+  margin-bottom: 0.25rem;
+  color: #1f1f1f;
 }
 
 .formInput {
   width: 100%;
   padding: 10px 14px;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  background: #f8f9fd;
-  font-size: 0.95rem;
-  transition: all 0.2s ease;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  background: #fafafa;
+  font-size: 0.9rem;
 }
 
 .formInput:focus {
-  background: #fff;
-  border-color: #4318ff;
-  box-shadow: 0 0 0 2px rgba(67, 24, 255, 0.15);
+  border-color: #4E7C66;
+  box-shadow: 0 0 0 3px rgba(78,124,102,0.1);
   outline: none;
+  background: #fff;
 }
 
 .formActions {
   display: flex;
   justify-content: flex-end;
-  gap: 12px;
-  margin-top: 24px;
+  gap: 0.6rem;
+  margin-top: 1rem;
+}
+/* Highlighted variant for goal card */
+.goalCardHighlight {
+  background: #fffefb;
+  border: 1px solid rgba(78, 124, 102, 0.15);
+  box-shadow: 0 2px 6px rgba(78, 124, 102, 0.05);
+}
+/* =============================
+   MISC STATES
+   ============================= */
+.loading,
+.error {
+  text-align: center;
+  padding: 3rem;
+  color: #6a6a5a;
 }
 
-.btn {
-  font-size: 0.95rem;
-  font-weight: 600;
-  border-radius: 12px;
-  padding: 10px 20px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
+@media (max-width: 768px) {
+  .pageContainer {
+    padding: 16px;
+  }
 
-.btnPrimary {
-  background: linear-gradient(135deg, #4318ff 0%, #868cff 100%);
-  color: white;
-  border: none;
-  box-shadow: 0 4px 12px rgba(67, 24, 255, 0.25);
-}
+  .actionRow {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 
-.btnPrimary:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(67, 24, 255, 0.3);
-}
-
-.btnSecondary {
-  background: #f4f7fe;
-  border: 1px solid #d9dbe9;
-  color: #2b3674;
-}
-
-.btnSecondary:hover {
-  background: #eef1fb;
+  .actionButtons {
+    width: 100%;
+    justify-content: flex-start;
+  }
 }
