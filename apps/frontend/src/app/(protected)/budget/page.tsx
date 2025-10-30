@@ -2,20 +2,24 @@
 
 import React, { useState, useEffect } from "react";
 import styles from "./budget.module.css";
+import { useRouter } from "next/navigation";
 import { budgetService, categoryService } from "@/services/budgetService";
 import type { BudgetDashboard, Category } from "@/services/budgetService";
 import CategorySpendingSection from "@/components/budgets/categorySpending";
 import { CreateBudgetInput, Currency } from "@budget/schemas";
 import { transactionsService } from "@/services/transactionsService";
-import SavingsGoalsSection from "@/components/budgets/savingsGoals";
 
 export default function BudgetPage() {
   const [dashboard, setDashboard] = useState<BudgetDashboard | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
+  const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showCategoryForm, setShowCategoryForm] = useState(false);
-  const [addingBudgetForCategory, setAddingBudgetForCategory] = useState<string | null>(null);
+  const [addingBudgetForCategory, setAddingBudgetForCategory] = useState<
+    string | null
+  >(null);
+
   const [formData, setFormData] = useState({
     categoryId: "",
     name: "",
@@ -25,12 +29,13 @@ export default function BudgetPage() {
     startDate: new Date().toISOString().split("T")[0],
     alertThreshold: "80",
   });
-  const [showAddModal, setShowAddModal] = useState(false);
+
   const [categoryFormData, setCategoryFormData] = useState({
     name: "",
     description: "",
     icon: "",
-    color: "#4ECDC4",
+    color: "#4E7C66",
+    parentId: "",
   });
 
   useEffect(() => {
@@ -40,7 +45,13 @@ export default function BudgetPage() {
   const loadDashboard = async () => {
     try {
       setLoading(true);
-      const cats = await categoryService.listCategories(true);
+
+      // Auto seed default categories if none exist
+      let cats = await categoryService.listCategories(true);
+      if (cats.length === 0) {
+        await categoryService.seedDefaultCategories();
+        cats = await categoryService.listCategories(true);
+      }
       setCategories(cats);
 
       const [dash, transactions] = await Promise.all([
@@ -57,7 +68,10 @@ export default function BudgetPage() {
         return d.getMonth() === month && d.getFullYear() === year;
       });
 
-      const totalSpentCents = monthlyTx.reduce((sum, t) => sum + t.amountCents, 0);
+      const totalSpentCents = monthlyTx.reduce(
+        (sum, t) => sum + t.amountCents,
+        0
+      );
 
       const categorySpentMap: Record<string, number> = {};
       for (const t of monthlyTx) {
@@ -87,15 +101,17 @@ export default function BudgetPage() {
         totalSpentCents,
       });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load budget data");
+      setError(
+        err instanceof Error ? err.message : "Failed to load budget data"
+      );
       console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  const formatMoney = (cents: number, currency = "USD"): string =>
-    new Intl.NumberFormat("en-US", {
+  const formatMoney = (cents: number, currency = "CAD"): string =>
+    new Intl.NumberFormat("en-CA", {
       style: "currency",
       currency,
     }).format(cents / 100);
@@ -115,15 +131,6 @@ export default function BudgetPage() {
 
   const handleCancelBudgetForm = () => {
     setAddingBudgetForCategory(null);
-    setFormData({
-      categoryId: "",
-      name: "",
-      amount: "",
-      currency: "CAD",
-      period: "MONTHLY",
-      startDate: new Date().toISOString().split("T")[0],
-      alertThreshold: "80",
-    });
   };
 
   const handleSubmitBudget = async (e: React.FormEvent) => {
@@ -139,26 +146,35 @@ export default function BudgetPage() {
         alertThreshold: parseInt(formData.alertThreshold),
       };
       await budgetService.createBudget(budgetData);
-      handleCancelBudgetForm();
-      loadDashboard();
+      setAddingBudgetForCategory(null);
+      await loadDashboard();
     } catch (err) {
-      alert("Failed to create budget: " + (err instanceof Error ? err.message : "Unknown error"));
+      alert(
+        "Failed to create budget: " +
+          (err instanceof Error ? err.message : "Unknown error")
+      );
     }
   };
 
-  const handleDeleteCategory = async (categoryId: string, categoryName: string) => {
-    if (!confirm(`Delete "${categoryName}"? This will fail if it has active budgets.`)) return;
+  const handleDeleteCategory = async (
+    categoryId: string,
+    categoryName: string
+  ) => {
+    if (
+      !confirm(
+        `Delete "${categoryName}"? This will fail if it has active budgets.`
+      )
+    )
+      return;
     try {
       await categoryService.deleteCategory(categoryId);
       loadDashboard();
     } catch (err) {
-      alert("Failed to delete category: " + (err instanceof Error ? err.message : "Unknown error"));
+      alert(
+        "Failed to delete category: " +
+          (err instanceof Error ? err.message : "Unknown error")
+      );
     }
-  };
-
-  const handleSeedDefaults = async () => {
-    await categoryService.seedDefaultCategories();
-    loadDashboard();
   };
 
   const handleCreateCategory = async (e: React.FormEvent) => {
@@ -167,13 +183,19 @@ export default function BudgetPage() {
       await categoryService.createCategory({
         name: categoryFormData.name,
         description: categoryFormData.description,
-        icon: categoryFormData.icon || "💰",
-        color: categoryFormData.color || "#4ECDC4",
+        icon: categoryFormData.icon || "",
+        color: categoryFormData.color || "#4E7C66",
         isActive: true,
       });
 
-      setShowAddModal(false);
-      setCategoryFormData({ name: "", description: "", icon: "", color: "#4ECDC4" });
+      setShowCategoryForm(false);
+      setCategoryFormData({
+        name: "",
+        description: "",
+        icon: "",
+        color: "#4E7C66",
+        parentId: "",
+      });
       await loadDashboard();
     } catch (err) {
       console.error("Failed to create category:", err);
@@ -181,95 +203,114 @@ export default function BudgetPage() {
     }
   };
 
-
-  if (loading) return <div className={styles.loading}>Loading budget data...</div>;
+  if (loading)
+    return <div className={styles.loading}>Loading budget data...</div>;
   if (error) return <div className={styles.error}>Error: {error}</div>;
 
   return (
-    <div className={styles.page}>
-      <h1 className={styles.title}>Budget</h1>
+    <div className={styles.pageContainer}>
+      <h1 className={styles.pageTitle}>Budget Overview</h1>
 
-      <section className={styles.section}>
-        <div className={styles.unifiedCard}>
-          <div className={styles.topSection}>
-            <h3 className={styles.label}>Budget Adherence</h3>
-            <p className={styles.amount}>
-              {dashboard ? formatMoney(dashboard.totalSpentCents, "CAD") : "--"}
+      {/* ===== SUMMARY BLOCK ===== */}
+      <section className={styles.card}>
+        <h2 className={styles.sectionTitle}>This Month’s Spending</h2>
+        <p className={styles.amount}>
+          {dashboard ? formatMoney(dashboard.totalSpentCents, "CAD") : "--"}
+        </p>
+        <p className={styles.subtext}>
+          Spent out of{" "}
+          {dashboard ? formatMoney(dashboard.totalBudgetCents, "CAD") : "--"}{" "}
+          total
+        </p>
+
+        <div className={styles.progressBar}>
+          {dashboard ? (
+            <div
+              className={styles.progressFill}
+              style={{
+                width:
+                  dashboard.totalBudgetCents > 0
+                    ? `${Math.min(
+                        (dashboard.totalSpentCents /
+                          dashboard.totalBudgetCents) *
+                          100,
+                        100
+                      )}%`
+                    : "0%",
+              }}
+            />
+          ) : (
+            <div className={styles.progressPlaceholder} />
+          )}
+        </div>
+        <p className={styles.note}>
+          {dashboard?.totalSpentCents
+            ? "Tracking current month’s spending"
+            : "No spending yet this month"}
+        </p>
+      </section>
+      {/* ===== GOAL SETTING SECTION ===== */}
+      <section className={`${styles.card} ${styles.goalCardHighlight}`}>
+        <div className={styles.actionRow}>
+          <div>
+            <h3 className={styles.actionTitle}>Savings & Goal Planning</h3>
+            <p className={styles.actionText}>
+              Plan future purchases or milestones by setting personalized goals.
             </p>
-            <p className={styles.description}>
-              Spent out of{" "}
-              {dashboard
-                ? formatMoney(dashboard.totalBudgetCents, "CAD")
-                : "--"}{" "}
-              total budget (this month).
-            </p>
-
-            <div className={styles.progressBar}>
-              {dashboard ? (
-                <div
-                  className={styles.progressFill}
-                  style={{
-                    width:
-                      dashboard.totalBudgetCents > 0
-                        ? `${Math.min(
-                            (dashboard.totalSpentCents /
-                              dashboard.totalBudgetCents) *
-                              100,
-                            100
-                          )}%`
-                        : "0%",
-                  }}
-                />
-              ) : (
-                <div className={styles.progressPlaceholder} />
-              )}
-            </div>
-
-            <p className={styles.note}>
-              {dashboard?.totalSpentCents
-                ? "Tracking current month's spending"
-                : "No spending yet this month"}
-            </p>
-
-            <button className={styles.linkBtn}>View Insights →</button>
           </div>
-
-          <div className={styles.bottomActions}>
-            <div className={styles.actionBox}>
-              <h4 className={styles.actionTitle}>New Spending Category</h4>
-              <p className={styles.actionText}>
-                Create a new expense category.
-              </p>
-              <button
-                onClick={() => setShowCategoryForm(true)}
-                className={styles.primaryBtn}
-              >
-                Add Category
-              </button>
-              <button
-                onClick={handleSeedDefaults}
-                className={`${styles.primaryBtn} ${styles.gradientAlt}`}
-              >
-                Add Default Categories
-              </button>
-            </div>
-
-            <div className={styles.divider} />
-
-            <div className={styles.actionBox}>
-              <h4 className={styles.actionTitle}>Create New Savings Goal</h4>
-              <p className={styles.actionText}>
-                Plan for future goals or purchases.
-              </p>
-              <button className={styles.secondaryBtn}>Set Goal</button>
-            </div>
+          <div className={styles.actionButtons}>
+            <button
+              className={`${styles.btn} ${styles.btnSecondary}`}
+              onClick={() => router.push("/goals")}
+            >
+              Set Goal
+            </button>
+          </div>
+        </div>
+      </section>
+      {/* ===== CATEGORY MANAGEMENT ===== */}
+      <section className={styles.card}>
+        <div className={styles.actionRow}>
+          <div>
+            <h3 className={styles.actionTitle}>Manage Categories</h3>
+            <p className={styles.actionText}>
+              Add new categories or organize subcategories to fine-tune
+              tracking.
+            </p>
+          </div>
+          <div className={styles.actionButtons}>
+            <button
+              onClick={() => setShowCategoryForm(true)}
+              className={`${styles.btn} ${styles.btnPrimary}`}
+            >
+              Add Category
+            </button>
           </div>
         </div>
       </section>
 
-      
+      {/* ===== CATEGORY SPENDING SECTION ===== */}
+      <section className={styles.card}>
+        <CategorySpendingSection
+          categories={categories}
+          dashboard={dashboard}
+          addingBudgetForCategory={addingBudgetForCategory}
+          formData={formData}
+          setFormData={setFormData}
+          handleSubmitBudget={handleSubmitBudget}
+          handleAddBudgetToCategory={handleAddBudgetToCategory}
+          handleDeleteCategory={handleDeleteCategory}
+          handleCancelBudgetForm={handleCancelBudgetForm}
+          formatMoney={formatMoney}
+        />
+      </section>
+
+      {/* ===== ADD CATEGORY MODAL ===== */}
       {showCategoryForm && (
-        <div className={styles.modal} onClick={() => setShowCategoryForm(false)}>
+        <div
+          className={styles.modal}
+          onClick={() => setShowCategoryForm(false)}
+        >
           <div
             className={styles.modalContent}
             onClick={(e) => e.stopPropagation()}
@@ -286,7 +327,7 @@ export default function BudgetPage() {
 
             <form onSubmit={handleCreateCategory}>
               <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Category Name</label>
+                <label className={styles.formLabel}>Name</label>
                 <input
                   type="text"
                   className={styles.formInput}
@@ -314,24 +355,31 @@ export default function BudgetPage() {
                       description: e.target.value,
                     })
                   }
-                  placeholder="Optional description"
+                  placeholder="Optional"
                 />
               </div>
 
               <div className={styles.formGroup}>
-                <label className={styles.formLabel}>Emoji/Icon</label>
-                <input
-                  type="text"
+                <label className={styles.formLabel}>
+                  Parent Category (optional)
+                </label>
+                <select
                   className={styles.formInput}
-                  value={categoryFormData.icon}
+                  value={categoryFormData.parentId || ""}
                   onChange={(e) =>
                     setCategoryFormData({
                       ...categoryFormData,
-                      icon: e.target.value,
+                      parentId: e.target.value || "",
                     })
                   }
-                  placeholder="e.g. 🍔"
-                />
+                >
+                  <option value="">None</option>
+                  {categories.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div className={styles.formGroup}>
@@ -357,7 +405,10 @@ export default function BudgetPage() {
                 >
                   Cancel
                 </button>
-                <button type="submit" className={`${styles.btn} ${styles.btnPrimary}`}>
+                <button
+                  type="submit"
+                  className={`${styles.btn} ${styles.btnPrimary}`}
+                >
                   Save Category
                 </button>
               </div>
@@ -365,25 +416,6 @@ export default function BudgetPage() {
           </div>
         </div>
       )}
-
-      <CategorySpendingSection
-        categories={categories}
-        dashboard={dashboard}
-        addingBudgetForCategory={addingBudgetForCategory}
-        formData={formData}
-        setFormData={setFormData}
-        handleSubmitBudget={handleSubmitBudget}
-        handleAddBudgetToCategory={handleAddBudgetToCategory}
-        handleDeleteCategory={handleDeleteCategory}
-        handleCancelBudgetForm={handleCancelBudgetForm}
-        formatMoney={formatMoney}
-      />
-
-      <SavingsGoalsSection
-        goals={dashboard?.savingsGoals || []}
-        formatMoney={formatMoney}
-      />
     </div>
   );
-
 }

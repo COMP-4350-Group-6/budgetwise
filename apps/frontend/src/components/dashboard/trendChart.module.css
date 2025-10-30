@@ -1,0 +1,20 @@
+.card {
+  composes: card from "../../app/(protected)/home/home.module.css";
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+}
+
+.subtitle {
+  color: var(--text-dim);
+  font-size: 0.75rem;
+}
+
+.empty {
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  padding: 2rem 0;
+}
