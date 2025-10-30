@@ -1,17 +1,20 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import styles from "./transactions.module.css";
 import { categoryService, budgetService } from "@/services/budgetService";
 import { transactionsService } from "@/services/transactionsService";
 import type { Category, Budget } from "@/services/budgetService";
 import type { TransactionDTO } from "@/services/transactionsService";
-import MonthSummary from "@/components/transactions/monthSummary";
-import TopCategories from "@/components/transactions/topCategories";
-
+import FinancialSummary from "@/components/transactions/financialSummary";
+import CategoryBreakdown from "@/components/transactions/categoryBreakdown";
 import { apiFetch } from "@/lib/apiClient";
+import { useRouter } from "next/navigation";
+import { Camera, Download, Plus,Pencil } from "lucide-react";
 
 export default function TransactionsPage() {
+  const router = useRouter();
+
   const [categories, setCategories] = useState<Category[]>([]);
   const [budgets, setBudgets] = useState<Budget[]>([]);
   const [transactions, setTransactions] = useState<TransactionDTO[]>([]);
@@ -29,7 +32,7 @@ export default function TransactionsPage() {
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  
+
   // ===== Invoice Upload State =====
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
@@ -90,6 +93,71 @@ export default function TransactionsPage() {
     load();
   }, []);
 
+  // ===== Derived: Month / Budget Stats for Snapshot =====
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth(); // 0-based
+
+  const startOfMonth = new Date(year, month, 1, 0, 0, 0, 0);
+  const endOfMonth = new Date(year, month + 1, 0, 23, 59, 59, 999);
+  const daysElapsed = Math.min(now.getDate(), new Date(year, month + 1, 0).getDate());
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  const monthTx = useMemo(
+    () =>
+      transactions.filter((tx) => {
+        const t = new Date(tx.occurredAt);
+        return t >= startOfMonth && t <= endOfMonth;
+      }),
+    [transactions, month, year]
+  );
+
+  const totalSpentThisMonth = monthTx
+    .reduce((sum, tx) => sum + (tx.amountCents > 0 ? tx.amountCents : 0), 0) / 100;
+
+  const totalTransactions = monthTx.length;
+  const averageTransaction =
+    totalTransactions > 0 ? totalSpentThisMonth / totalTransactions : 0;
+
+  const lastMonthStart = new Date(year, month - 1, 1, 0, 0, 0, 0);
+  const lastMonthEnd = new Date(year, month, 0, 23, 59, 59, 999);
+  const lastMonthTx = useMemo(
+    () =>
+      transactions.filter((tx) => {
+        const t = new Date(tx.occurredAt);
+        return t >= lastMonthStart && t <= lastMonthEnd;
+      }),
+    [transactions, month, year]
+  );
+
+  const totalSpentLastMonth = lastMonthTx
+    .filter((tx) => tx.amountCents < 0)
+    .reduce((s, tx) => s + Math.abs(tx.amountCents) / 100, 0);
+
+  // Sum all active budgets (fallback to 0)
+  const totalBudgetThisMonth =
+    budgets?.reduce((s, b) => s + (b.amountCents ?? 0), 0) / 100 || 0;
+
+  // ===== Category Totals (for breakdown) =====
+  const categoryMap = useMemo(() => {
+    const m = new Map<string, string>();
+    categories.forEach((c) => m.set(c.id, c.name));
+    return m;
+  }, [categories]);
+
+  const categoryTotals = useMemo(() => {
+    const totals = new Map<string, number>();
+    monthTx.forEach((tx) => {
+      if (tx.amountCents < 0) {
+        const name = categoryMap.get(tx.categoryId || "") || "Uncategorized";
+        totals.set(name, (totals.get(name) ?? 0) + Math.abs(tx.amountCents) / 100);
+      }
+    });
+    return Array.from(totals.entries())
+      .map(([name, total]) => ({ name, total }))
+      .sort((a, b) => b.total - a.total);
+  }, [monthTx, categoryMap]);
+
   // ===== Add & Edit Transactions =====
   const handleAddTransaction = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -99,7 +167,7 @@ export default function TransactionsPage() {
     today.setHours(0, 0, 0, 0);
 
     if (selectedDate > today) {
-      setMessage(" Transaction date cannot be in the future.");
+      setMessage("Transaction date cannot be in the future.");
       return;
     }
 
@@ -112,14 +180,13 @@ export default function TransactionsPage() {
       setSubmitting(true);
       const hadCategorySelected = Boolean(selectedCategoryId);
       const hadNoteOrDescription = Boolean(note || description);
-      
-      // Create transaction (with or without category)
+
       const result = await transactionsService.addTransaction({
         budgetId: selectedBudgetId || undefined,
         categoryId: selectedCategoryId || undefined,
         amountCents: cents,
         note: note || description || undefined,
-        occurredAt: new Date(date),
+        occurredAt: selectedDate,
       });
 
       const newTx = result.transaction;
@@ -131,7 +198,7 @@ export default function TransactionsPage() {
             new Date(b.occurredAt).getTime() - new Date(a.occurredAt).getTime()
         );
       });
-      
+
       // Clear form
       setDescription("");
       setAmount("");
@@ -139,14 +206,13 @@ export default function TransactionsPage() {
       setSelectedCategoryId("");
       setSelectedBudgetId("");
       setShowAddModal(false);
-      
-      // If no category was selected, try to auto-categorize
+
+      // Auto-categorize if needed
       if (!hadCategorySelected && newTx.id && hadNoteOrDescription) {
         const txId = newTx.id;
         setCategorizingId(txId);
-        
-        // Call categorization endpoint asynchronously
-        transactionsService.categorizeTransaction(txId)
+        transactionsService
+          .categorizeTransaction(txId)
           .then((response) => {
             if (response) {
               setTransactions((prev) =>
@@ -162,12 +228,8 @@ export default function TransactionsPage() {
               );
             }
           })
-          .catch((err) => {
-            console.error("Auto-categorization failed:", err);
-          })
-          .finally(() => {
-            setCategorizingId(null);
-          });
+          .catch((err) => console.error("Auto-categorization failed:", err))
+          .finally(() => setCategorizingId(null));
       }
     } catch {
       setMessage("Failed to add transaction.");
@@ -230,78 +292,67 @@ export default function TransactionsPage() {
       setDeleting(false);
     }
   };
-  
+
   // ===== Handle Invoice Upload =====
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
-      setUploadMessage('Please select an image file');
+
+    if (!file.type.startsWith("image/")) {
+      setUploadMessage("Please select an image file");
       return;
     }
-    
-    // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      setUploadMessage('Image must be less than 5MB');
+      setUploadMessage("Image must be less than 5MB");
       return;
     }
-    
-    // Convert to base64
+
     const reader = new FileReader();
     reader.onloadend = () => {
       setUploadedImage(reader.result as string);
-      setUploadMessage('');
+      setUploadMessage("");
     };
     reader.onerror = () => {
-      setUploadMessage('Failed to read image');
+      setUploadMessage("Failed to read image");
     };
     reader.readAsDataURL(file);
   };
-  
+
   const handleParseInvoice = async () => {
     if (!uploadedImage) {
-      setUploadMessage('Please upload an image first');
+      setUploadMessage("Please upload an image first");
       return;
     }
-    
+
     try {
       setParsingInvoice(true);
-      setUploadMessage('Parsing invoice with AI...');
-      
+      setUploadMessage("Parsing invoice with AI...");
+
       const parsed = await transactionsService.parseInvoice(uploadedImage);
-      
       if (!parsed) {
-        setUploadMessage('Could not parse invoice. Please try again or enter manually.');
+        setUploadMessage("Could not parse invoice. Please try again or enter manually.");
         return;
       }
-      
-      // Pre-fill the add transaction form with parsed data
+
       setDescription(parsed.merchant);
       setAmount((parsed.total / 100).toFixed(2));
-      setNote(parsed.invoiceNumber ? `Invoice #${parsed.invoiceNumber}` : '');
+      setNote(parsed.invoiceNumber ? `Invoice #${parsed.invoiceNumber}` : "");
       setDate(parsed.date);
-      
-      // Try to match suggested category
+
       if (parsed.suggestedCategory) {
-        const matchedCat = categories.find(c =>
-          c.name.toLowerCase() === parsed.suggestedCategory?.toLowerCase()
+        const matchedCat = categories.find(
+          (c) => c.name.toLowerCase() === parsed.suggestedCategory?.toLowerCase()
         );
-        if (matchedCat) {
-          setSelectedCategoryId(matchedCat.id);
-        }
+        if (matchedCat) setSelectedCategoryId(matchedCat.id);
       }
-      
-      // Close upload modal and open add modal
+
       setShowUploadModal(false);
       setUploadedImage(null);
       setShowAddModal(true);
-      setUploadMessage('');
-      
+      setUploadMessage("");
     } catch (error) {
-      console.error('Invoice parsing error:', error);
-      setUploadMessage('Failed to parse invoice. Please try again.');
+      console.error("Invoice parsing error:", error);
+      setUploadMessage("Failed to parse invoice. Please try again.");
     } finally {
       setParsingInvoice(false);
     }
@@ -316,11 +367,11 @@ export default function TransactionsPage() {
       (description && description.toLowerCase().includes(searchQuery.toLowerCase()));
 
     const txDate = new Date(tx.occurredAt).getTime();
-    const now = Date.now();
+    const nowMs = Date.now();
     let withinRange = true;
-    if (dateRange === "7") withinRange = txDate >= now - 7 * 24 * 60 * 60 * 1000;
-    else if (dateRange === "30") withinRange = txDate >= now - 30 * 24 * 60 * 60 * 1000;
-    else if (dateRange === "90") withinRange = txDate >= now - 90 * 24 * 60 * 60 * 1000;
+    if (dateRange === "7") withinRange = txDate >= nowMs - 7 * 24 * 60 * 60 * 1000;
+    else if (dateRange === "30") withinRange = txDate >= nowMs - 30 * 24 * 60 * 60 * 1000;
+    else if (dateRange === "90") withinRange = txDate >= nowMs - 90 * 24 * 60 * 60 * 1000;
     else if (dateRange === "custom" && customStart && customEnd) {
       withinRange =
         txDate >= new Date(customStart).getTime() &&
@@ -365,71 +416,52 @@ export default function TransactionsPage() {
     setCurrentPage(1);
   }, [filteredTransactions.length, itemsPerPage]);
 
-  // ===== Compute Category Totals (top 5) =====
-  const categoryTotals = categories
-    .map((cat) => {
-      const total = transactions
-        .filter((tx) => tx.categoryId === cat.id)
-        .reduce((sum, tx) => sum + Math.abs(tx.amountCents) / 100, 0);
-      return { name: cat.name, total };
-    })
-    .filter((c) => c.total > 0)
-    .sort((a, b) => b.total - a.total)
-    .slice(0, 5);
+  // ==== Export ====
+  const handleExport = () => {
+    if (filteredTransactions.length === 0) {
+      alert("No transactions to export.");
+      return;
+    }
+    const headers = ["Date", "Category", "Amount ($)", "Type", "Note"];
+    const rows = filteredTransactions.map((tx) => {
+      const cat = categories.find((c) => c.id === tx.categoryId)?.name || "Uncategorized";
+      const amount = (Math.abs(tx.amountCents) / 100).toFixed(2);
+      const type = tx.amountCents < 0 ? "Expense" : "Income";
+      const d = new Date(tx.occurredAt);
+      const date = d.toLocaleDateString();
+      return [date, cat, amount, type, tx.note || ""];
+    });
 
-    // ==== Export ==== 
-    const handleExport = () => {
-      if (filteredTransactions.length === 0) {
-        alert("No transactions to export.");
-        return;
-      }
+    const totalSpent = filteredTransactions
+      .filter((tx) => tx.amountCents < 0)
+      .reduce((sum, tx) => sum + Math.abs(tx.amountCents) / 100, 0)
+      .toFixed(2);
 
-      // Headers for CSV
-      const headers = ["Date", "Category", "Amount ($)", "Type", "Note"];
+    const totalIncome = filteredTransactions
+      .filter((tx) => tx.amountCents > 0)
+      .reduce((sum, tx) => sum + tx.amountCents / 100, 0)
+      .toFixed(2);
 
-      // Rows
-      const rows = filteredTransactions.map((tx) => {
-        const cat = categories.find((c) => c.id === tx.categoryId)?.name || "Uncategorized";
-        const amount = (Math.abs(tx.amountCents) / 100).toFixed(2);
-        const type = tx.amountCents < 0 ? "Expense" : "Income";
-        const date = new Date(tx.occurredAt).toLocaleDateString();
-        return [date, cat, amount, type, tx.note || ""];
-      });
+    rows.push([]);
+    rows.push(["", "Total Income", totalIncome, "", ""]);
+    rows.push(["", "Total Expenses", totalSpent, "", ""]);
 
-      // Total row at bottom
-      const totalSpent = filteredTransactions
-        .filter((tx) => tx.amountCents < 0)
-        .reduce((sum, tx) => sum + Math.abs(tx.amountCents) / 100, 0)
-        .toFixed(2);
+    const csvContent = [headers, ...rows]
+      .map((r) => r.map((v) => `"${v}"`).join(","))
+      .join("\n");
 
-      const totalIncome = filteredTransactions
-        .filter((tx) => tx.amountCents > 0)
-        .reduce((sum, tx) => sum + tx.amountCents / 100, 0)
-        .toFixed(2);
-
-      rows.push([]);
-      rows.push(["", "Total Income", totalIncome, "", ""]);
-      rows.push(["", "Total Expenses", totalSpent, "", ""]);
-
-      // Convert to CSV text
-      const csvContent = [headers, ...rows]
-        .map((r) => r.map((v) => `"${v}"`).join(","))
-        .join("\n");
-
-      // Create blob and trigger download
-      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute(
-        "download",
-        `transactions_${new Date().toISOString().split("T")[0]}.csv`
-      );
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    };
-
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute(
+      "download",
+      `transactions_${new Date().toISOString().split("T")[0]}.csv`
+    );
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   return (
     <div className={styles.pageContainer}>
@@ -439,26 +471,23 @@ export default function TransactionsPage() {
           <h1 className={styles.pageTitle}>Transactions</h1>
         </div>
         <div className={styles.headerRight}>
-          <button
-            className={`${styles.btn} ${styles.btnSecondary}`}
-            onClick={handleExport}
-          >
-            📥 Export CSV
+          <button className={`${styles.btn} ${styles.btnSecondary}`} onClick={handleExport}>
+            <Download size={16} style={{ marginRight: 6 }} /> Export CSV
           </button>
           <button
             className={`${styles.btn} ${styles.btnSecondary}`}
             onClick={() => setShowUploadModal(true)}
           >
-            📸 Upload Invoice
+            <Camera size={16} style={{ marginRight: 6 }} /> Upload Invoice
           </button>
           <button
             className={`${styles.btn} ${styles.btnPrimary}`}
             onClick={() => setShowAddModal(true)}
           >
-            + Add Transaction
+            <Plus size={16} style={{ marginRight: 6 }} /> Add Transaction
           </button>
         </div>
-      </div>
+      </div> 
 
       {/* ===== FILTERS ===== */}
       <div className={styles.filterRow}>
@@ -469,47 +498,52 @@ export default function TransactionsPage() {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
-        <select
-          className={styles.filterSelect}
-          value={filterCategory}
-          onChange={(e) => setFilterCategory(e.target.value)}
-        >
-          <option value="">All Categories</option>
-          {categories.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.name}
-            </option>
-          ))}
-        </select>
-        <select
-          className={styles.filterSelect}
-          value={dateRange}
-          onChange={(e) => setDateRange(e.target.value)}
-        >
-          <option value="7">Last 7 Days</option>
-          <option value="30">Last 30 Days</option>
-          <option value="90">Last 90 Days</option>
-          <option value="custom">Custom Range</option>
-        </select>
-        {dateRange === "custom" && (
-          <>
-            <input
-              type="date"
-              value={customStart}
-              onChange={(e) => setCustomStart(e.target.value)}
-              className={styles.dateInput}
-            />
-            <input
-              type="date"
-              value={customEnd}
-              onChange={(e) => setCustomEnd(e.target.value)}
-              className={styles.dateInput}
-            />
-          </>
-        )}
+        <div className={styles.filterGroup}>
+          <select
+            className={styles.filterSelect}
+            value={filterCategory}
+            onChange={(e) => setFilterCategory(e.target.value)}
+          >
+            <option value="">All Categories</option>
+            {categories.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+
+          <select
+            className={styles.filterSelect}
+            value={dateRange}
+            onChange={(e) => setDateRange(e.target.value)}
+          >
+            <option value="7">Last 7 Days</option>
+            <option value="30">Last 30 Days</option>
+            <option value="90">Last 90 Days</option>
+            <option value="custom">Custom Range</option>
+          </select>
+
+          {dateRange === "custom" && (
+            <>
+              <input
+                type="date"
+                value={customStart}
+                onChange={(e) => setCustomStart(e.target.value)}
+                className={styles.dateInput}
+              />
+              <input
+                type="date"
+                value={customEnd}
+                onChange={(e) => setCustomEnd(e.target.value)}
+                className={styles.dateInput}
+              />
+            </>
+          )}
+        </div>
       </div>
 
       {/* ===== TRANSACTIONS LIST ===== */}
+    <div className={styles.sectionBlock}>
       <div className={styles.card}>
         {loading ? (
           <div className={styles.emptyState}>Loading...</div>
@@ -518,13 +552,14 @@ export default function TransactionsPage() {
         ) : (
           currentTransactions.map((tx) => {
             const cat = categories.find((c) => c.id === tx.categoryId);
-            const amount = (tx.amountCents / 100).toFixed(2);
+            const amount = (Math.abs(tx.amountCents) / 100).toFixed(2);
             const isExpense = tx.amountCents < 0;
 
             return (
               <div key={tx.id} className={styles.transactionItem}>
-                <div className={styles.transactionIcon}>
-                  {cat?.name?.[0] ?? "💸"}
+                <div className={styles.transactionIcon} aria-hidden>
+                  
+                  <div className={styles.iconDot} />
                 </div>
                 <div className={styles.transactionContent}>
                   <div className={styles.transactionMerchant}>
@@ -532,11 +567,7 @@ export default function TransactionsPage() {
                   </div>
                   <div className={styles.transactionMeta}>
                     <span className={styles.categoryBadge}>
-                      {categorizingId === tx.id ? (
-                        <>⏳ Categorizing...</>
-                      ) : (
-                        cat?.name || "Uncategorized"
-                      )}
+                      {categorizingId === tx.id ? "Categorizing…" : cat?.name || "Uncategorized"}
                     </span>
                     <span className={styles.transactionDate}>
                       {new Date(tx.occurredAt).toLocaleDateString()}
@@ -553,13 +584,31 @@ export default function TransactionsPage() {
                 <button
                   className={styles.editBtn}
                   onClick={() => openEditModal(tx)}
+                  aria-label="Edit"
                 >
-                  ✏️
+                  <Pencil size={16} />
                 </button>
               </div>
             );
           })
         )}
+      </div>
+    </div>
+        {/* ===== FINANCIAL SUMMARY SECTION ===== */}
+
+      <div className={styles.sectionBlock}>
+        <FinancialSummary
+          totalTransactions={monthTx.length}
+          totalSpent={totalSpentThisMonth}
+          averageTransaction={averageTransaction}
+        />
+      </div>
+
+      <div className={styles.sectionBlock}>
+        <CategoryBreakdown
+          categories={categoryTotals}
+          onCategorizeNow={() => router.push("/transactions")}
+        />
       </div>
 
       {/* ===== PAGINATION ===== */}
@@ -570,6 +619,7 @@ export default function TransactionsPage() {
               onClick={() => goToPage(currentPage - 1)}
               disabled={currentPage === 1}
               className={styles.arrowBtn}
+              aria-label="Previous page"
             >
               ←
             </button>
@@ -583,9 +633,7 @@ export default function TransactionsPage() {
                 <button
                   key={p}
                   onClick={() => goToPage(p as number)}
-                  className={`${styles.pageNumberBtn} ${
-                    p === currentPage ? styles.activePage : ""
-                  }`}
+                  className={`${styles.pageNumberBtn} ${p === currentPage ? styles.activePage : ""}`}
                 >
                   {p}
                 </button>
@@ -596,6 +644,7 @@ export default function TransactionsPage() {
               onClick={() => goToPage(currentPage + 1)}
               disabled={currentPage === totalPages}
               className={styles.arrowBtn}
+              aria-label="Next page"
             >
               →
             </button>
@@ -603,10 +652,7 @@ export default function TransactionsPage() {
 
           <div className={styles.pageSizeControl}>
             <label>Items per page:</label>
-            <select
-              value={itemsPerPage}
-              onChange={(e) => setItemsPerPage(Number(e.target.value))}
-            >
+            <select value={itemsPerPage} onChange={(e) => setItemsPerPage(Number(e.target.value))}>
               <option value={5}>5</option>
               <option value={10}>10</option>
               <option value={20}>20</option>
@@ -616,39 +662,15 @@ export default function TransactionsPage() {
         </div>
       )}
 
-      {/* ===== MONTHLY SUMMARY ===== */}
-      <MonthSummary
-        totalTransactions={transactions.length}
-        totalSpent={transactions.reduce(
-          (sum, tx) => sum + Math.abs(tx.amountCents) / 100,
-          0
-        )}
-        averageTransaction={
-          transactions.length
-            ? transactions.reduce(
-                (sum, tx) => sum + Math.abs(tx.amountCents) / 100,
-                0
-              ) / transactions.length
-            : 0
-        }
-      />
 
-      {/* ===== TOP CATEGORIES ===== */}
-      <TopCategories categories={categoryTotals} />
 
       {/* ===== EDIT MODAL ===== */}
       {showEditModal && editTx && (
         <div className={styles.modal} onClick={() => setShowEditModal(false)}>
-          <div
-            className={styles.modalContent}
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalHeader}>
               <h2 className={styles.modalTitle}>Edit Transaction</h2>
-              <button
-                className={styles.closeBtn}
-                onClick={() => setShowEditModal(false)}
-              >
+              <button className={styles.closeBtn} onClick={() => setShowEditModal(false)}>
                 ✕
               </button>
             </div>
@@ -688,6 +710,7 @@ export default function TransactionsPage() {
                   className={styles.formInput}
                   value={editDate}
                   onChange={(e) => setEditDate(e.target.value)}
+                  max={new Date().toISOString().split("T")[0]}
                 />
               </div>
 
@@ -701,9 +724,7 @@ export default function TransactionsPage() {
                 />
               </div>
 
-              {editMessage && (
-                <div className={styles.message}>{editMessage}</div>
-              )}
+              {editMessage && <div className={styles.message}>{editMessage}</div>}
 
               <div className={styles.formActions}>
                 <button
@@ -724,11 +745,7 @@ export default function TransactionsPage() {
                 >
                   Delete
                 </button>
-                <button
-                  type="submit"
-                  className={`${styles.btn} ${styles.btnPrimary}`}
-                  disabled={editSubmitting}
-                >
+                <button type="submit" className={`${styles.btn} ${styles.btnPrimary}`} disabled={editSubmitting}>
                   {editSubmitting ? "Saving..." : "Save Changes"}
                 </button>
               </div>
@@ -740,8 +757,8 @@ export default function TransactionsPage() {
       {showDeleteConfirm && editTx && (
         <div className={styles.modal} onClick={() => setShowDeleteConfirm(false)}>
           <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-            <div className={styles.modalHeader}
-              ><h2 className={styles.modalTitle}>Delete Transaction</h2>
+            <div className={styles.modalHeader}>
+              <h2 className={styles.modalTitle}>Delete Transaction</h2>
               <button className={styles.closeBtn} onClick={() => setShowDeleteConfirm(false)}>
                 ✕
               </button>
@@ -774,16 +791,10 @@ export default function TransactionsPage() {
       {/* ===== ADD MODAL ===== */}
       {showAddModal && (
         <div className={styles.modal} onClick={() => setShowAddModal(false)}>
-          <div
-            className={styles.modalContent}
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalHeader}>
               <h2 className={styles.modalTitle}>Add Transaction</h2>
-              <button
-                className={styles.closeBtn}
-                onClick={() => setShowAddModal(false)}
-              >
+              <button className={styles.closeBtn} onClick={() => setShowAddModal(false)}>
                 ✕
               </button>
             </div>
@@ -814,7 +825,10 @@ export default function TransactionsPage() {
 
               <div className={styles.formGroup}>
                 <label className={styles.formLabel}>
-                  Category <span style={{ fontSize: '0.85em', color: '#666', fontWeight: 'normal' }}>(optional - AI will suggest if empty)</span>
+                  Category{" "}
+                  <span style={{ fontSize: "0.85em", color: "#666", fontWeight: "normal" }}>
+                    (optional - AI will suggest if empty)
+                  </span>
                 </label>
                 <select
                   className={styles.formInput}
@@ -862,11 +876,7 @@ export default function TransactionsPage() {
                 >
                   Cancel
                 </button>
-                <button
-                  type="submit"
-                  className={`${styles.btn} ${styles.btnPrimary}`}
-                  disabled={submitting}
-                >
+                <button type="submit" className={`${styles.btn} ${styles.btnPrimary}`} disabled={submitting}>
                   {submitting ? "Adding..." : "Add Transaction"}
                 </button>
               </div>
@@ -878,10 +888,7 @@ export default function TransactionsPage() {
       {/* ===== UPLOAD INVOICE MODAL ===== */}
       {showUploadModal && (
         <div className={styles.modal} onClick={() => setShowUploadModal(false)}>
-          <div
-            className={styles.modalContent}
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalHeader}>
               <h2 className={styles.modalTitle}>Upload Invoice</h2>
               <button
@@ -889,7 +896,7 @@ export default function TransactionsPage() {
                 onClick={() => {
                   setShowUploadModal(false);
                   setUploadedImage(null);
-                  setUploadMessage('');
+                  setUploadMessage("");
                 }}
               >
                 ✕
@@ -915,19 +922,14 @@ export default function TransactionsPage() {
               ) : (
                 <div className={styles.imagePreview}>
                   <img src={uploadedImage} alt="Invoice preview" className={styles.previewImage} />
-                  <button
-                    className={`${styles.btn} ${styles.btnSecondary}`}
-                    onClick={() => setUploadedImage(null)}
-                  >
+                  <button className={`${styles.btn} ${styles.btnSecondary}`} onClick={() => setUploadedImage(null)}>
                     Change Image
                   </button>
                 </div>
               )}
             </div>
 
-            {uploadMessage && (
-              <div className={styles.message}>{uploadMessage}</div>
-            )}
+            {uploadMessage && <div className={styles.message}>{uploadMessage}</div>}
 
             <div className={styles.formActions}>
               <button
@@ -936,7 +938,7 @@ export default function TransactionsPage() {
                 onClick={() => {
                   setShowUploadModal(false);
                   setUploadedImage(null);
-                  setUploadMessage('');
+                  setUploadMessage("");
                 }}
               >
                 Cancel
