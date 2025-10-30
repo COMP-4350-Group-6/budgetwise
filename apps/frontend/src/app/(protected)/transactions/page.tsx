@@ -148,8 +148,8 @@ export default function TransactionsPage() {
   const categoryTotals = useMemo(() => {
     const totals = new Map<string, number>();
     monthTx.forEach((tx) => {
-      if (tx.amountCents < 0) {
-        const name = categoryMap.get(tx.categoryId || "") || "Uncategorized";
+      if (tx.categoryId) {
+        const name = categoryMap.get(tx.categoryId) || "Uncategorized";
         totals.set(name, (totals.get(name) ?? 0) + Math.abs(tx.amountCents) / 100);
       }
     });
@@ -611,6 +611,7 @@ export default function TransactionsPage() {
         />
       </div>
 
+    
       {/* ===== PAGINATION ===== */}
       {totalPages > 1 && (
         <div className={styles.paginationContainer}>
