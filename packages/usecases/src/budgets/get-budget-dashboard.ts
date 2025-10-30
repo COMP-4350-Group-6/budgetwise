@@ -53,6 +53,15 @@ export function makeGetBudgetDashboard(deps: {
         b => b.props.categoryId === category.id
       );
 
+      // Debug: Log category and matching budgets to help tests
+      // (Left intentionally lightweight; removed after debugging)
+      try {
+        // eslint-disable-next-line no-console
+        console.log('getBudgetDashboard: category', category.id, 'found budgets', categoryBudgets.map(b => ({ id: b.id, userId: b.props.userId })));
+      } catch (e) {
+        // ignore logging failures in non-test env
+      }
+
       const budgetStatuses: BudgetStatus[] = [];
       let categoryBudgetTotal = 0;
       let categorySpentTotal = 0;
@@ -68,6 +77,12 @@ export function makeGetBudgetDashboard(deps: {
           totalSpent += status.spentCents;
           if (status.isOverBudget) overBudgetCount++;
           if (status.shouldAlert) alertCount++;
+        }
+        else {
+          try {
+            // eslint-disable-next-line no-console
+            console.log('getBudgetDashboard: getBudgetStatus returned null for budget', budget.id, 'userIdChecked', userId, 'budgetUser', budget.props.userId);
+          } catch (e) {}
         }
       }
 

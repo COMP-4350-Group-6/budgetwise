@@ -1,4 +1,4 @@
-import { makeSystemClock, makeUlid } from "../../../adapters/system/src";
+import { makeSystemClock, makeUlid } from "@budget/adapters-system";
 import {
   makeInMemTransactionsRepo,
   makeInMemCategoriesRepo,
@@ -36,6 +36,13 @@ export function makeContainer(env?: Env) {
   const categoriesRepo = makeInMemCategoriesRepo();
   const budgetsRepo = makeInMemBudgetsRepo();
   const txRepo = makeInMemTransactionsRepo();
+  
+  // Reset function for testing
+  const reset = () => {
+    categoriesRepo.clear?.();
+    budgetsRepo.clear?.();
+    txRepo.clear?.();
+  };
   
   // Optional AI services (only if API key is provided)
   const categorization = env?.OPENROUTER_API_KEY
@@ -91,6 +98,7 @@ export function makeContainer(env?: Env) {
             invoiceParser
           })
         : undefined,
-    }
+    },
+    reset,
   };
 }

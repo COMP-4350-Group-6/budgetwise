@@ -20,12 +20,23 @@
       ]
     },
     "typecheck": {
+      "dependsOn": ["^build"],
       "outputs": []
     },
     "lint": {
       "outputs": []
     },
     "test": {
+      "outputs": [
+        "coverage/**"
+      ]
+    },
+    "test:unit": {
+      "outputs": [
+        "coverage/**"
+      ]
+    },
+    "test:int": {
       "outputs": [
         "coverage/**"
       ]

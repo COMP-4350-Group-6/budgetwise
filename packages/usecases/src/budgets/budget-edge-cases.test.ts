@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { makeCreateBudget } from './create-budget';
 import { makeUpdateBudget } from './update-budget';
 import { makeGetBudgetStatus } from './get-budget-status';
-import { makeAddTransaction } from '../transactions/add-transaction';
+import { makeAddTransaction } from '@budget/usecases/transactions/add-transaction';
 import { makeInMemBudgetsRepo, makeInMemTransactionsRepo } from '@budget/adapters-persistence-local';
 import { makeSystemClock, makeUlid } from '@budget/adapters-system';
 
