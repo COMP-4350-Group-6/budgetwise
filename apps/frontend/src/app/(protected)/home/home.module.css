@@ -1,27 +1,6 @@
 @reference "tailwindcss";
 
-/* ===============================
-   Global Dashboard Styling
-   =============================== */
-:root {
-  --accent-green: #4E7C66;
-  --accent-green-light: #9CB6A4;
-  --accent-yellow: #F6C947;
-  --accent-red: #D55C5A;
-  --accent-orange: #F6A947;
-  --bg-page: #FAF9F5;
-  --bg-card: #FFF9F1;
-  --border-light: rgba(0, 0, 0, 0.06);
-  --text-main: #222;
-  --text-muted: #777;
-  --text-dim: #6A6A5A;
-  --radius: 12px;
-  --shadow: 0 2px 6px rgba(0,0,0,0.05);
-}
-
-/* ===============================
-   Page Wrapper
-   =============================== */
+/* page Wrapper */
 .page {
   background: linear-gradient(180deg, #FAF9F5 0%, #F3F2EE 100%);
   min-height: 100vh;
@@ -33,9 +12,7 @@
   font-family: "Inter", system-ui, sans-serif;
 }
 
-/* ===============================
-   Header
-   =============================== */
+/* Header */
 .header {
   display: flex;
   flex-direction: column;
@@ -54,9 +31,7 @@
   color: var(--text-main);
 }
 
-/* ===============================
-   Top Stats
-   =============================== */
+/* Top stats */
 .topStatsRow {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -64,9 +39,7 @@
   margin-bottom: 0.5rem;
 }
 
-/* ===============================
-   Chart + Overview Grids
-   =============================== */
+/* Chart + Overview Grids */
 .midRow {
   display: grid;
   grid-template-columns: 1fr;
@@ -90,9 +63,7 @@
   }
 }
 
-/* ===============================
-   Cards
-   =============================== */
+/* Cards */
 .card {
   background: var(--bg-card);
   border: 1px solid var(--border-light);
@@ -110,9 +81,7 @@
   transform: translateY(-1px);
 }
 
-/* ===============================
-   Section Titles
-   =============================== */
+/* Section Titles */
 .sectionLabel {
   font-size: 1rem;
   font-weight: 600;
@@ -133,9 +102,7 @@
   display: inline-block;
 }
 
-/* ===============================
-   Status Colors
-   =============================== */
+/* Status Colors */
 .good {
   color: var(--accent-green);
 }
@@ -146,9 +113,7 @@
   color: var(--accent-red);
 }
 
-/* ===============================
-   Empty State
-   =============================== */
+/* Empty State */
 .emptyState {
   text-align: center;
   color: var(--text-dim);

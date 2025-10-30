@@ -2,7 +2,7 @@
 import { useEffect, useState, useMemo } from "react";
 import styles from "./home.module.css";
 import { useRouter } from "next/navigation";
-import { budgetService } from "@/services/budgetService";
+import { budgetService, BudgetDashboard } from "@/services/budgetService";
 import { apiFetch } from "@/lib/apiClient";
 import type { TransactionDTO } from "@/services/transactionsService";
 import StatCard from "@/components/dashboard/statCard";
@@ -13,7 +13,7 @@ import SpendingOverview from "@/components/dashboard/spendingOverview";
 
 export default function HomePage() {
   const router = useRouter();
-  const [dashboard, setDashboard] = useState<any>(null);
+  const [dashboard, setDashboard] = useState<BudgetDashboard | null>(null);
   const [transactions, setTransactions] = useState<TransactionDTO[]>([]);
   const [loading, setLoading] = useState(true);
 

@@ -19,7 +19,7 @@ function formatLocalYMD(date: Date) {
 }
 
 export default function TrendChart({ transactions }: { transactions: TransactionDTO[] }) {
-  // 👉 group spend per local calendar day
+  // group spend per local calendar day
   const trendData = useMemo(() => {
     const totalsByDay = new Map<string, number>();
 
@@ -53,11 +53,16 @@ export default function TrendChart({ transactions }: { transactions: Transaction
             <XAxis dataKey="date" stroke="#7a7a7a" fontSize={10} />
             <YAxis stroke="#7a7a7a" fontSize={10} />
             <Tooltip
-              formatter={(v: any) => {
-                const num = typeof v === "number" ? v : parseFloat(String(v));
-                return `$${(isNaN(num) ? 0 : num).toFixed(2)}`;
+              formatter={(v: unknown) => {
+                const num =
+                  typeof v === "number"
+                    ? v
+                    : typeof v === "string"
+                    ? parseFloat(v)
+                    : 0;
+                return `$${num.toFixed(2)}`;
               }}
-              labelFormatter={(label) => label} // show YYYY-MM-DD correctly
+              labelFormatter={(label) => label}
             />
             <Line
               type="monotone"
