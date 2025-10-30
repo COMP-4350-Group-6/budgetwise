@@ -17,9 +17,16 @@ vi.mock("@/components/transactions/monthSummary", () => ({
   ),
 }));
 
-vi.mock("@/components/transactions/topCategories", () => ({
+vi.mock("@/components/transactions/categoryBreakdown", () => ({
   __esModule: true,
   default: () => <div data-testid="top-categories" />,
+}));
+
+vi.mock("@/components/transactions/financialSummary", () => ({
+  __esModule: true,
+  default: ({ totalTransactions }: { totalTransactions: number }) => (
+    <div data-testid="month-summary">Transactions: {totalTransactions}</div>
+  ),
 }));
 
 // Mock services
@@ -134,7 +141,7 @@ describe("TransactionsPage", () => {
       expect(screen.queryByText(/no transactions found/i)).toBeInTheDocument()
     );
 
-    const addBtn = screen.getByRole("button", { name: /\+ add transaction/i });
+    const addBtn = screen.getByRole("button", { name: /add transaction/i })
     fireEvent.click(addBtn);
     expect(screen.getByRole("heading", { name: /^add transaction$/i })).toBeInTheDocument();
 

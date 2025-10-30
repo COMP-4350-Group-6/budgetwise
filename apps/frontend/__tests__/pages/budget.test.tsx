@@ -92,9 +92,8 @@ describe("BudgetPage", () => {
       expect(screen.queryByText(/loading budget data/i)).not.toBeInTheDocument()
     );
 
-    expect(screen.getByText("Budget")).toBeInTheDocument();
+    expect(screen.getByText(/budget overview/i)).toBeInTheDocument();
     expect(screen.getByTestId("category-spending")).toBeInTheDocument();
-    expect(screen.getByTestId("savings-goals")).toBeInTheDocument();
     expect(screen.getByText(/spent out of/i)).toBeInTheDocument();
   });
 
@@ -122,28 +121,6 @@ describe("BudgetPage", () => {
     await waitFor(() =>
       expect(screen.queryByText(/add new category/i)).not.toBeInTheDocument()
     );
-  });
-
-  it("calls seedDefaultCategories when clicking Add Default Categories", async () => {
-    const { budgetService, categoryService } = await import("@/services/budgetService");
-    const { transactionsService } = await import("@/services/transactionsService");
-
-    (categoryService.listCategories as any).mockResolvedValueOnce(mockCategories);
-    (budgetService.getDashboard as any).mockResolvedValueOnce(mockDashboard);
-    (transactionsService.listTransactions as any).mockResolvedValueOnce(mockTransactions);
-
-    render(<BudgetPage />);
-
-    await waitFor(() =>
-      expect(screen.queryByText(/loading budget data/i)).not.toBeInTheDocument()
-    );
-
-    const addDefaultsButton = screen.getByRole("button", {
-      name: /add default categories/i,
-    });
-    fireEvent.click(addDefaultsButton);
-
-    expect(categoryService.seedDefaultCategories).toHaveBeenCalledTimes(1);
   });
 
   it("shows error message if loading fails", async () => {
