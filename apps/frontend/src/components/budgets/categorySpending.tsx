@@ -17,15 +17,15 @@ import {
   Plus,
   Trash2,
   Lightbulb,
-  ChevronDown,
-  ChevronUp,
+  
   Wallet,
 } from "lucide-react";
 
-interface Props {
+export interface Props {
   categories: Category[];
   dashboard: BudgetDashboard | null;
   addingBudgetForCategory: string | null;
+  editingBudgetId: string | null;
   formData: {
     categoryId: string;
     name: string;
@@ -51,6 +51,11 @@ interface Props {
   handleDeleteCategory: (id: string, name: string) => void;
   handleCancelBudgetForm: () => void;
   formatMoney: (cents: number, currency?: string) => string;
+  onEditBudget: (
+    categoryId: string,
+    budget: BudgetDashboard["categories"][number]["budgets"][number]
+  ) => void;
+  onDeleteBudget: (budgetId: string) => void;
 }
 
 const iconMap: Record<string, JSX.Element> = {
@@ -71,6 +76,7 @@ export default function CategorySpendingSection({
   categories,
   dashboard,
   addingBudgetForCategory,
+  editingBudgetId,
   formData,
   setFormData,
   handleSubmitBudget,
@@ -78,10 +84,10 @@ export default function CategorySpendingSection({
   handleDeleteCategory,
   handleCancelBudgetForm,
   formatMoney,
+  onEditBudget,
+  onDeleteBudget,
 }: Props) {
-  const [expanded, setExpanded] = useState<string | null>(null);
-  const [subcategoryInput, setSubcategoryInput] = useState("");
-  const [subcategories, setSubcategories] = useState<Record<string, string[]>>({});
+  // Dropdown expand removed for flat categories
   const [showAll, setShowAll] = useState(false);
 
   if (!categories || categories.length === 0) {
@@ -95,15 +101,6 @@ export default function CategorySpendingSection({
 
   const displayedCategories = showAll ? categories : categories.slice(0, 6);
 
-  const handleAddSubcategory = (categoryId: string) => {
-    if (!subcategoryInput.trim()) return;
-    setSubcategories((prev) => ({
-      ...prev,
-      [categoryId]: [...(prev[categoryId] || []), subcategoryInput.trim()],
-    }));
-    setSubcategoryInput("");
-  };
-
   return (
     <section className={styles.section}>
       <h2 className={styles.subheading}>Category Spending Limits (This Month)</h2>
@@ -113,15 +110,23 @@ export default function CategorySpendingSection({
           const categorySummary = dashboard?.categories.find(
             (c) => c.categoryId === category.id
           );
-          const hasBudgets = categorySummary?.budgets?.length;
+          const hasBudgets = (categorySummary?.budgets?.length || 0) > 0;
+          const singleBudget = hasBudgets ? categorySummary!.budgets[0] : null;
+          
+          // Debug: log budget structure if it exists
+          if (singleBudget && !singleBudget.budget?.id) {
+            console.warn("Budget structure issue:", {
+              singleBudget,
+              budget: singleBudget.budget,
+              budgetId: singleBudget.budget?.id,
+            });
+          }
           const progress =
             categorySummary && categorySummary.totalBudgetCents > 0
               ? (categorySummary.totalSpentCents /
                   categorySummary.totalBudgetCents) *
                 100
               : 0;
-
-          const isExpanded = expanded === category.id;
 
           return (
             <div
@@ -144,16 +149,7 @@ export default function CategorySpendingSection({
                 </div>
 
                 <div className={styles.headerActions}>
-                  <button
-                    onClick={() =>
-                      setExpanded((prev) =>
-                        prev === category.id ? null : category.id
-                      )
-                    }
-                    className={styles.iconBtn}
-                  >
-                    {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                  </button>
+                  {/* Dropdown toggle removed for flat categories */}
                   <button
                     onClick={() =>
                       addingBudgetForCategory === category.id
@@ -162,6 +158,7 @@ export default function CategorySpendingSection({
                     }
                     className={`${styles.iconBtn} ${styles.addBtn}`}
                     title="Add Budget"
+                    disabled={hasBudgets}
                   >
                     <Plus size={16} />
                   </button>
@@ -194,38 +191,59 @@ export default function CategorySpendingSection({
                 />
               </div>
 
-              {/* Expandable budgets */}
-              {isExpanded && hasBudgets && (
-                <div className={styles.budgetList}>
-                  {categorySummary!.budgets.map((b) => {
-                    const amt = b.budget.amountCents;
-                    const spent = b.spentCents;
-                    const pct = amt > 0 ? (spent / amt) * 100 : 0;
-                    return (
-                      <div key={b.budget.id} className={styles.budgetItem}>
-                        <div className={styles.budgetMeta}>
-                          <strong>{b.budget.name}</strong> – {b.budget.period}
-                        </div>
-                        <div className={styles.budgetAmounts}>
-                          {formatMoney(spent, "CAD")} / {formatMoney(amt, "CAD")}
-                        </div>
-                        <div className={styles.progressBarSmall}>
-                          <div
-                            className={`${styles.progressFill} ${
-                              pct >= 100
-                                ? styles.red
-                                : pct >= 80
-                                ? styles.yellow
-                                : styles.green
-                            }`}
-                            style={{ width: `${Math.min(pct, 100)}%` }}
-                          />
-                        </div>
-                      </div>
-                    );
-                  })}
+          {/* Single budget details + actions (always visible when budget exists) */}
+          {singleBudget && (
+            <div className={styles.budgetList}>
+              <div className={styles.budgetItem}>
+                <div className={styles.budgetMeta}>
+                  {singleBudget.budget.name} – {singleBudget.budget.period.charAt(0) + singleBudget.budget.period.slice(1).toLowerCase().replace(/_/g, ' ')}
                 </div>
-              )}
+                <div className={styles.budgetAmounts}>
+                  {formatMoney(singleBudget.spentCents, "CAD")} / {formatMoney(singleBudget.budget.amountCents, "CAD")}
+                </div>
+                <div className={styles.progressBarSmall}>
+                  <div
+                    className={`${styles.progressFill} ${(() => {
+                      const amt = singleBudget.budget.amountCents;
+                      const spent = singleBudget.spentCents;
+                      const pct = amt > 0 ? (spent / amt) * 100 : 0;
+                      return pct >= 100 ? styles.red : pct >= 80 ? styles.yellow : styles.green;
+                    })()}`}
+                    style={{ width: `${Math.min(
+                      singleBudget.budget.amountCents > 0
+                        ? (singleBudget.spentCents / singleBudget.budget.amountCents) * 100
+                        : 0,
+                      100
+                    )}%` }}
+                  />
+                </div>
+              </div>
+              <div className={styles.formActions}>
+                <button
+                  type="button"
+                  className={`${styles.btn} ${styles.btnSecondary}`}
+                  onClick={() => onEditBudget(category.id, singleBudget)}
+                >
+                  Edit Budget
+                </button>
+                <button
+                  type="button"
+                  className={`${styles.btn} ${styles.btnDanger || styles.deleteBtn}`}
+                  onClick={() => {
+                    const budgetId = singleBudget.budget?.id;
+                    if (!budgetId) {
+                      console.error("Budget ID not found:", singleBudget);
+                      alert("Error: Budget ID is missing. Please refresh the page.");
+                      return;
+                    }
+                    onDeleteBudget(budgetId);
+                  }}
+                >
+                  Delete Budget
+                </button>
+              </div>
+            </div>
+          )}
 
               {/* Add Budget Form */}
               {addingBudgetForCategory === category.id && (
@@ -271,7 +289,7 @@ export default function CategorySpendingSection({
                       type="button"
                       onClick={() => {
                         handleCancelBudgetForm();
-                        setExpanded(null);
+                        // No-op: expand removed
                       }}
                       className={`${styles.btn} ${styles.btnSecondary}`}
                     >
@@ -281,67 +299,13 @@ export default function CategorySpendingSection({
                       type="submit"
                       className={`${styles.btn} ${styles.btnPrimary}`}
                     >
-                      Save Budget
+                      {editingBudgetId ? "Update Budget" : "Save Budget"}
                     </button>
                   </div>
                 </form>
               )}
 
-              {/* Subcategory input */}
-              {isExpanded && (
-                <div className={styles.subcategoryForm}>
-                  <input
-                    type="text"
-                    placeholder="Add subcategory (e.g. Rent)"
-                    value={subcategoryInput}
-                    onChange={(e) => setSubcategoryInput(e.target.value)}
-                    className={styles.input}
-                  />
-                  <div className={styles.formActions}>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSubcategoryInput("");
-                        setExpanded(null);
-                      }}
-                      className={`${styles.btn} ${styles.btnSecondary}`}
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleAddSubcategory(category.id)}
-                      className={`${styles.btn} ${styles.btnPrimary}`}
-                    >
-                      Add Subcategory
-                    </button>
-                  </div>
-
-                  {subcategories[category.id]?.length ? (
-                    <ul className={styles.subcategoryList}>
-                      {subcategories[category.id].map((sub, idx) => (
-                        <li
-                          key={`sub-${category.id}-${idx}`}
-                          className={`${styles.subcategoryItem} ${
-                            formData.name === sub
-                              ? styles.activeSubcategory
-                              : ""
-                          }`}
-                          onClick={() =>
-                            setFormData({
-                              ...formData,
-                              categoryId: category.id,
-                              name: sub,
-                            })
-                          }
-                        >
-                          {sub}
-                        </li>
-                      ))}
-                    </ul>
-                  ) : null}
-                </div>
-              )}
+              {/* Subcategory UI removed for flat categories */}
             </div>
           );
         })}

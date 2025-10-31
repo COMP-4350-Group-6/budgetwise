@@ -8,6 +8,7 @@ import type { BudgetDashboard, Category } from "@/services/budgetService";
 import CategorySpendingSection from "@/components/budgets/categorySpending";
 import { CreateBudgetInput, Currency } from "@budget/schemas";
 import { transactionsService } from "@/services/transactionsService";
+import type { UpdateBudgetInput } from "@/services/budgetService";
 
 export default function BudgetPage() {
   const [dashboard, setDashboard] = useState<BudgetDashboard | null>(null);
@@ -19,6 +20,7 @@ export default function BudgetPage() {
   const [addingBudgetForCategory, setAddingBudgetForCategory] = useState<
     string | null
   >(null);
+  const [editingBudgetId, setEditingBudgetId] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     categoryId: "",
@@ -117,6 +119,7 @@ export default function BudgetPage() {
     }).format(cents / 100);
 
   const handleAddBudgetToCategory = (categoryId: string) => {
+    setEditingBudgetId(null);
     setAddingBudgetForCategory(categoryId);
     setFormData({
       categoryId,
@@ -131,26 +134,78 @@ export default function BudgetPage() {
 
   const handleCancelBudgetForm = () => {
     setAddingBudgetForCategory(null);
+    setEditingBudgetId(null);
   };
 
   const handleSubmitBudget = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const budgetData: CreateBudgetInput = {
-        categoryId: formData.categoryId,
-        name: formData.name,
-        amountCents: Math.round(parseFloat(formData.amount) * 100),
-        currency: formData.currency as Currency,
-        period: formData.period,
-        startDate: new Date(formData.startDate),
-        alertThreshold: parseInt(formData.alertThreshold),
-      };
-      await budgetService.createBudget(budgetData);
+      if (editingBudgetId) {
+        // Update budget - send only changed fields
+        const updateData: UpdateBudgetInput = {
+          name: formData.name,
+          amountCents: Math.round(parseFloat(formData.amount) * 100),
+          currency: formData.currency as Currency,
+          period: formData.period,
+          startDate: new Date(formData.startDate),
+          alertThreshold: parseInt(formData.alertThreshold),
+        };
+        await budgetService.updateBudget(editingBudgetId, updateData);
+      } else {
+        // Create budget - send all required fields
+        const budgetData: CreateBudgetInput = {
+          categoryId: formData.categoryId,
+          name: formData.name,
+          amountCents: Math.round(parseFloat(formData.amount) * 100),
+          currency: formData.currency as Currency,
+          period: formData.period,
+          startDate: new Date(formData.startDate),
+          alertThreshold: parseInt(formData.alertThreshold),
+        };
+        await budgetService.createBudget(budgetData);
+      }
       setAddingBudgetForCategory(null);
+      setEditingBudgetId(null);
       await loadDashboard();
     } catch (err) {
       alert(
-        "Failed to create budget: " +
+        `Failed to ${editingBudgetId ? "update" : "create"} budget: ` +
+          (err instanceof Error ? err.message : "Unknown error")
+      );
+    }
+  };
+
+  const handleEditBudget = (
+    categoryId: string,
+    budget: BudgetDashboard["categories"][number]["budgets"][number]
+  ) => {
+    setEditingBudgetId(budget.budget.id);
+    setAddingBudgetForCategory(categoryId);
+    setFormData({
+      categoryId,
+      name: budget.budget.name,
+      amount: String(budget.budget.amountCents / 100),
+      currency: budget.budget.currency,
+      period: budget.budget.period,
+      startDate: budget.budget.startDate.split("T")[0],
+      alertThreshold: String(budget.budget.alertThreshold ?? 80),
+    });
+  };
+
+  const handleDeleteBudget = async (budgetId: string) => {
+    if (!budgetId) {
+      console.error("Delete budget called with no ID");
+      alert("Error: Budget ID is missing.");
+      return;
+    }
+    if (!confirm("Delete this budget? This cannot be undone.")) return;
+    try {
+      await budgetService.deleteBudget(budgetId);
+      await loadDashboard();
+    } catch (err) {
+      console.error("Delete budget error:", err);
+      alert(
+        "Failed to delete budget: " +
           (err instanceof Error ? err.message : "Unknown error")
       );
     }
@@ -295,6 +350,7 @@ export default function BudgetPage() {
           categories={categories}
           dashboard={dashboard}
           addingBudgetForCategory={addingBudgetForCategory}
+          editingBudgetId={editingBudgetId}
           formData={formData}
           setFormData={setFormData}
           handleSubmitBudget={handleSubmitBudget}
@@ -302,6 +358,8 @@ export default function BudgetPage() {
           handleDeleteCategory={handleDeleteCategory}
           handleCancelBudgetForm={handleCancelBudgetForm}
           formatMoney={formatMoney}
+          onEditBudget={handleEditBudget}
+          onDeleteBudget={handleDeleteBudget}
         />
       </section>
 
