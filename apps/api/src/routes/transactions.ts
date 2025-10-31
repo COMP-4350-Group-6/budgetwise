@@ -208,6 +208,93 @@ transactions.post("/transactions/parse-invoice", async (c) => {
   }
 });
 
+// POST /transactions/bulk-import - Import multiple transactions at once
+const BulkImportInput = z.object({
+  transactions: z.array(CreateTransactionInput),
+});
+
+transactions.post(
+  "/transactions/bulk-import",
+  zValidator("json", BulkImportInput),
+  async (c) => {
+    const input = c.req.valid("json");
+    const userId = c.get("userId") as string;
+    const { usecases } = container;
+
+    const results = {
+      success: [] as any[],
+      errors: [] as Array<{ index: number; error: string; data: any }>,
+    };
+
+    for (let i = 0; i < input.transactions.length; i++) {
+      const txInput = input.transactions[i];
+      try {
+        const tx = await usecases.addTransaction({
+          userId,
+          budgetId: txInput.budgetId,
+          categoryId: txInput.categoryId,
+          amountCents: txInput.amountCents,
+          note: txInput.note,
+          occurredAt: txInput.occurredAt,
+        });
+
+        // Auto-categorize if no category was provided and categorization service is available
+        let finalTx = tx;
+        if (!tx.props.categoryId && tx.props.note && usecases.categorizeTransaction) {
+          try {
+            const categorizationResult = await usecases.categorizeTransaction({
+              transactionId: tx.props.id,
+              userId,
+            });
+            
+            // If categorization succeeded, fetch the updated transaction from the repo
+            if (categorizationResult) {
+              const updatedTx = await container.repos.txRepo.getById(tx.props.id);
+              if (updatedTx) {
+                finalTx = updatedTx;
+                console.log(`[BulkImport] Transaction ${tx.props.id} categorized with categoryId: ${updatedTx.props.categoryId}`);
+              } else {
+                console.warn(`[BulkImport] Could not fetch updated transaction ${tx.props.id} after categorization`);
+              }
+            }
+          } catch (catError) {
+            // Log but don't fail the import if categorization fails
+            console.error(`Failed to categorize transaction ${tx.props.id}:`, catError);
+          }
+        }
+
+        const txResponse = {
+          ...finalTx.props,
+          occurredAt: finalTx.props.occurredAt.toISOString(),
+          createdAt: finalTx.props.createdAt.toISOString(),
+          updatedAt: finalTx.props.updatedAt.toISOString(),
+        };
+        
+        console.log(`[BulkImport] Returning transaction ${txResponse.id} with categoryId: ${txResponse.categoryId || 'null'}`);
+        
+        results.success.push(txResponse);
+      } catch (error) {
+        results.errors.push({
+          index: i,
+          error: error instanceof Error ? error.message : "Unknown error",
+          data: txInput,
+        });
+      }
+    }
+
+    return c.json(
+      {
+        imported: results.success.length,
+        failed: results.errors.length,
+        total: input.transactions.length,
+        success: results.success,
+        errors: results.errors,
+      },
+      results.errors.length === 0 ? 201 : 207 // 207 Multi-Status if some failed
+    );
+  }
+);
+
 // GET /transactions - list recent transactions for the authenticated user
 // Query params:
 //   - days?: number (default 30) - time window ending now

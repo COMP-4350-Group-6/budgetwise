@@ -10,7 +10,8 @@ import FinancialSummary from "@/components/transactions/financialSummary";
 import CategoryBreakdown from "@/components/transactions/categoryBreakdown";
 import { apiFetch } from "@/lib/apiClient";
 import { useRouter } from "next/navigation";
-import { Camera, Download, Plus,Pencil } from "lucide-react";
+import { Camera, Download, Plus, Pencil, Upload } from "lucide-react";
+import { parseCSV } from "@/lib/csvParser";
 
 export default function TransactionsPage() {
   const router = useRouter();
@@ -38,6 +39,18 @@ export default function TransactionsPage() {
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [parsingInvoice, setParsingInvoice] = useState(false);
   const [uploadMessage, setUploadMessage] = useState("");
+
+  // ===== CSV Import State =====
+  const [showCSVModal, setShowCSVModal] = useState(false);
+  const [csvFile, setCsvFile] = useState<File | null>(null);
+  const [parsedTransactions, setParsedTransactions] = useState<any[]>([]);
+  const [parseErrors, setParseErrors] = useState<Array<{ row: number; error: string }>>([]);
+  const [importing, setImporting] = useState(false);
+  const [importResult, setImportResult] = useState<{
+    imported: number;
+    failed: number;
+    errors: Array<{ index: number; error: string; data: any }>;
+  } | null>(null);
 
   // ===== Edit Modal State =====
   const [showEditModal, setShowEditModal] = useState(false);
@@ -293,6 +306,128 @@ export default function TransactionsPage() {
     }
   };
 
+  // ===== Handle CSV Import =====
+  const handleCSVFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setCsvFile(file);
+    setImportResult(null);
+    setParseErrors([]);
+
+    try {
+      const text = await file.text();
+      const result = parseCSV(text);
+      setParsedTransactions(result.transactions);
+      setParseErrors(result.errors);
+    } catch (error) {
+      setParseErrors([{ 
+        row: 0, 
+        error: error instanceof Error ? error.message : "Failed to parse CSV" 
+      }]);
+      setParsedTransactions([]);
+    }
+  };
+
+  const handleImportTransactions = async () => {
+    if (parsedTransactions.length === 0) return;
+
+    try {
+      setImporting(true);
+      setImportResult(null);
+      
+      // Don't map categories - app will auto-categorize based on description
+      // Just use the transactions as-is
+      const transactionsToImport = parsedTransactions;
+
+      const result = await transactionsService.bulkImportTransactions(transactionsToImport);
+      setImportResult(result);
+      
+      if (result.imported > 0) {
+        // Add imported transactions directly to state so they appear immediately
+        // Also reload to ensure we have the latest data
+        const newTransactions = result.success.map(tx => ({
+          ...tx,
+          occurredAt: tx.occurredAt,
+          createdAt: tx.createdAt,
+          updatedAt: tx.updatedAt,
+        }));
+        
+        console.log('[CSV Import] Imported transactions with categories:', newTransactions.map(tx => ({
+          id: tx.id,
+          note: tx.note,
+          categoryId: tx.categoryId || 'null'
+        })));
+        
+        // Update state with categorized transactions
+        setTransactions((prev) => {
+          // Create a map of new transactions by ID for efficient lookup
+          const newTxMap = new Map(newTransactions.map(tx => [tx.id, tx]));
+          
+          // Merge: use new transactions if they exist, otherwise keep old ones
+          const merged = [
+            ...newTransactions, // New imported transactions (with categories)
+            ...prev.filter(oldTx => !newTxMap.has(oldTx.id)) // Old transactions that weren't imported
+          ];
+          
+          // Deduplicate and sort
+          const unique = merged.filter((tx, index, self) => 
+            index === self.findIndex(t => t.id === tx.id)
+          );
+          return unique.sort(
+            (a, b) => new Date(b.occurredAt).getTime() - new Date(a.occurredAt).getTime()
+          );
+        });
+        
+        // Expand date filter to show imported transactions if they're outside current range
+        const now = Date.now();
+        const allImportedDates = newTransactions.map(tx => new Date(tx.occurredAt).getTime());
+        const oldestImported = Math.min(...allImportedDates);
+        const newestImported = Math.max(...allImportedDates);
+        const daysSinceOldest = Math.ceil((now - oldestImported) / (24 * 60 * 60 * 1000));
+        const daysUntilNewest = Math.ceil((newestImported - now) / (24 * 60 * 60 * 1000));
+        
+        // Check if any imported transactions are outside the current filter
+        const hasFutureDates = newestImported > now;
+        const hasOldDates = daysSinceOldest > 30;
+        
+        if (hasFutureDates || hasOldDates || dateRange === "30") {
+          // Use custom range to include all imported transactions
+          const oldestDate = new Date(Math.min(oldestImported, now));
+          const newestDate = new Date(Math.max(newestImported, now));
+          setDateRange("custom");
+          setCustomStart(oldestDate.toISOString().split("T")[0]);
+          setCustomEnd(newestDate.toISOString().split("T")[0]);
+        }
+        
+        // Reload after a short delay to ensure categorization has completed and persisted
+        setTimeout(async () => {
+          await loadTransactions();
+        }, 500);
+      }
+    } catch (error) {
+      console.error("Import failed:", error);
+      setImportResult({
+        imported: 0,
+        failed: parsedTransactions.length,
+        errors: [{
+          index: 0,
+          error: error instanceof Error ? error.message : "Import failed",
+          data: null
+        }]
+      });
+    } finally {
+      setImporting(false);
+    }
+  };
+
+  const resetCSVImport = () => {
+    setCsvFile(null);
+    setParsedTransactions([]);
+    setParseErrors([]);
+    setImportResult(null);
+  };
+
   // ===== Handle Invoice Upload =====
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -373,9 +508,9 @@ export default function TransactionsPage() {
     else if (dateRange === "30") withinRange = txDate >= nowMs - 30 * 24 * 60 * 60 * 1000;
     else if (dateRange === "90") withinRange = txDate >= nowMs - 90 * 24 * 60 * 60 * 1000;
     else if (dateRange === "custom" && customStart && customEnd) {
-      withinRange =
-        txDate >= new Date(customStart).getTime() &&
-        txDate <= new Date(customEnd).getTime();
+      const startMs = new Date(customStart).getTime();
+      const endMs = new Date(customEnd + 'T23:59:59').getTime(); // Include entire end date
+      withinRange = txDate >= startMs && txDate <= endMs;
     }
 
     return matchesCategory && matchesSearch && withinRange;
@@ -473,6 +608,15 @@ export default function TransactionsPage() {
         <div className={styles.headerRight}>
           <button className={`${styles.btn} ${styles.btnSecondary}`} onClick={handleExport}>
             <Download size={16} style={{ marginRight: 6 }} /> Export CSV
+          </button>
+          <button
+            className={`${styles.btn} ${styles.btnSecondary}`}
+            onClick={() => {
+              resetCSVImport();
+              setShowCSVModal(true);
+            }}
+          >
+            <Upload size={16} style={{ marginRight: 6 }} /> Import CSV
           </button>
           <button
             className={`${styles.btn} ${styles.btnSecondary}`}
@@ -952,6 +1096,146 @@ export default function TransactionsPage() {
               >
                 {parsingInvoice ? "Parsing..." : "Parse Invoice"}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ===== CSV IMPORT MODAL ===== */}
+      {showCSVModal && (
+        <div className={styles.modal} onClick={() => {
+          if (!importing) {
+            setShowCSVModal(false);
+            resetCSVImport();
+          }
+        }}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()} style={{ maxWidth: '800px', maxHeight: '90vh', overflow: 'auto' }}>
+            <div className={styles.modalHeader}>
+              <h2 className={styles.modalTitle}>Import Transactions from CSV</h2>
+              <button
+                className={styles.closeBtn}
+                onClick={() => {
+                  if (!importing) {
+                    setShowCSVModal(false);
+                    resetCSVImport();
+                  }
+                }}
+                disabled={importing}
+              >
+                ✕
+              </button>
+            </div>
+
+            <div style={{ marginBottom: '20px' }}>
+              <p style={{ marginBottom: '10px', fontSize: '14px', color: '#666' }}>
+                Upload a CSV file with transactions. Required columns: <strong>amount</strong> (or price/total/cost), <strong>date</strong> (or occurredAt), <strong>description</strong> (purchase name - matches manual entry form).
+                Optional: notes (additional notes). Categories are automatically assigned by AI based on the description.
+              </p>
+              <input
+                type="file"
+                accept=".csv,.txt"
+                onChange={handleCSVFileSelect}
+                disabled={importing}
+                style={{ marginBottom: '10px' }}
+              />
+              {csvFile && (
+                <p style={{ fontSize: '12px', color: '#666' }}>
+                  Selected: {csvFile.name}
+                </p>
+              )}
+            </div>
+
+            {parseErrors.length > 0 && (
+              <div style={{ marginBottom: '20px', padding: '10px', backgroundColor: '#fee', borderRadius: '4px' }}>
+                <strong style={{ color: '#c33' }}>Parse Errors ({parseErrors.length}):</strong>
+                <ul style={{ marginTop: '5px', paddingLeft: '20px', fontSize: '12px' }}>
+                  {parseErrors.slice(0, 10).map((err, idx) => (
+                    <li key={idx}>Row {err.row}: {err.error}</li>
+                  ))}
+                  {parseErrors.length > 10 && <li>... and {parseErrors.length - 10} more errors</li>}
+                </ul>
+              </div>
+            )}
+
+            {parsedTransactions.length > 0 && (
+              <div style={{ marginBottom: '20px' }}>
+                <strong>Preview ({parsedTransactions.length} transactions ready to import):</strong>
+                <div style={{ maxHeight: '300px', overflow: 'auto', marginTop: '10px', border: '1px solid #ddd', borderRadius: '4px' }}>
+                  <table style={{ width: '100%', fontSize: '12px', borderCollapse: 'collapse' }}>
+                    <thead style={{ backgroundColor: '#f5f5f5', position: 'sticky', top: 0 }}>
+                      <tr>
+                        <th style={{ padding: '8px', textAlign: 'left', borderBottom: '1px solid #ddd' }}>Date</th>
+                        <th style={{ padding: '8px', textAlign: 'left', borderBottom: '1px solid #ddd' }}>Amount</th>
+                        <th style={{ padding: '8px', textAlign: 'left', borderBottom: '1px solid #ddd' }}>Note</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {parsedTransactions.slice(0, 20).map((tx, idx) => (
+                        <tr key={idx} style={{ borderBottom: '1px solid #eee' }}>
+                          <td style={{ padding: '8px' }}>{tx.occurredAt instanceof Date ? tx.occurredAt.toLocaleDateString() : new Date(tx.occurredAt).toLocaleDateString()}</td>
+                          <td style={{ padding: '8px' }}>${(tx.amountCents / 100).toFixed(2)}</td>
+                          <td style={{ padding: '8px' }}>{tx.note || '-'}</td>
+                        </tr>
+                      ))}
+                      {parsedTransactions.length > 20 && (
+                        <tr>
+                          <td colSpan={3} style={{ padding: '8px', textAlign: 'center', color: '#666' }}>
+                            ... and {parsedTransactions.length - 20} more
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {importResult && (
+              <div style={{ 
+                marginBottom: '20px', 
+                padding: '10px', 
+                backgroundColor: importResult.failed === 0 ? '#efe' : '#ffe', 
+                borderRadius: '4px' 
+              }}>
+                <strong>Import Results:</strong>
+                <ul style={{ marginTop: '5px', paddingLeft: '20px', fontSize: '12px' }}>
+                  <li>✓ Successfully imported: {importResult.imported}</li>
+                  {importResult.failed > 0 && (
+                    <>
+                      <li>✗ Failed: {importResult.failed}</li>
+                      {importResult.errors.slice(0, 5).map((err, idx) => (
+                        <li key={idx}>Row {err.index + 1}: {err.error}</li>
+                      ))}
+                    </>
+                  )}
+                </ul>
+              </div>
+            )}
+
+            <div className={styles.formActions}>
+              <button
+                type="button"
+                className={`${styles.btn} ${styles.btnSecondary}`}
+                onClick={() => {
+                  if (!importing) {
+                    setShowCSVModal(false);
+                    resetCSVImport();
+                  }
+                }}
+                disabled={importing}
+              >
+                {importResult ? 'Close' : 'Cancel'}
+              </button>
+              {parsedTransactions.length > 0 && !importResult && (
+                <button
+                  type="button"
+                  className={`${styles.btn} ${styles.btnPrimary}`}
+                  onClick={handleImportTransactions}
+                  disabled={importing || parsedTransactions.length === 0}
+                >
+                  {importing ? 'Importing...' : `Import ${parsedTransactions.length} Transactions`}
+                </button>
+              )}
             </div>
           </div>
         </div>
