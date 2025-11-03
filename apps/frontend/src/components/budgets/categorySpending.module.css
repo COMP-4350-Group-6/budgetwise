@@ -14,28 +14,30 @@
   gap: 20px;
 }
 
+/* ====== CATEGORY CARD ====== */
 .card {
   background: #fff;
   border-radius: 16px;
   padding: 20px;
   border: 1px solid #eaeaea;
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.03);
-  transition: all 0.2s ease;
+  transition: all 0.25s ease;
 }
 
 .card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.05);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
 }
 
 .activeCard {
-  border-left: 4px solid #2f5f4d;
+  border-left: 4px solid #4e7c66;
 }
 
 .inactiveCard {
   opacity: 0.9;
 }
 
+/* ====== HEADER ====== */
 .cardHeader {
   display: flex;
   justify-content: space-between;
@@ -90,23 +92,34 @@
   font-size: 0.9rem;
 }
 
-.statText {
-  color: #2e2e2e;
-  font-weight: 500;
-  margin-bottom: 8px;
+/* ====== BUDGET DETAILS ====== */
+.budgetDetails {
+  margin-top: 12px;
 }
 
-.progressBar,
-.progressBarSmall {
+.budgetRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  margin-bottom: 4px;
+  color: #2e2e2e;
+}
+
+.redText {
+  color: #b91c1c;
+}
+
+.greenText {
+  color: #2f5f4d;
+}
+
+/* ====== PROGRESS BAR ====== */
+.progressBar {
   background: #f3f3f3;
   border-radius: 8px;
   height: 6px;
   overflow: hidden;
-  margin-top: 4px;
-}
-
-.progressBarSmall {
-  height: 5px;
+  margin-top: 6px;
 }
 
 .progressFill {
@@ -127,34 +140,8 @@
   background: #b91c1c;
 }
 
-.budgetList {
-  margin-top: 12px;
-  background: #f9faf9;
-  border-radius: 10px;
-  padding: 12px;
-}
-
-.budgetItem {
-  margin-bottom: 10px;
-}
-
-.budgetMeta {
-  font-weight: 600;
-}
-
-.budgetAmounts {
-  font-size: 0.9rem;
-  color: #444;
-}
-
-.noBudgetText {
-  color: #888;
-  font-size: 0.9rem;
-  margin-top: 8px;
-}
-
-.addBudgetForm,
-.subcategoryForm {
+/* ====== FORMS ====== */
+.addBudgetForm {
   margin-top: 12px;
   background: #fafafa;
   padding: 12px;
@@ -195,26 +182,11 @@
   border: 1px solid #ddd;
 }
 
-.subcategoryList {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 10px;
-}
-
-.subcategoryItem {
-  background: #e7f0eb;
-  color: #2f5f4d;
-  padding: 5px 12px;
-  border-radius: 20px;
-  cursor: pointer;
-  font-size: 0.85rem;
-  font-weight: 600;
-}
-
-.activeSubcategory {
-  background: #2f5f4d;
-  color: #fff;
+/* ====== EMPTY STATE ====== */
+.noBudgetText {
+  color: #888;
+  font-size: 0.9rem;
+  margin-top: 8px;
 }
 
 .showMoreBtn {

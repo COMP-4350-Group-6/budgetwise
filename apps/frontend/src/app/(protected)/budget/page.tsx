@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { budgetService, categoryService } from "@/services/budgetService";
 import type { BudgetDashboard, Category } from "@/services/budgetService";
 import CategorySpendingSection from "@/components/budgets/categorySpending";
+import SavingsGoal from "@/components/budgets/savingsGoal";
 import { CreateBudgetInput, Currency } from "@budget/schemas";
 import { transactionsService } from "@/services/transactionsService";
 
@@ -22,7 +23,6 @@ export default function BudgetPage() {
 
   const [formData, setFormData] = useState({
     categoryId: "",
-    name: "",
     amount: "",
     currency: "CAD",
     period: "MONTHLY" as "DAILY" | "WEEKLY" | "MONTHLY" | "YEARLY",
@@ -58,7 +58,6 @@ export default function BudgetPage() {
         budgetService.getDashboard(),
         transactionsService.listTransactions(),
       ]);
-
       const now = new Date();
       const month = now.getMonth();
       const year = now.getFullYear();
@@ -75,17 +74,20 @@ export default function BudgetPage() {
 
       const categorySpentMap: Record<string, number> = {};
       for (const t of monthlyTx) {
-        if (t.categoryId) {
-          categorySpentMap[t.categoryId] =
-            (categorySpentMap[t.categoryId] || 0) + t.amountCents;
-        }
+        const catId = t.categoryId;
+        if (!catId) continue;
+        categorySpentMap[catId] =
+          (categorySpentMap[catId] || 0) + t.amountCents;
       }
 
       const updatedCats = dash.categories.map((c) => {
-        const spent = categorySpentMap[c.categoryId] || 0;
-        const remaining = c.totalBudgetCents - spent;
+        const catKey = c.categoryId;
+        const spent = categorySpentMap[catKey] || 0;
+
+        const remaining = Math.max(c.totalBudgetCents - spent, 0);
         const percent =
           c.totalBudgetCents > 0 ? (spent / c.totalBudgetCents) * 100 : 0;
+
         return {
           ...c,
           totalSpentCents: spent,
@@ -120,12 +122,11 @@ export default function BudgetPage() {
     setAddingBudgetForCategory(categoryId);
     setFormData({
       categoryId,
-      name: "",
       amount: "",
       currency: "CAD",
       period: "MONTHLY",
       startDate: new Date().toISOString().split("T")[0],
-      alertThreshold: "80",
+      alertThreshold: "",
     });
   };
 
@@ -136,23 +137,35 @@ export default function BudgetPage() {
   const handleSubmitBudget = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const cat = categories.find((c) => c.id === formData.categoryId);
+      const hiddenName = cat ? `${cat.name} Budget` : "Budget"; // not shown to users
+
       const budgetData: CreateBudgetInput = {
         categoryId: formData.categoryId,
-        name: formData.name,
-        amountCents: Math.round(parseFloat(formData.amount) * 100),
+        name: hiddenName,
+        amountCents: Math.round(parseFloat(formData.amount || "0") * 100),
         currency: formData.currency as Currency,
         period: formData.period,
         startDate: new Date(formData.startDate),
         alertThreshold: parseInt(formData.alertThreshold),
       };
+
       await budgetService.createBudget(budgetData);
+
       setAddingBudgetForCategory(null);
+      setFormData({
+        categoryId: "",
+        amount: "",
+        currency: "CAD",
+        period: "MONTHLY",
+        startDate: new Date().toISOString().split("T")[0],
+        alertThreshold: "80",
+      });
+
       await loadDashboard();
     } catch (err) {
-      alert(
-        "Failed to create budget: " +
-          (err instanceof Error ? err.message : "Unknown error")
-      );
+      console.error("Budget creation failed:", err);
+      alert("Failed to create budget. Please try again.");
     }
   };
 
@@ -180,14 +193,15 @@ export default function BudgetPage() {
   const handleCreateCategory = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await categoryService.createCategory({
+      const newCategory = await categoryService.createCategory({
         name: categoryFormData.name,
-        description: categoryFormData.description,
+        description: categoryFormData.description || "",
         icon: categoryFormData.icon || "",
         color: categoryFormData.color || "#4E7C66",
         isActive: true,
       });
 
+      setCategories((prev) => [newCategory, ...prev]); // add to top
       setShowCategoryForm(false);
       setCategoryFormData({
         name: "",
@@ -196,10 +210,9 @@ export default function BudgetPage() {
         color: "#4E7C66",
         parentId: "",
       });
-      await loadDashboard();
     } catch (err) {
       console.error("Failed to create category:", err);
-      alert("Error creating category.");
+      alert("Error creating category. Please try again.");
     }
   };
 
@@ -249,33 +262,19 @@ export default function BudgetPage() {
             : "No spending yet this month"}
         </p>
       </section>
-      {/* ===== GOAL SETTING SECTION ===== */}
-      <section className={`${styles.card} ${styles.goalCardHighlight}`}>
-        <div className={styles.actionRow}>
-          <div>
-            <h3 className={styles.actionTitle}>Savings & Goal Planning</h3>
-            <p className={styles.actionText}>
-              Plan future purchases or milestones by setting personalized goals.
-            </p>
-          </div>
-          <div className={styles.actionButtons}>
-            <button
-              className={`${styles.btn} ${styles.btnSecondary}`}
-              onClick={() => router.push("/goals")}
-            >
-              Set Goal
-            </button>
-          </div>
-        </div>
+
+      {/* ===== SAVINGS Goal SECTION ===== */}
+      <section className={styles.card}>
+        <SavingsGoal />
       </section>
+
       {/* ===== CATEGORY MANAGEMENT ===== */}
       <section className={styles.card}>
         <div className={styles.actionRow}>
           <div>
             <h3 className={styles.actionTitle}>Manage Categories</h3>
             <p className={styles.actionText}>
-              Add new categories or organize subcategories to fine-tune
-              tracking.
+              Add and manage budget categories for tracking spending.
             </p>
           </div>
           <div className={styles.actionButtons}>
@@ -357,29 +356,6 @@ export default function BudgetPage() {
                   }
                   placeholder="Optional"
                 />
-              </div>
-
-              <div className={styles.formGroup}>
-                <label className={styles.formLabel}>
-                  Parent Category (optional)
-                </label>
-                <select
-                  className={styles.formInput}
-                  value={categoryFormData.parentId || ""}
-                  onChange={(e) =>
-                    setCategoryFormData({
-                      ...categoryFormData,
-                      parentId: e.target.value || "",
-                    })
-                  }
-                >
-                  <option value="">None</option>
-                  {categories.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name}
-                    </option>
-                  ))}
-                </select>
               </div>
 
               <div className={styles.formGroup}>
