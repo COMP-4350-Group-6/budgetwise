@@ -1,9 +1,16 @@
 # Example environment variables for local development
-# Copy this file to .dev.vars and fill in your actual values
-# Get the JWT secret from: https://supabase.com/dashboard/project/YOUR_PROJECT/settings/api
+# Copy this file to .dev.vars and fill in your values
 
-SUPABASE_JWT_SECRET=your-actual-jwt-secret-here
+# LOCAL SUPABASE
+# When you run `supabase start`, copy these values from the output:
+SUPABASE_JWT_SECRET=<copy-from-supabase-start-output>
+SUPABASE_SERVICE_ROLE_KEY=<copy-from-supabase-start-output>
 
-# OpenRouter API key for auto-categorization feature
-# Get your API key from: https://openrouter.ai/keys
-OPENROUTER_API_KEY=your-openrouter-api-key-here
+# CLOUD SUPABASE (when not using local)
+# Get these from: https://supabase.com/dashboard/project/YOUR_PROJECT/settings/api
+# SUPABASE_JWT_SECRET=<your-cloud-jwt-secret>
+# SUPABASE_SERVICE_ROLE_KEY=<your-cloud-service-role-key>
+
+# OPTIONAL: AI features
+# Get from: https://openrouter.ai/keys
+OPENROUTER_API_KEY=<your-openrouter-key-or-leave-empty>

@@ -48,6 +48,8 @@ export function makeContainer(env?: Env) {
   const supabaseServiceRoleKey = env?.SUPABASE_SERVICE_ROLE_KEY;
 
   if (supabaseUrl && supabaseServiceRoleKey) {
+    console.log(`[Container] Using Supabase at ${supabaseUrl}`);
+    
     const supabaseClient = makeSupabaseServiceClient({
       supabaseUrl,
       serviceRoleKey: supabaseServiceRoleKey,
@@ -57,6 +59,8 @@ export function makeContainer(env?: Env) {
     budgetsRepo = makeSupabaseBudgetsRepo({ client: supabaseClient });
     txRepo = makeSupabaseTransactionsRepo({ client: supabaseClient });
     id = makeUuid();
+  } else {
+    console.log('[Container] Using in-memory repositories (no Supabase configured)');
   }
   
   // Optional AI services (only if API key is provided)

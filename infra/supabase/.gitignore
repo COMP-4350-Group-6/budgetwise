@@ -1,0 +1,6 @@
+# Supabase local development files
+.branches
+.temp
+.env
+.env.local
+postgres_data/

@@ -9,7 +9,11 @@
   // Date to use for Workers Runtime compatibility
   "compatibility_date": "2025-05-05",
   "vars": {
-    "SUPABASE_URL": "https://yikylzhrskotiqnaitwz.supabase.co"
+    // Local development: Use local Supabase instance
+    "SUPABASE_URL": "http://127.0.0.1:54321"
+    
+    // Production/Remote: Uncomment and use your hosted Supabase URL
+    // "SUPABASE_URL": "https://yikylzhrskotiqnaitwz.supabase.co"
   }
   // Note: SUPABASE_JWT_SECRET is loaded from .dev.vars (local) or Cloudflare secrets (production)
 }
