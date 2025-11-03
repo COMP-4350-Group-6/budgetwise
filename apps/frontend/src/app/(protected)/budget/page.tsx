@@ -10,6 +10,39 @@ import SavingsGoal from "@/components/budgets/savingsGoal";
 import { CreateBudgetInput, Currency } from "@budget/schemas";
 import { transactionsService } from "@/services/transactionsService";
 import type { UpdateBudgetInput } from "@/services/budgetService";
+import {
+  Home,
+  Building2,
+  Car,
+  Bus,
+  Bike,
+  Fuel,
+  Heart,
+  Pill,
+  Activity,
+  UtensilsCrossed,
+  Coffee,
+  ShoppingCart,
+  Film,
+  Gamepad2,
+  Music,
+  Plane,
+  Palmtree,
+  PhoneCall,
+  Wifi,
+  Tv,
+  ShoppingBag,
+  Shirt,
+  Lightbulb,
+  Droplets,
+  Zap,
+  Wallet,
+  DollarSign,
+  PiggyBank,
+  GraduationCap,
+  BookOpen,
+  type LucideIcon,
+} from "lucide-react";
 
 export default function BudgetPage() {
   const [dashboard, setDashboard] = useState<BudgetDashboard | null>(null);
@@ -36,10 +69,116 @@ export default function BudgetPage() {
   const [categoryFormData, setCategoryFormData] = useState({
     name: "",
     description: "",
-    icon: "",
+    icon: "Wallet",
     color: "#4E7C66",
     parentId: "",
   });
+
+  const [showIconPicker, setShowIconPicker] = useState(false);
+
+  const iconGroups: { category: string; icons: { name: string; Icon: LucideIcon }[] }[] = [
+    {
+      category: "Housing",
+      icons: [
+        { name: "Home", Icon: Home },
+        { name: "Building2", Icon: Building2 },
+      ],
+    },
+    {
+      category: "Transportation",
+      icons: [
+        { name: "Car", Icon: Car },
+        { name: "Bus", Icon: Bus },
+        { name: "Bike", Icon: Bike },
+        { name: "Fuel", Icon: Fuel },
+      ],
+    },
+    {
+      category: "Food & Dining",
+      icons: [
+        { name: "UtensilsCrossed", Icon: UtensilsCrossed },
+        { name: "Coffee", Icon: Coffee },
+        { name: "ShoppingCart", Icon: ShoppingCart },
+      ],
+    },
+    {
+      category: "Entertainment",
+      icons: [
+        { name: "Film", Icon: Film },
+        { name: "Gamepad2", Icon: Gamepad2 },
+        { name: "Music", Icon: Music },
+      ],
+    },
+    {
+      category: "Travel",
+      icons: [
+        { name: "Plane", Icon: Plane },
+        { name: "Palmtree", Icon: Palmtree },
+      ],
+    },
+    {
+      category: "Healthcare",
+      icons: [
+        { name: "Heart", Icon: Heart },
+        { name: "Pill", Icon: Pill },
+        { name: "Activity", Icon: Activity },
+      ],
+    },
+    {
+      category: "Utilities",
+      icons: [
+        { name: "Lightbulb", Icon: Lightbulb },
+        { name: "Droplets", Icon: Droplets },
+        { name: "Zap", Icon: Zap },
+      ],
+    },
+    {
+      category: "Subscriptions",
+      icons: [
+        { name: "PhoneCall", Icon: PhoneCall },
+        { name: "Wifi", Icon: Wifi },
+        { name: "Tv", Icon: Tv },
+      ],
+    },
+    {
+      category: "Shopping",
+      icons: [
+        { name: "ShoppingBag", Icon: ShoppingBag },
+        { name: "Shirt", Icon: Shirt },
+      ],
+    },
+    {
+      category: "Finance",
+      icons: [
+        { name: "Wallet", Icon: Wallet },
+        { name: "DollarSign", Icon: DollarSign },
+        { name: "PiggyBank", Icon: PiggyBank },
+      ],
+    },
+    {
+      category: "Education",
+      icons: [
+        { name: "GraduationCap", Icon: GraduationCap },
+        { name: "BookOpen", Icon: BookOpen },
+      ],
+    },
+  ];
+
+  const getAllIcons = () => {
+    const allIcons: { name: string; Icon: LucideIcon }[] = [];
+    iconGroups.forEach(group => {
+      allIcons.push(...group.icons);
+    });
+    return allIcons;
+  };
+
+  const getIconComponent = (iconName: string) => {
+    const allIcons = getAllIcons();
+    const option = allIcons.find(opt => opt.name === iconName);
+    return option ? option.Icon : Wallet;
+  };
+
+  const SelectedIcon = getIconComponent(categoryFormData.icon);
 
   useEffect(() => {
     loadDashboard();
@@ -405,6 +544,48 @@ export default function BudgetPage() {
                   }
                   placeholder="Optional"
                 />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label className={styles.formLabel}>Icon</label>
+                <div style={{ position: 'relative' }}>
+                  <button
+                    type="button"
+                    className={styles.emojiButton}
+                    onClick={() => setShowIconPicker(!showIconPicker)}
+                  >
+                    <SelectedIcon size={20} />
+                    <span style={{ marginLeft: '8px', fontSize: '14px' }}>Choose icon</span>
+                  </button>
+                  {showIconPicker && (
+                    <div className={styles.iconPickerDropdown}>
+                      {iconGroups.map((group) => (
+                        <div key={group.category} className={styles.iconGroup}>
+                          <div className={styles.iconGroupLabel}>{group.category}</div>
+                          <div className={styles.iconGroupGrid}>
+                            {group.icons.map(({ name, Icon }) => (
+                              <button
+                                key={name}
+                                type="button"
+                                className={styles.iconOption}
+                                onClick={() => {
+                                  setCategoryFormData({
+                                    ...categoryFormData,
+                                    icon: name,
+                                  });
+                                  setShowIconPicker(false);
+                                }}
+                                title={name}
+                              >
+                                <Icon size={18} />
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className={styles.formGroup}>

@@ -214,6 +214,89 @@
   gap: 0.6rem;
   margin-top: 1rem;
 }
+
+/* =============================
+   EMOJI PICKER
+   ============================= */
+.emojiButton {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  background: #fafafa;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  text-align: left;
+  transition: all 0.2s ease;
+}
+
+.emojiButton:hover {
+  border-color: #4E7C66;
+  background: #fff;
+}
+
+.iconPickerDropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 8px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.iconGroup {
+  margin-bottom: 16px;
+}
+
+.iconGroup:last-child {
+  margin-bottom: 0;
+}
+
+.iconGroupLabel {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6a6a5a;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.iconGroupGrid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+}
+
+.iconOption {
+  width: 40px;
+  height: 40px;
+  border: 1px solid #eee;
+  background: #fafafa;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  color: #4E7C66;
+}
+
+.iconOption:hover {
+  background: #4E7C66;
+  border-color: #4E7C66;
+  color: white;
+  transform: scale(1.05);
+}
+
 /* Highlighted variant for goal card */
 .goalCardHighlight {
   background: #fffefb;
