@@ -1,0 +1,51 @@
+.card {
+  composes: card from "../../app/(protected)/home/home.module.css";
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+}
+
+.subtitle {
+  color: var(--text-dim);
+  font-size: 0.75rem;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  margin-right: 0.5rem;
+}
+
+.name {
+  flex: 1;
+  font-size: 0.8rem;
+  color: var(--text-main);
+}
+
+.value {
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.empty {
+  text-align: center;
+  color: var(--text-dim);
+  font-size: 0.8rem;
+  padding: 2rem 0;
+}
