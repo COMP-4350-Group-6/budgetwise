@@ -26,10 +26,11 @@ export function makeParseInvoice(deps: {
 
     console.log('[ParseInvoice] Calling invoice parser...');
 
-    // Parse the invoice image
+    // Parse the invoice image - Pass userId for LLM call tracking
     const result = await deps.invoiceParser.parseInvoice(
       input.imageBase64,
-      categoryInfo
+      categoryInfo,
+      input.userId  // Enable LLM call tracking
     );
 
     if (!result) {

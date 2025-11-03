@@ -24,11 +24,13 @@ export interface CategorizationPort {
    * @param note Transaction description
    * @param amountCents Transaction amount in cents
    * @param categories Available categories for the user
+   * @param userId Optional user ID for LLM call tracking
    * @returns The categorization result with reasoning, or null if uncertain
    */
   categorizeTransaction(
     note: string | undefined,
     amountCents: number,
-    categories: CategoryInfo[]
+    categories: CategoryInfo[],
+    userId?: string
   ): Promise<CategorizationResult | null>;
 }

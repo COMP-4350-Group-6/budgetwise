@@ -9,8 +9,8 @@ export const transactions = new Hono<{ Variables: { userId: string } }>();
 // Accept a minimal client payload; userId/id/timestamps are server-derived.
 // budgetId is optional to allow unbudgeted transactions.
 const CreateTransactionInput = z.object({
-  budgetId: z.string().ulid().optional(),
-  categoryId: z.string().ulid().optional(),
+  budgetId: z.string().uuid().optional(),
+  categoryId: z.string().uuid().optional(),
   amountCents: z.number().int(),
   note: z.string().max(280).optional(),
   occurredAt: z.coerce.date(),
@@ -18,8 +18,8 @@ const CreateTransactionInput = z.object({
 
 const UpdateTransactionInput = z
   .object({
-    budgetId: z.string().ulid().optional(),
-    categoryId: z.string().ulid().optional(),
+    budgetId: z.string().uuid().optional(),
+    categoryId: z.string().uuid().optional(),
     amountCents: z.number().int().optional(),
     note: z.string().max(280).optional(),
     occurredAt: z.coerce.date().optional(),
@@ -41,11 +41,21 @@ transactions.use("*", authMiddleware);
 
 transactions.post(
   "/transactions",
-  zValidator("json", CreateTransactionInput),
+  zValidator("json", CreateTransactionInput, (result, c) => {
+    if (!result.success) {
+      console.error('[CreateTransaction] Validation failed:', JSON.stringify(result.error.issues, null, 2));
+      return c.json({
+        error: "Validation failed",
+        details: result.error.issues
+      }, 400);
+    }
+  }),
   async (c) => {
     const input = c.req.valid("json");
     const userId = c.get("userId") as string;
     const { usecases } = container;
+    
+    console.log('[CreateTransaction] Creating transaction with input:', JSON.stringify(input, null, 2));
 
     const tx = await usecases.addTransaction({
       userId,

@@ -33,6 +33,12 @@ export default function TransactionsPage() {
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [parsedInvoiceItems, setParsedInvoiceItems] = useState<Array<{ description: string; quantity?: number; price?: number; categoryId?: string }>>([]);
+  const [showItemsTable, setShowItemsTable] = useState(false);
+  const [showEditItemsModal, setShowEditItemsModal] = useState(false);
+  const [editingItems, setEditingItems] = useState<Array<{ description: string; quantity?: number; price?: number; categoryId?: string }>>([]);
+  const [editingItemIndex, setEditingItemIndex] = useState<number | null>(null);
+  const [itemEditForm, setItemEditForm] = useState({ description: '', quantity: '', price: '', categoryId: '' });
 
   // ===== Invoice Upload State =====
   const [showUploadModal, setShowUploadModal] = useState(false);
@@ -218,6 +224,8 @@ export default function TransactionsPage() {
       setNote("");
       setSelectedCategoryId("");
       setSelectedBudgetId("");
+      setParsedInvoiceItems([]);
+      setShowItemsTable(false);
       setShowAddModal(false);
 
       // Auto-categorize if needed
@@ -469,16 +477,24 @@ export default function TransactionsPage() {
         return;
       }
 
-      setDescription(parsed.merchant);
+      // Use the AI-generated description as the note (includes merchant and items)
+      setDescription(parsed.description || parsed.merchant);
       setAmount((parsed.total / 100).toFixed(2));
-      setNote(parsed.invoiceNumber ? `Invoice #${parsed.invoiceNumber}` : "");
+      setNote(parsed.description || parsed.merchant);
       setDate(parsed.date);
 
+      // Store parsed items for display (default closed)
+      if (parsed.items && parsed.items.length > 0) {
+        setParsedInvoiceItems(parsed.items);
+        setShowItemsTable(false); // Default closed
+      } else {
+        setParsedInvoiceItems([]);
+        setShowItemsTable(false);
+      }
+
+      // suggestedCategory is now the category ID (UUID), not the name
       if (parsed.suggestedCategory) {
-        const matchedCat = categories.find(
-          (c) => c.name.toLowerCase() === parsed.suggestedCategory?.toLowerCase()
-        );
-        if (matchedCat) setSelectedCategoryId(matchedCat.id);
+        setSelectedCategoryId(parsed.suggestedCategory);
       }
 
       setShowUploadModal(false);
@@ -1011,6 +1027,69 @@ export default function TransactionsPage() {
                 />
               </div>
 
+              {/* Invoice Items Table */}
+              {parsedInvoiceItems.length > 0 && (
+                <div className={styles.formGroup}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                    <button
+                      type="button"
+                      onClick={() => setShowItemsTable(!showItemsTable)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '8px',
+                        background: 'transparent',
+                        border: 'none',
+                        cursor: 'pointer',
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        color: '#333'
+                      }}
+                    >
+                      <span style={{ transform: showItemsTable ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}>▶</span>
+                      Invoice Items ({parsedInvoiceItems.length})
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingItems([...parsedInvoiceItems]);
+                        setShowEditItemsModal(true);
+                      }}
+                      className={`${styles.btn} ${styles.btnSecondary}`}
+                      style={{ fontSize: '13px', padding: '6px 12px' }}
+                    >
+                      ✏️ Edit Items
+                    </button>
+                  </div>
+                  
+                  {showItemsTable && (
+                    <div style={{ marginTop: '12px', border: '1px solid #e0e0e0', borderRadius: '8px', overflow: 'hidden' }}>
+                      <table style={{ width: '100%', fontSize: '13px', borderCollapse: 'collapse' }}>
+                        <thead style={{ backgroundColor: '#f5f5f5' }}>
+                          <tr>
+                            <th style={{ padding: '10px', textAlign: 'left', borderBottom: '1px solid #e0e0e0', fontWeight: '600' }}>Item</th>
+                            <th style={{ padding: '10px', textAlign: 'center', borderBottom: '1px solid #e0e0e0', fontWeight: '600', width: '80px' }}>Qty</th>
+                            <th style={{ padding: '10px', textAlign: 'right', borderBottom: '1px solid #e0e0e0', fontWeight: '600', width: '100px' }}>Price</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {parsedInvoiceItems.map((item, idx) => (
+                            <tr key={idx} style={{ borderBottom: idx < parsedInvoiceItems.length - 1 ? '1px solid #f0f0f0' : 'none' }}>
+                              <td style={{ padding: '10px' }}>{item.description}</td>
+                              <td style={{ padding: '10px', textAlign: 'center', color: '#666' }}>{item.quantity || '-'}</td>
+                              <td style={{ padding: '10px', textAlign: 'right', fontWeight: '500' }}>
+                                {item.price ? `$${(item.price / 100).toFixed(2)}` : '-'}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {message && <div className={styles.message}>{message}</div>}
 
               <div className={styles.formActions}>
@@ -1233,6 +1312,194 @@ export default function TransactionsPage() {
                   onClick={handleImportTransactions}
                   disabled={importing || parsedTransactions.length === 0}
                 >
+
+      {/* ===== EDIT INVOICE ITEMS MODAL ===== */}
+      {showEditItemsModal && (
+        <div className={styles.modal} onClick={() => setShowEditItemsModal(false)}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()} style={{ maxWidth: '900px', maxHeight: '90vh', overflow: 'auto' }}>
+            <div className={styles.modalHeader}>
+              <h2 className={styles.modalTitle}>Edit Invoice Items</h2>
+              <button className={styles.closeBtn} onClick={() => setShowEditItemsModal(false)}>
+                ✕
+              </button>
+            </div>
+
+            <div style={{ marginBottom: '20px' }}>
+              <p style={{ fontSize: '14px', color: '#666', marginBottom: '16px' }}>
+                Edit, add, or remove items from the parsed invoice. Changes will update the current transaction.
+              </p>
+
+              {/* Items List */}
+              <div style={{ border: '1px solid #e0e0e0', borderRadius: '8px', overflow: 'hidden' }}>
+                <table style={{ width: '100%', fontSize: '13px', borderCollapse: 'collapse' }}>
+                  <thead style={{ backgroundColor: '#f5f5f5' }}>
+                    <tr>
+                      <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #e0e0e0', fontWeight: '600' }}>Description</th>
+                      <th style={{ padding: '12px', textAlign: 'center', borderBottom: '1px solid #e0e0e0', fontWeight: '600', width: '100px' }}>Quantity</th>
+                      <th style={{ padding: '12px', textAlign: 'right', borderBottom: '1px solid #e0e0e0', fontWeight: '600', width: '120px' }}>Price ($)</th>
+                      <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #e0e0e0', fontWeight: '600', width: '150px' }}>Category</th>
+                      <th style={{ padding: '12px', textAlign: 'center', borderBottom: '1px solid #e0e0e0', fontWeight: '600', width: '80px' }}>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {editingItems.map((item, idx) => (
+                      <tr key={idx} style={{ borderBottom: idx < editingItems.length - 1 ? '1px solid #f0f0f0' : 'none' }}>
+                        {editingItemIndex === idx ? (
+                          /* Edit Mode */
+                          <>
+                            <td style={{ padding: '8px' }}>
+                              <input
+                                type="text"
+                                value={itemEditForm.description}
+                                onChange={(e) => setItemEditForm({ ...itemEditForm, description: e.target.value })}
+                                className={styles.formInput}
+                                style={{ width: '100%', padding: '6px 8px', fontSize: '13px' }}
+                                placeholder="Item description"
+                              />
+                            </td>
+                            <td style={{ padding: '8px' }}>
+                              <input
+                                type="number"
+                                value={itemEditForm.quantity}
+                                onChange={(e) => setItemEditForm({ ...itemEditForm, quantity: e.target.value })}
+                                className={styles.formInput}
+                                style={{ width: '100%', padding: '6px 8px', fontSize: '13px', textAlign: 'center' }}
+                                placeholder="Qty"
+                              />
+                            </td>
+                            <td style={{ padding: '8px' }}>
+                              <input
+                                type="number"
+                                step="0.01"
+                                value={itemEditForm.price}
+                                onChange={(e) => setItemEditForm({ ...itemEditForm, price: e.target.value })}
+                                className={styles.formInput}
+                                style={{ width: '100%', padding: '6px 8px', fontSize: '13px', textAlign: 'right' }}
+                                placeholder="0.00"
+                              />
+                            </td>
+                            <td style={{ padding: '8px' }}>
+                              <select
+                                value={itemEditForm.categoryId}
+                                onChange={(e) => setItemEditForm({ ...itemEditForm, categoryId: e.target.value })}
+                                className={styles.formInput}
+                                style={{ width: '100%', padding: '6px 8px', fontSize: '13px' }}
+                              >
+                                <option value="">None</option>
+                                {categories.map((cat) => (
+                                  <option key={cat.id} value={cat.id}>{cat.name}</option>
+                                ))}
+                              </select>
+                            </td>
+                            <td style={{ padding: '8px', textAlign: 'center' }}>
+                              <button
+                                onClick={() => {
+                                  const updated = [...editingItems];
+                                  updated[idx] = {
+                                    description: itemEditForm.description,
+                                    quantity: itemEditForm.quantity ? Number(itemEditForm.quantity) : undefined,
+                                    price: itemEditForm.price ? Math.round(Number(itemEditForm.price) * 100) : undefined,
+                                    categoryId: itemEditForm.categoryId || undefined,
+                                  };
+                                  setEditingItems(updated);
+                                  setEditingItemIndex(null);
+                                  setItemEditForm({ description: '', quantity: '', price: '', categoryId: '' });
+                                }}
+                                style={{ padding: '4px 8px', fontSize: '12px', marginRight: '4px', background: '#4CAF50', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                              >
+                                ✓
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setEditingItemIndex(null);
+                                  setItemEditForm({ description: '', quantity: '', price: '', categoryId: '' });
+                                }}
+                                style={{ padding: '4px 8px', fontSize: '12px', background: '#f44336', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                              >
+                                ✕
+                              </button>
+                            </td>
+                          </>
+                        ) : (
+                          /* View Mode */
+                          <>
+                            <td style={{ padding: '12px' }}>{item.description}</td>
+                            <td style={{ padding: '12px', textAlign: 'center', color: '#666' }}>{item.quantity || '-'}</td>
+                            <td style={{ padding: '12px', textAlign: 'right', fontWeight: '500' }}>
+                              {item.price ? `$${(item.price / 100).toFixed(2)}` : '-'}
+                            </td>
+                            <td style={{ padding: '12px', fontSize: '12px', color: '#666' }}>
+                              {item.categoryId ? (categories.find(c => c.id === item.categoryId)?.name || 'Unknown') : '-'}
+                            </td>
+                            <td style={{ padding: '12px', textAlign: 'center' }}>
+                              <button
+                                onClick={() => {
+                                  setEditingItemIndex(idx);
+                                  setItemEditForm({
+                                    description: item.description,
+                                    quantity: item.quantity?.toString() || '',
+                                    price: item.price ? (item.price / 100).toFixed(2) : '',
+                                    categoryId: item.categoryId || '',
+                                  });
+                                }}
+                                style={{ padding: '4px 8px', fontSize: '12px', marginRight: '4px', background: '#2196F3', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                              >
+                                ✏️
+                              </button>
+                              <button
+                                onClick={() => {
+                                  const updated = editingItems.filter((_, i) => i !== idx);
+                                  setEditingItems(updated);
+                                }}
+                                style={{ padding: '4px 8px', fontSize: '12px', background: '#f44336', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                              >
+                                🗑️
+                              </button>
+                            </td>
+                          </>
+                        )}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Add New Item Button */}
+              <button
+                onClick={() => {
+                  setEditingItems([...editingItems, { description: '', quantity: undefined, price: undefined, categoryId: undefined }]);
+                  setEditingItemIndex(editingItems.length);
+                  setItemEditForm({ description: '', quantity: '', price: '', categoryId: '' });
+                }}
+                className={`${styles.btn} ${styles.btnSecondary}`}
+                style={{ marginTop: '12px', width: '100%' }}
+              >
+                ➕ Add New Item
+              </button>
+            </div>
+
+            <div className={styles.formActions}>
+              <button
+                type="button"
+                className={`${styles.btn} ${styles.btnSecondary}`}
+                onClick={() => setShowEditItemsModal(false)}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className={`${styles.btn} ${styles.btnPrimary}`}
+                onClick={() => {
+                  setParsedInvoiceItems(editingItems);
+                  setShowEditItemsModal(false);
+                }}
+              >
+                Save Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
                   {importing ? 'Importing...' : `Import ${parsedTransactions.length} Transactions`}
                 </button>
               )}

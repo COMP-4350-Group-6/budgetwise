@@ -9,8 +9,10 @@ import {
   makeSupabaseCategoriesRepo,
   makeSupabaseTransactionsRepo,
   makeSupabaseServiceClient,
+  SupabaseLLMCallsRepository,
 } from "@budget/adapters-persistence-supabase";
 import { OpenRouterCategorization, OpenRouterInvoiceParser } from "@budget/adapters-openrouter";
+import { LLMTracker } from "@budget/ports";
 import {
   makeCreateCategory,
   makeListCategories,
@@ -43,6 +45,8 @@ export function makeContainer(env?: Env) {
   let categoriesRepo = makeInMemCategoriesRepo();
   let budgetsRepo = makeInMemBudgetsRepo();
   let txRepo = makeInMemTransactionsRepo();
+  let llmCallsRepo: SupabaseLLMCallsRepository | undefined;
+  let llmTracker: LLMTracker | undefined;
 
   const supabaseUrl = env?.SUPABASE_URL;
   const supabaseServiceRoleKey = env?.SUPABASE_SERVICE_ROLE_KEY;
@@ -59,17 +63,20 @@ export function makeContainer(env?: Env) {
     budgetsRepo = makeSupabaseBudgetsRepo({ client: supabaseClient });
     txRepo = makeSupabaseTransactionsRepo({ client: supabaseClient });
     id = makeUuid();
+    llmCallsRepo = new SupabaseLLMCallsRepository(supabaseClient);
+    llmTracker = new LLMTracker(llmCallsRepo, id);
   } else {
     console.log('[Container] Using in-memory repositories (no Supabase configured)');
   }
   
   // Optional AI services (only if API key is provided)
+  // Pass the LLM tracker if available for automatic call tracking
   const categorization = env?.OPENROUTER_API_KEY
-    ? new OpenRouterCategorization(env.OPENROUTER_API_KEY)
+    ? new OpenRouterCategorization(env.OPENROUTER_API_KEY, { tracker: llmTracker })
     : undefined;
   
   const invoiceParser = env?.OPENROUTER_API_KEY
-    ? new OpenRouterInvoiceParser(env.OPENROUTER_API_KEY)
+    ? new OpenRouterInvoiceParser(env.OPENROUTER_API_KEY, { tracker: llmTracker })
     : undefined;
   
   return {
@@ -77,6 +84,10 @@ export function makeContainer(env?: Env) {
       categoriesRepo,
       budgetsRepo,
       txRepo,
+      llmCallsRepo,
+    },
+    services: {
+      llmTracker,
     },
     usecases: {
       // Category use cases

@@ -266,7 +266,11 @@ importers:
 
   packages/domain: {}
 
-  packages/ports: {}
+  packages/ports:
+    dependencies:
+      '@budget/domain':
+        specifier: workspace:*
+        version: link:../domain
 
   packages/schemas:
     dependencies:

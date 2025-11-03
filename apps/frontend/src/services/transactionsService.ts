@@ -32,9 +32,11 @@ export interface ParsedInvoiceData {
     description: string;
     quantity?: number;
     price?: number;
+    categoryId?: string;
   }>;
   paymentMethod?: string;
   suggestedCategory?: string;
+  description?: string; // Human-readable description for the transaction note
   confidence: number;
 }
 
