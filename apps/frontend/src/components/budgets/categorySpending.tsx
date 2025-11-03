@@ -18,13 +18,15 @@ import {
   Plus,
   Trash2,
   Lightbulb,
+  
   Wallet,
 } from "lucide-react";
 
-interface Props {
+export interface Props {
   categories: Category[];
   dashboard: BudgetDashboard | null;
   addingBudgetForCategory: string | null;
+  editingBudgetId: string | null;
   formData: {
     categoryId: string;
     amount: string;
@@ -48,6 +50,11 @@ interface Props {
   handleDeleteCategory: (id: string, name: string) => void;
   handleCancelBudgetForm: () => void;
   formatMoney: (cents: number, currency?: string) => string;
+  onEditBudget: (
+    categoryId: string,
+    budget: BudgetDashboard["categories"][number]["budgets"][number]
+  ) => void;
+  onDeleteBudget: (budgetId: string) => void;
 }
 
 const iconMap: Record<string, JSX.Element> = {
@@ -68,6 +75,7 @@ export default function CategorySpendingSection({
   categories,
   dashboard,
   addingBudgetForCategory,
+  editingBudgetId,
   formData,
   setFormData,
   handleSubmitBudget,
@@ -75,7 +83,10 @@ export default function CategorySpendingSection({
   handleDeleteCategory,
   handleCancelBudgetForm,
   formatMoney,
+  onEditBudget,
+  onDeleteBudget,
 }: Props) {
+  // Dropdown expand removed for flat categories
   const [showAll, setShowAll] = useState(false);
 
   if (!categories || categories.length === 0) {
@@ -89,20 +100,7 @@ export default function CategorySpendingSection({
     );
   }
 
-  // sort: categories with budgets first, then by newest
-  const sorted = [...categories].sort((a, b) => {
-    const aHasBudget = dashboard?.categories.some(
-      (c) => c.categoryId === a.id && c.budgets.length > 0
-    );
-    const bHasBudget = dashboard?.categories.some(
-      (c) => c.categoryId === b.id && c.budgets.length > 0
-    );
-    if (aHasBudget && !bHasBudget) return -1;
-    if (!aHasBudget && bHasBudget) return 1;
-    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-  });
-
-  const displayed = showAll ? sorted : sorted.slice(0, 6);
+  const displayedCategories = showAll ? categories : categories.slice(0, 6);
 
   return (
     <section className={styles.section}>
@@ -115,12 +113,17 @@ export default function CategorySpendingSection({
           const summary = dashboard?.categories.find(
             (c) => c.categoryId === category.id
           );
-          const hasBudget = !!summary?.budgets?.length;
-          const budget = hasBudget ? summary!.budgets[0] : null;
-
-          const amountCents = budget?.budget?.amountCents || 0;
-          const spentCents = budget?.spentCents || 0;
-          const remainingCents = amountCents - spentCents;
+          const hasBudgets = (categorySummary?.budgets?.length || 0) > 0;
+          const singleBudget = hasBudgets ? categorySummary!.budgets[0] : null;
+          
+          // Debug: log budget structure if it exists
+          if (singleBudget && !singleBudget.budget?.id) {
+            console.warn("Budget structure issue:", {
+              singleBudget,
+              budget: singleBudget.budget,
+              budgetId: singleBudget.budget?.id,
+            });
+          }
           const progress =
             amountCents > 0
               ? Math.min((spentCents / amountCents) * 100, 100)
@@ -148,6 +151,7 @@ export default function CategorySpendingSection({
                 </div>
 
                 <div className={styles.headerActions}>
+                  {/* Dropdown toggle removed for flat categories */}
                   <button
                     onClick={() =>
                       addingBudgetForCategory === category.id
@@ -156,6 +160,7 @@ export default function CategorySpendingSection({
                     }
                     className={`${styles.iconBtn} ${styles.addBtn}`}
                     title="Add Budget"
+                    disabled={hasBudgets}
                   >
                     <Plus size={16} />
                   </button>
@@ -171,51 +176,76 @@ export default function CategorySpendingSection({
                 </div>
               </div>
 
-              {/* Show if no budget */}
-              {!hasBudget && addingBudgetForCategory !== category.id && (
-                <p className={styles.noBudgetText}>
-                  No budget set up for this category yet.
-                </p>
-              )}
+              <p className={styles.statText}>
+                Spent: {formatMoney(categorySummary?.totalSpentCents || 0, "CAD")} /{" "}
+                {formatMoney(categorySummary?.totalBudgetCents || 0, "CAD")}
+              </p>
+              <div className={styles.progressBar}>
+                <div
+                  className={`${styles.progressFill} ${
+                    progress >= 100
+                      ? styles.red
+                      : progress >= 80
+                      ? styles.yellow
+                      : styles.green
+                  }`}
+                  style={{ width: `${Math.min(progress, 100)}%` }}
+                />
+              </div>
 
-              {/* Show if budget exists */}
-              {hasBudget && (
-                <>
-                  <div className={styles.budgetDetails}>
-                    <div className={styles.budgetRow}>
-                      <span>Budgeted</span>
-                      <strong>{formatMoney(amountCents, "CAD")}</strong>
-                    </div>
-                    <div className={styles.budgetRow}>
-                      <span>Spent</span>
-                      <strong>{formatMoney(spentCents, "CAD")}</strong>
-                    </div>
-                    <div className={styles.budgetRow}>
-                      <span>Remaining</span>
-                      <strong
-                        className={
-                          remainingCents < 0 ? styles.redText : styles.greenText
-                        }
-                      >
-                        {formatMoney(remainingCents, "CAD")}
-                      </strong>
-                    </div>
-
-                    <div className={styles.progressBar}>
-                      <div
-                        className={`${styles.progressFill} ${
-                          progress >= 100
-                            ? styles.red
-                            : progress >= 80
-                            ? styles.yellow
-                            : styles.green
-                        }`}
-                        style={{ width: `${progress}%` }}
-                      />
-                    </div>
-                  </div>
-                </>
-              )}
+          {/* Single budget details + actions (always visible when budget exists) */}
+          {singleBudget && (
+            <div className={styles.budgetList}>
+              <div className={styles.budgetItem}>
+                <div className={styles.budgetMeta}>
+                  {singleBudget.budget.name} – {singleBudget.budget.period.charAt(0) + singleBudget.budget.period.slice(1).toLowerCase().replace(/_/g, ' ')}
+                </div>
+                <div className={styles.budgetAmounts}>
+                  {formatMoney(singleBudget.spentCents, "CAD")} / {formatMoney(singleBudget.budget.amountCents, "CAD")}
+                </div>
+                <div className={styles.progressBarSmall}>
+                  <div
+                    className={`${styles.progressFill} ${(() => {
+                      const amt = singleBudget.budget.amountCents;
+                      const spent = singleBudget.spentCents;
+                      const pct = amt > 0 ? (spent / amt) * 100 : 0;
+                      return pct >= 100 ? styles.red : pct >= 80 ? styles.yellow : styles.green;
+                    })()}`}
+                    style={{ width: `${Math.min(
+                      singleBudget.budget.amountCents > 0
+                        ? (singleBudget.spentCents / singleBudget.budget.amountCents) * 100
+                        : 0,
+                      100
+                    )}%` }}
+                  />
+                </div>
+              </div>
+              <div className={styles.formActions}>
+                <button
+                  type="button"
+                  className={`${styles.btn} ${styles.btnSecondary}`}
+                  onClick={() => onEditBudget(category.id, singleBudget)}
+                >
+                  Edit Budget
+                </button>
+                <button
+                  type="button"
+                  className={`${styles.btn} ${styles.btnDanger || styles.deleteBtn}`}
+                  onClick={() => {
+                    const budgetId = singleBudget.budget?.id;
+                    if (!budgetId) {
+                      console.error("Budget ID not found:", singleBudget);
+                      alert("Error: Budget ID is missing. Please refresh the page.");
+                      return;
+                    }
+                    onDeleteBudget(budgetId);
+                  }}
+                >
+                  Delete Budget
+                </button>
+              </div>
+            </div>
+          )}
 
               {/* Inline Add Budget */}
               {addingBudgetForCategory === category.id && (
@@ -265,7 +295,10 @@ export default function CategorySpendingSection({
                   <div className={styles.formActions}>
                     <button
                       type="button"
-                      onClick={handleCancelBudgetForm}
+                      onClick={() => {
+                        handleCancelBudgetForm();
+                        // No-op: expand removed
+                      }}
                       className={`${styles.btn} ${styles.btnSecondary}`}
                     >
                       Cancel
@@ -274,11 +307,13 @@ export default function CategorySpendingSection({
                       type="submit"
                       className={`${styles.btn} ${styles.btnPrimary}`}
                     >
-                      Save Budget
+                      {editingBudgetId ? "Update Budget" : "Save Budget"}
                     </button>
                   </div>
                 </form>
               )}
+
+              {/* Subcategory UI removed for flat categories */}
             </div>
           );
         })}
