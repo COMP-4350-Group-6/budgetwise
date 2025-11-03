@@ -25,6 +25,7 @@ export default function BudgetPage() {
 
   const [formData, setFormData] = useState({
     categoryId: "",
+    name: "",
     amount: "",
     currency: "CAD",
     period: "MONTHLY" as "DAILY" | "WEEKLY" | "MONTHLY" | "YEARLY",
@@ -123,8 +124,10 @@ export default function BudgetPage() {
   const handleAddBudgetToCategory = (categoryId: string) => {
     setEditingBudgetId(null);
     setAddingBudgetForCategory(categoryId);
+    const category = categories.find(c => c.id === categoryId);
     setFormData({
       categoryId,
+      name: category ? `${category.name} Budget` : "Budget",
       amount: "",
       currency: "CAD",
       period: "MONTHLY",
