@@ -141,37 +141,6 @@ export default function BudgetPage() {
   const handleSubmitBudget = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-<<<<<<< HEAD
-      const cat = categories.find((c) => c.id === formData.categoryId);
-      const hiddenName = cat ? `${cat.name} Budget` : "Budget"; // not shown to users
-
-      const budgetData: CreateBudgetInput = {
-        categoryId: formData.categoryId,
-        name: hiddenName,
-        amountCents: Math.round(parseFloat(formData.amount || "0") * 100),
-        currency: formData.currency as Currency,
-        period: formData.period,
-        startDate: new Date(formData.startDate),
-        ...(isNaN(alertThresholdValue) ? { alertThreshold: null } : { alertThreshold: alertThresholdValue }),
-      };
-
-      await budgetService.createBudget(budgetData);
-
-      setAddingBudgetForCategory(null);
-      setFormData({
-        categoryId: "",
-        amount: "",
-        currency: "CAD",
-        period: "MONTHLY",
-        startDate: new Date().toISOString().split("T")[0],
-        alertThreshold: "80",
-      });
-
-      await loadDashboard();
-    } catch (err) {
-      console.error("Budget creation failed:", err);
-      alert("Failed to create budget. Please try again.");
-=======
       if (editingBudgetId) {
         // Update budget - send only changed fields
         const updateData: UpdateBudgetInput = {
@@ -240,7 +209,6 @@ export default function BudgetPage() {
         "Failed to delete budget: " +
           (err instanceof Error ? err.message : "Unknown error")
       );
->>>>>>> origin/front/csv-upload
     }
   };
 

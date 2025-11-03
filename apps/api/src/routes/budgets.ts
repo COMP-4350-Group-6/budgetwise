@@ -94,34 +94,11 @@ budgets.post(
     const input = c.req.valid("json");
     const { usecases, repos } = container;
     
-<<<<<<< HEAD
-    // Validate category
-    const category = await repos.categoriesRepo.getById(input.categoryId);
-    if (!category || category.props.userId !== userId) {
-      return c.json({ error: "Invalid category" }, 400);
-    }
-    
-    const budget = await usecases.createBudget({
-      ...input,
-      endDate: input.endDate ?? undefined,
-      alertThreshold: input.alertThreshold ?? undefined,
-      userId,
-    });
-    
-    return c.json({
-      budget: {
-        ...budget.props,
-        startDate: budget.props.startDate.toISOString(),
-        endDate: budget.props.endDate?.toISOString(),
-        createdAt: budget.props.createdAt.toISOString(),
-        updatedAt: budget.props.updatedAt.toISOString(),
-=======
     try {
       // Validate category
       const category = await repos.categoriesRepo.getById(input.categoryId);
       if (!category || category.props.userId !== userId) {
         return c.json({ error: "Invalid category" }, 400);
->>>>>>> origin/front/csv-upload
       }
       
       const budget = await usecases.createBudget({
