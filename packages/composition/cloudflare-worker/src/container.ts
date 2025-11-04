@@ -1,4 +1,4 @@
-import { makeSystemClock, makeUlid, makeUuid } from "../../../adapters/system/src";
+import { makeSystemClock, makeUuid } from "../../../adapters/system/src";
 import {
   makeInMemTransactionsRepo,
   makeInMemCategoriesRepo,
@@ -38,7 +38,8 @@ interface Env {
 
 export function makeContainer(env?: Env) {
   const clock = makeSystemClock();
-  let id = makeUlid();
+  // Use UUIDv7 for all IDs (time-ordered, compatible with PostgreSQL uuid type)
+  const id = makeUuid();
   
   let categoriesRepo = makeInMemCategoriesRepo();
   let budgetsRepo = makeInMemBudgetsRepo();
@@ -56,7 +57,6 @@ export function makeContainer(env?: Env) {
     categoriesRepo = makeSupabaseCategoriesRepo({ client: supabaseClient });
     budgetsRepo = makeSupabaseBudgetsRepo({ client: supabaseClient });
     txRepo = makeSupabaseTransactionsRepo({ client: supabaseClient });
-    id = makeUuid();
   }
   
   // Optional AI services (only if API key is provided)

@@ -20,7 +20,7 @@ export function makeAddTransaction(deps: {
   }) => {
     const now = deps.clock.now();
     const tx = new Transaction({
-      id: deps.id.ulid(),
+      id: deps.id.uuid(),
       userId: input.userId,
       budgetId: input.budgetId,
       amountCents: input.amountCents,

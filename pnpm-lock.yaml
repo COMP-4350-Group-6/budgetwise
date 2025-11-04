@@ -11,6 +11,9 @@ importers:
       recharts:
         specifier: ^3.3.0
         version: 3.3.0(@types/react@19.2.2)(react-dom@19.1.0(react@19.1.0))(react-is@18.3.1)(react@19.1.0)(redux@5.0.1)
+      uuidv7:
+        specifier: ^1.0.2
+        version: 1.0.2
     devDependencies:
       '@types/node':
         specifier: ^24.7.2
@@ -234,9 +237,9 @@ importers:
       '@budget/ports':
         specifier: workspace:*
         version: link:../../ports
-      ulid:
-        specifier: ^2.3.0
-        version: 2.4.0
+      uuidv7:
+        specifier: ^1.0.2
+        version: 1.0.2
 
   packages/composition/cloudflare-worker:
     dependencies:
@@ -5684,10 +5687,6 @@ packages:
     engines: {node: '>=0.8.0'}
     hasBin: true
 
-  ulid@2.4.0:
-    resolution: {integrity: sha512-fIRiVTJNcSRmXKPZtGzFQv9WRrZ3M9eoptl/teFJvjOzmpU+/K/JH6HZ8deBfb5vMEpicJcLn7JmvdknlMq7Zg==}
-    hasBin: true
-
   unbox-primitive@1.1.0:
     resolution: {integrity: sha512-nWJ91DjeOkej/TA8pXQ3myruKpKEYgqvpw9lz4OPHj/NWFNluYrjbz9j01CJ8yKQd2g4jFoOkINCTW2I5LEEyw==}
     engines: {node: '>= 0.4'}
@@ -5741,6 +5740,10 @@ packages:
 
   uuid@9.0.1:
     resolution: {integrity: sha512-b+1eJOlsR9K8HJpow9Ok3fiWOWSIcIzXodvv0rQjVoOVNpWMpxf1wZNpt4y9h10odCNrqnYp1OBzRktckBe3sA==}
+    hasBin: true
+
+  uuidv7@1.0.2:
+    resolution: {integrity: sha512-8JQkH4ooXnm1JCIhqTMbtmdnYEn6oKukBxHn1Ic9878jMkL7daTI7anTExfY18VRCX7tcdn5quzvCb6EWrR8PA==}
     hasBin: true
 
   v8-compile-cache-lib@3.0.1:
@@ -12808,8 +12811,6 @@ snapshots:
   uglify-js@3.19.3:
     optional: true
 
-  ulid@2.4.0: {}
-
   unbox-primitive@1.1.0:
     dependencies:
       call-bound: 1.0.4
@@ -12880,6 +12881,8 @@ snapshots:
   utils-merge@1.0.1: {}
 
   uuid@9.0.1: {}
+
+  uuidv7@1.0.2: {}
 
   v8-compile-cache-lib@3.0.1: {}
 

@@ -8,7 +8,7 @@ import { makeUpdateTransaction } from '../transactions/update-transaction';
 import { makeDeleteTransaction } from '../transactions/delete-transaction';
 
 import { makeInMemCategoriesRepo, makeInMemBudgetsRepo, makeInMemTransactionsRepo } from '@budget/adapters-persistence-local';
-import { makeUlid } from '@budget/adapters-system';
+import { makeUuid } from '@budget/adapters-system';
 
 describe('Usecases Integration: Category + Budget + Transaction -> Dashboard', () => {
   const userId = 'user-1';
@@ -16,7 +16,7 @@ describe('Usecases Integration: Category + Budget + Transaction -> Dashboard', (
   let categoriesRepo: ReturnType<typeof makeInMemCategoriesRepo>;
   let budgetsRepo: ReturnType<typeof makeInMemBudgetsRepo>;
   let transactionsRepo: ReturnType<typeof makeInMemTransactionsRepo>;
-  let id: ReturnType<typeof makeUlid>;
+  let id: ReturnType<typeof makeUuid>;
   // Fixed clock anchored mid-month so transactions fall within the MONTHLY period
   const clock = { now: () => new Date('2025-01-15T12:00:00Z') };
 
@@ -31,7 +31,7 @@ describe('Usecases Integration: Category + Budget + Transaction -> Dashboard', (
     categoriesRepo = makeInMemCategoriesRepo();
     budgetsRepo = makeInMemBudgetsRepo();
     transactionsRepo = makeInMemTransactionsRepo();
-    id = makeUlid();
+    id = makeUuid();
 
     createCategory = makeCreateCategory({ categoriesRepo, clock, id });
     createBudget = makeCreateBudget({ budgetsRepo, clock, id });

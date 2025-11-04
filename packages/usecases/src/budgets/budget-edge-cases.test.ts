@@ -4,7 +4,7 @@ import { makeUpdateBudget } from './update-budget';
 import { makeGetBudgetStatus } from './get-budget-status';
 import { makeAddTransaction } from '../transactions/add-transaction';
 import { makeInMemBudgetsRepo, makeInMemTransactionsRepo } from '@budget/adapters-persistence-local';
-import { makeSystemClock, makeUlid } from '@budget/adapters-system';
+import { makeSystemClock, makeUuid } from '@budget/adapters-system';
 
 describe('Budget Edge Cases & Boundary Tests', () => {
   let budgetsRepo: ReturnType<typeof makeInMemBudgetsRepo>;
@@ -14,14 +14,14 @@ describe('Budget Edge Cases & Boundary Tests', () => {
   let getBudgetStatus: ReturnType<typeof makeGetBudgetStatus>;
   let addTransaction: ReturnType<typeof makeAddTransaction>;
   let clock: { now: () => Date };
-  let id: ReturnType<typeof makeUlid>;
+  let id: ReturnType<typeof makeUuid>;
 
   beforeEach(() => {
     budgetsRepo = makeInMemBudgetsRepo();
     transactionsRepo = makeInMemTransactionsRepo();
     // Mock clock to return a fixed date in January 2025
     clock = { now: () => new Date('2025-01-15T12:00:00Z') };
-    id = makeUlid();
+    id = makeUuid();
     
     createBudget = makeCreateBudget({ budgetsRepo, clock, id });
     updateBudget = makeUpdateBudget({ budgetsRepo, clock });

@@ -4,7 +4,7 @@ import { makeCreateBudget } from './create-budget';
 import { makeCreateCategory } from '../categories/create-category';
 import { makeAddTransaction } from '../transactions/add-transaction';
 import { makeInMemBudgetsRepo, makeInMemCategoriesRepo, makeInMemTransactionsRepo } from '@budget/adapters-persistence-local';
-import { makeSystemClock, makeUlid } from '@budget/adapters-system';
+import { makeSystemClock, makeUuid } from '@budget/adapters-system';
 
 describe('getBudgetDashboard', () => {
   let budgetsRepo: ReturnType<typeof makeInMemBudgetsRepo>;
@@ -15,7 +15,7 @@ describe('getBudgetDashboard', () => {
   let createCategory: ReturnType<typeof makeCreateCategory>;
   let addTransaction: ReturnType<typeof makeAddTransaction>;
   let clock: { now: () => Date };
-  let id: ReturnType<typeof makeUlid>;
+  let id: ReturnType<typeof makeUuid>;
 
   beforeEach(() => {
     budgetsRepo = makeInMemBudgetsRepo();
@@ -23,7 +23,7 @@ describe('getBudgetDashboard', () => {
     transactionsRepo = makeInMemTransactionsRepo();
     // Mock clock to return a fixed date in January 2025
     clock = { now: () => new Date('2025-01-15T12:00:00Z') };
-    id = makeUlid();
+    id = makeUuid();
     
     getBudgetDashboard = makeGetBudgetDashboard({
       categoriesRepo,

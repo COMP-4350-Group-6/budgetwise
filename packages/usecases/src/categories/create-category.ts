@@ -25,7 +25,7 @@ export function makeCreateCategory(deps: {
     }
     
     const category = new Category({
-      id: deps.id.ulid(),
+      id: deps.id.uuid(),
       userId: input.userId,
       name: input.name.trim(),
       description: input.description,

@@ -9,8 +9,8 @@ export const transactions = new Hono<{ Variables: { userId: string } }>();
 // Accept a minimal client payload; userId/id/timestamps are server-derived.
 // budgetId is optional to allow unbudgeted transactions.
 const CreateTransactionInput = z.object({
-  budgetId: z.string().ulid().optional(),
-  categoryId: z.string().ulid().optional(),
+  budgetId: z.string().uuid().optional(),
+  categoryId: z.string().uuid().optional(),
   amountCents: z.number().int(),
   note: z.string().max(280).optional(),
   occurredAt: z.coerce.date(),
