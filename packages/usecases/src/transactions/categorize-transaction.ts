@@ -53,11 +53,12 @@ export function makeCategorizeTransaction(deps: {
 
     console.log('[CategorizeTransaction] Calling OpenRouter with categories:', categoryInfo.map(c => c.name).join(', '));
 
-    // Categorize
+    // Categorize - Pass userId for LLM call tracking
     const result = await deps.categorization.categorizeTransaction(
       tx.props.note,
       tx.props.amountCents,
-      categoryInfo
+      categoryInfo,
+      input.userId  // Enable LLM call tracking
     );
 
     console.log('[CategorizeTransaction] OpenRouter result:', result);

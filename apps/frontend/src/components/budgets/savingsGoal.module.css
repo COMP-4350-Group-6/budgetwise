@@ -1,0 +1,245 @@
+.section {
+  margin-top: 30px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.title {
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.text {
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.btn {
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btnPrimary {
+  background: #4E7C66;
+  color: white;
+  border: none;
+}
+
+.btnPrimary:hover {
+  background: #244b3d;
+}
+
+.btnSecondary {
+  background: #f3f3f3;
+  border: 1px solid #ddd;
+}
+
+.noGoal {
+  color: #6b7280;
+  margin-top: 12px;
+  font-size: 0.9rem;
+}
+
+.goalsGrid {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.goalCard {
+  background: #fff;
+  border: 1px solid #eaeaea;
+  border-radius: 12px;
+  padding: 16px;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.goalCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.goalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+}
+
+.goalName {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.deleteBtn {
+  background: none;
+  border: none;
+  color: #a33f3d;
+  cursor: pointer;
+  padding: 2px;
+  border-radius: 6px;
+  transition: background 0.2s ease;
+}
+
+.deleteBtn:hover {
+  background: #fbeaea;
+}
+/* Delete Confirmation */
+.deleteText {
+  margin: 16px 0;
+  color: #555;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.btnDanger {
+  background: #a33f3d;
+  color: #fff;
+  border: none;
+}
+
+.btnDanger:hover {
+  background: #872f2d;
+}
+
+.progressText {
+  color: #4e7c66;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.progressBar {
+  background: #f3f3f3;
+  border-radius: 8px;
+  height: 6px;
+  margin: 10px 0;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  border-radius: 8px;
+  transition: width 0.4s ease;
+}
+
+.green {
+  background: #2f5f4d;
+}
+
+.yellow {
+  background: #eab308;
+}
+
+.red {
+  background: #b91c1c;
+}
+
+.stats {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  color: #333;
+  margin-top: 4px;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.linkBtn {
+  background: none;
+  border: none;
+  color: #2f5f4d;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: color 0.2s ease;
+}
+
+.linkBtn:hover {
+  color: #244b3d;
+}
+
+/* Modal */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+
+.modal {
+  background: #fff;
+  width: 400px;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+  animation: scaleIn 0.25s ease forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.modalTitle {
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  font-size: 1.4rem;
+  cursor: pointer;
+}
+
+.formGroup {
+  margin-bottom: 14px;
+}
+
+.label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: #333;
+}
+
+.input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}

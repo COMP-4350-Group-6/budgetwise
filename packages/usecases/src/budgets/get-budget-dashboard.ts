@@ -48,6 +48,10 @@ export function makeGetBudgetDashboard(deps: {
     let overBudgetCount = 0;
     let alertCount = 0;
 
+    // Track orphaned transactions (categoryId but no budgetId) to avoid double-counting
+    // Map: categoryId -> Set of transaction IDs
+    const orphanedTxIds = new Map<string, Set<string>>();
+
     for (const category of categories) {
       const categoryBudgets = allBudgets.filter(
         b => b.props.categoryId === category.id
@@ -65,6 +69,18 @@ export function makeGetBudgetDashboard(deps: {
       const budgetStatuses: BudgetStatus[] = [];
       let categoryBudgetTotal = 0;
       let categorySpentTotal = 0;
+
+      // Track orphaned transactions for this category (categoryId but no budgetId)
+      // These are counted once per category, not per budget
+      const categoryOrphanedTxs = allTransactions.filter(
+        (tx) => 
+          tx.props.categoryId === category.id &&
+          !tx.props.budgetId
+      );
+      const orphanedSpent = categoryOrphanedTxs.reduce(
+        (sum, tx) => sum + Math.abs(tx.props.amountCents),
+        0
+      );
 
       // Calculate spending from budgets if they exist
       for (const budget of categoryBudgets) {
@@ -86,7 +102,19 @@ export function makeGetBudgetDashboard(deps: {
         }
       }
 
-      // If no budgets, calculate spending from transactions
+      // Add orphaned transactions to category total (once per category)
+      // This ensures transactions with categoryId but no budgetId are included
+      if (categoryBudgets.length > 0) {
+        categorySpentTotal += orphanedSpent;
+        // Only add to total if not already counted
+        const categoryIdKey = category.id;
+        if (!orphanedTxIds.has(categoryIdKey)) {
+          orphanedTxIds.set(categoryIdKey, new Set(categoryOrphanedTxs.map(tx => tx.props.id)));
+          totalSpent += orphanedSpent;
+        }
+      }
+
+      // If no budgets, calculate spending from all transactions in category
       if (categoryBudgets.length === 0) {
         const categoryTransactions = allTransactions.filter(
           (tx) => tx.props.categoryId === category.id

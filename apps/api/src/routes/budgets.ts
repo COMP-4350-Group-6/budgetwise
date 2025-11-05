@@ -59,7 +59,19 @@ budgets.get("/budgets/:id/status", async (c) => {
     return c.json({ error: "Budget not found" }, 404);
   }
   
-  return c.json({ status });
+  // Serialize Budget object
+  const serializedStatus = {
+    ...status,
+    budget: {
+      ...status.budget.props,
+      startDate: status.budget.props.startDate.toISOString(),
+      endDate: status.budget.props.endDate?.toISOString(),
+      createdAt: status.budget.props.createdAt.toISOString(),
+      updatedAt: status.budget.props.updatedAt.toISOString(),
+    }
+  };
+  
+  return c.json({ status: serializedStatus });
 });
 
 // GET /budgets
@@ -90,26 +102,33 @@ budgets.post(
     const input = c.req.valid("json");
     const { usecases, repos } = container;
     
-    // Validate category
-    const category = await repos.categoriesRepo.getById(input.categoryId);
-    if (!category || category.props.userId !== userId) {
-      return c.json({ error: "Invalid category" }, 400);
-    }
-    
-    const budget = await usecases.createBudget({
-      ...input,
-      userId,
-    });
-    
-    return c.json({
-      budget: {
-        ...budget.props,
-        startDate: budget.props.startDate.toISOString(),
-        endDate: budget.props.endDate?.toISOString(),
-        createdAt: budget.props.createdAt.toISOString(),
-        updatedAt: budget.props.updatedAt.toISOString(),
+    try {
+      // Validate category
+      const category = await repos.categoriesRepo.getById(input.categoryId);
+      if (!category || category.props.userId !== userId) {
+        return c.json({ error: "Invalid category" }, 400);
       }
-    }, 201);
+      
+      const budget = await usecases.createBudget({
+        ...input,
+        userId,
+      });
+      
+      return c.json({
+        budget: {
+          ...budget.props,
+          startDate: budget.props.startDate.toISOString(),
+          endDate: budget.props.endDate?.toISOString(),
+          createdAt: budget.props.createdAt.toISOString(),
+          updatedAt: budget.props.updatedAt.toISOString(),
+        }
+      }, 201);
+    } catch (err) {
+      console.error("Error creating budget:", err);
+      return c.json({ 
+        error: err instanceof Error ? err.message : "Failed to create budget" 
+      }, 400);
+    }
   }
 );
 
@@ -124,7 +143,15 @@ budgets.put(
     const { usecases } = container;
     
     try {
-      const budget = await usecases.updateBudget(id, userId, updates);
+      const budget = await usecases.updateBudget(
+        id,
+        userId,
+        {
+          ...updates,
+          endDate: updates.endDate ?? undefined,
+          alertThreshold: updates.alertThreshold ?? undefined,
+        }
+      );
       return c.json({
         budget: {
           ...budget.props,

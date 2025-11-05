@@ -122,10 +122,10 @@ importers:
         specifier: ^20
         version: 20.19.21
       '@types/react':
-        specifier: ^19
+        specifier: ^19.2.2
         version: 19.2.2
       '@types/react-dom':
-        specifier: ^19
+        specifier: ^19.2.1
         version: 19.2.1(@types/react@19.2.2)
       '@vitejs/plugin-react':
         specifier: ^5.0.4
@@ -180,6 +180,15 @@ importers:
         specifier: ^3.2.4
         version: 3.2.4(@types/node@24.7.2)(jiti@2.6.1)(jsdom@27.0.0(postcss@8.5.6))(lightningcss@1.30.1)(msw@2.11.5(@types/node@24.7.2)(typescript@5.9.3))(terser@5.16.9)(yaml@2.8.1)
 
+  packages/adapters/persistence:
+    dependencies:
+      '@budget/domain':
+        specifier: workspace:*
+        version: link:../../domain
+      '@budget/ports':
+        specifier: workspace:*
+        version: link:../../ports
+
   packages/adapters/persistence/local:
     dependencies:
       '@budget/domain':
@@ -188,6 +197,18 @@ importers:
       '@budget/ports':
         specifier: workspace:*
         version: link:../../../ports
+
+  packages/adapters/persistence/supabase:
+    dependencies:
+      '@budget/domain':
+        specifier: workspace:*
+        version: link:../../../domain
+      '@budget/ports':
+        specifier: workspace:*
+        version: link:../../../ports
+      '@supabase/supabase-js':
+        specifier: ^2.45.4
+        version: 2.75.0
 
   packages/adapters/services/openrouter:
     dependencies:
@@ -212,6 +233,9 @@ importers:
       '@budget/adapters-persistence-local':
         specifier: workspace:*
         version: link:../../adapters/persistence/local
+      '@budget/adapters-persistence-supabase':
+        specifier: workspace:*
+        version: link:../../adapters/persistence/supabase
       '@budget/usecases':
         specifier: workspace:*
         version: link:../../usecases
@@ -233,7 +257,11 @@ importers:
         specifier: ^3.2.4
         version: 3.2.4(@types/node@24.7.2)(jiti@2.6.1)(jsdom@27.0.0(postcss@8.5.6))(lightningcss@1.30.1)(msw@2.11.5(@types/node@24.7.2)(typescript@5.9.3))(terser@5.16.9)(yaml@2.8.1)
 
-  packages/ports: {}
+  packages/ports:
+    dependencies:
+      '@budget/domain':
+        specifier: workspace:*
+        version: link:../domain
 
   packages/schemas:
     dependencies:

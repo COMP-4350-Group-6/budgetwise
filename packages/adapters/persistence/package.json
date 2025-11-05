@@ -1,0 +1,14 @@
+{
+  "name": "@budget/adapters-persistence",
+  "version": "0.0.0",
+  "type": "module",
+  "exports": {
+    "./local": "./local/src/index.ts",
+    "./supabase": "./supabase/src/index.ts"
+  },
+  "dependencies": {
+    "@budget/ports": "workspace:*",
+    "@budget/domain": "workspace:*"
+  }
+}
+

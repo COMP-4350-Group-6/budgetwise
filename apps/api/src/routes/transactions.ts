@@ -9,8 +9,8 @@ export const transactions = new Hono<{ Variables: { userId: string } }>();
 // Accept a minimal client payload; userId/id/timestamps are server-derived.
 // budgetId is optional to allow unbudgeted transactions.
 const CreateTransactionInput = z.object({
-  budgetId: z.string().ulid().optional(),
-  categoryId: z.string().ulid().optional(),
+  budgetId: z.string().uuid().optional(),
+  categoryId: z.string().uuid().optional(),
   amountCents: z.number().int(),
   note: z.string().max(280).optional(),
   occurredAt: z.coerce.date(),
@@ -18,8 +18,8 @@ const CreateTransactionInput = z.object({
 
 const UpdateTransactionInput = z
   .object({
-    budgetId: z.string().ulid().optional(),
-    categoryId: z.string().ulid().optional(),
+    budgetId: z.string().uuid().optional(),
+    categoryId: z.string().uuid().optional(),
     amountCents: z.number().int().optional(),
     note: z.string().max(280).optional(),
     occurredAt: z.coerce.date().optional(),
@@ -41,11 +41,21 @@ transactions.use("*", authMiddleware);
 
 transactions.post(
   "/transactions",
-  zValidator("json", CreateTransactionInput),
+  zValidator("json", CreateTransactionInput, (result, c) => {
+    if (!result.success) {
+      console.error('[CreateTransaction] Validation failed:', JSON.stringify(result.error.issues, null, 2));
+      return c.json({
+        error: "Validation failed",
+        details: result.error.issues
+      }, 400);
+    }
+  }),
   async (c) => {
     const input = c.req.valid("json");
     const userId = c.get("userId") as string;
     const { usecases } = container;
+    
+    console.log('[CreateTransaction] Creating transaction with input:', JSON.stringify(input, null, 2));
 
     const tx = await usecases.addTransaction({
       userId,
@@ -207,6 +217,93 @@ transactions.post("/transactions/parse-invoice", async (c) => {
     return c.json({ error: (error as Error).message }, 500);
   }
 });
+
+// POST /transactions/bulk-import - Import multiple transactions at once
+const BulkImportInput = z.object({
+  transactions: z.array(CreateTransactionInput),
+});
+
+transactions.post(
+  "/transactions/bulk-import",
+  zValidator("json", BulkImportInput),
+  async (c) => {
+    const input = c.req.valid("json");
+    const userId = c.get("userId") as string;
+    const { usecases } = container;
+
+    const results = {
+      success: [] as any[],
+      errors: [] as Array<{ index: number; error: string; data: any }>,
+    };
+
+    for (let i = 0; i < input.transactions.length; i++) {
+      const txInput = input.transactions[i];
+      try {
+        const tx = await usecases.addTransaction({
+          userId,
+          budgetId: txInput.budgetId,
+          categoryId: txInput.categoryId,
+          amountCents: txInput.amountCents,
+          note: txInput.note,
+          occurredAt: txInput.occurredAt,
+        });
+
+        // Auto-categorize if no category was provided and categorization service is available
+        let finalTx = tx;
+        if (!tx.props.categoryId && tx.props.note && usecases.categorizeTransaction) {
+          try {
+            const categorizationResult = await usecases.categorizeTransaction({
+              transactionId: tx.props.id,
+              userId,
+            });
+            
+            // If categorization succeeded, fetch the updated transaction from the repo
+            if (categorizationResult) {
+              const updatedTx = await container.repos.txRepo.getById(tx.props.id);
+              if (updatedTx) {
+                finalTx = updatedTx;
+                console.log(`[BulkImport] Transaction ${tx.props.id} categorized with categoryId: ${updatedTx.props.categoryId}`);
+              } else {
+                console.warn(`[BulkImport] Could not fetch updated transaction ${tx.props.id} after categorization`);
+              }
+            }
+          } catch (catError) {
+            // Log but don't fail the import if categorization fails
+            console.error(`Failed to categorize transaction ${tx.props.id}:`, catError);
+          }
+        }
+
+        const txResponse = {
+          ...finalTx.props,
+          occurredAt: finalTx.props.occurredAt.toISOString(),
+          createdAt: finalTx.props.createdAt.toISOString(),
+          updatedAt: finalTx.props.updatedAt.toISOString(),
+        };
+        
+        console.log(`[BulkImport] Returning transaction ${txResponse.id} with categoryId: ${txResponse.categoryId || 'null'}`);
+        
+        results.success.push(txResponse);
+      } catch (error) {
+        results.errors.push({
+          index: i,
+          error: error instanceof Error ? error.message : "Unknown error",
+          data: txInput,
+        });
+      }
+    }
+
+    return c.json(
+      {
+        imported: results.success.length,
+        failed: results.errors.length,
+        total: input.transactions.length,
+        success: results.success,
+        errors: results.errors,
+      },
+      results.errors.length === 0 ? 201 : 207 // 207 Multi-Status if some failed
+    );
+  }
+);
 
 // GET /transactions - list recent transactions for the authenticated user
 // Query params:

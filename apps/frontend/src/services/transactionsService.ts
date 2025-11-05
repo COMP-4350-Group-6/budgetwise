@@ -32,9 +32,11 @@ export interface ParsedInvoiceData {
     description: string;
     quantity?: number;
     price?: number;
+    categoryId?: string;
   }>;
   paymentMethod?: string;
   suggestedCategory?: string;
+  description?: string; // Human-readable description for the transaction note
   confidence: number;
 }
 
@@ -140,5 +142,29 @@ export const transactionsService = {
       console.error("Invoice parsing failed:", error);
       return null;
     }
+  },
+
+  async bulkImportTransactions(transactions: AddTransactionInput[]): Promise<{
+    imported: number;
+    failed: number;
+    total: number;
+    success: TransactionDTO[];
+    errors: Array<{ index: number; error: string; data: any }>;
+  }> {
+    const response = await apiFetch<{
+      imported: number;
+      failed: number;
+      total: number;
+      success: TransactionDTO[];
+      errors: Array<{ index: number; error: string; data: any }>;
+    }>(
+      "/transactions/bulk-import",
+      {
+        method: "POST",
+        body: JSON.stringify({ transactions }),
+      },
+      true
+    );
+    return response;
   },
 };
