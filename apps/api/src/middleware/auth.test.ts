@@ -8,11 +8,12 @@ vi.mock("jose", () => {
   return {
     createRemoteJWKSet: vi.fn(() => ({})),
     jwtVerify: vi.fn(async () => ({ payload: { sub: "user-123" } })),
+    decodeProtectedHeader: vi.fn(() => ({ alg: "ES256" })),
   };
 });
 
 // Import mocked symbols after vi.mock so we can control behavior
-import { jwtVerify } from "jose";
+import { jwtVerify, decodeProtectedHeader } from "jose";
 
 const jwtSecret = process.env.SUPABASE_JWT_SECRET;
 
@@ -44,7 +45,7 @@ describe.skipIf(!jwtSecret)("auth middleware", () => {
     expect(res.status).toBe(401);
   });
 
-  it("allows request when token is valid", async () => {
+  it("@critical allows request when token is valid", async () => {
     const app = new Hono();
     app.use("/auth/me", authMiddleware);
     app.get("/auth/me", (c) => c.json({ ok: true }));

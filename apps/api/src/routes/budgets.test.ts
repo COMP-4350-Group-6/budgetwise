@@ -11,10 +11,12 @@ vi.mock('jose', () => {
       else if (token.includes('different-user')) sub = 'different-user';
       return { payload: { sub } } as any;
     }),
+    decodeProtectedHeader: vi.fn(() => ({ alg: "ES256" })),
   };
 });
 
 import { app } from '../app';
+import { container } from '../container';
 
 interface BudgetDTO {
   id: string;
@@ -66,13 +68,16 @@ describe('Budgets API Integration Tests', () => {
   beforeAll(() => {
     const originalFetch = app.fetch.bind(app);
     (app as any).fetch = (req: Request, env?: any, event?: any) =>
-      originalFetch(req, { ...(env || {}), SUPABASE_JWT_SECRET: process.env.SUPABASE_JWT_SECRET }, event);
+      originalFetch(req, { ...(env || {}), SUPABASE_JWT_SECRET: process.env.SUPABASE_JWT_SECRET, SUPABASE_URL: "https://test.supabase.co" }, event);
   });
   let authToken: string;
   let userId: string;
   let categoryId: string;
 
   beforeEach(async () => {
+    // Reset database for test isolation
+    (container as any).reset();
+    
     // Note: In a real scenario, you'd set up test authentication
     // For now, we'll mock the auth token
     authToken = `test-token-${++testCounter}`;
@@ -96,7 +101,7 @@ describe('Budgets API Integration Tests', () => {
   });
 
   describe('POST /budgets - Create Budget', () => {
-    it('should create a budget with valid data', async () => {
+    it('@critical should create a budget with valid data', async () => {
       const res = await app.request('/budgets', {
         method: 'POST',
         headers: {
@@ -249,7 +254,7 @@ describe('Budgets API Integration Tests', () => {
   });
 
   describe('GET /budgets - List Budgets', () => {
-    it('should list all budgets for user', async () => {
+    it('@critical should list all budgets for user', async () => {
       // Create a few budgets
       await app.request('/budgets', {
         method: 'POST',
@@ -328,7 +333,7 @@ describe('Budgets API Integration Tests', () => {
   });
 
   describe('GET /budgets/dashboard - Dashboard', () => {
-    it('should return dashboard data', async () => {
+    it('@critical should return dashboard data', async () => {
       const res = await app.request('/budgets/dashboard', {
         method: 'GET',
         headers: {
@@ -354,7 +359,7 @@ describe('Budgets API Integration Tests', () => {
   });
 
   describe('PUT /budgets/:id - Update Budget', () => {
-    it('should update budget amount', async () => {
+    it('@critical should update budget amount', async () => {
       // Create budget first
       const createRes = await app.request('/budgets', {
         method: 'POST',

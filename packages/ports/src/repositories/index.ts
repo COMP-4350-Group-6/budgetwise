@@ -2,3 +2,4 @@ export * from './transactions-repo';
 export * from './users-repo';
 export * from './budgets-repo';
 export * from './categories-repo';
+export * from './llm-calls-repo';

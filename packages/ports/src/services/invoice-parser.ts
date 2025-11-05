@@ -12,9 +12,11 @@ export interface ParsedInvoice {
     description: string;
     quantity?: number;
     price?: number; // in cents
+    categoryId?: string; // Suggested category UUID for this item
   }>;
   paymentMethod?: string;
   suggestedCategory?: string;
+  description?: string; // Human-readable description for the transaction
   confidence: number; // 0-1, how confident the parser is
 }
 
@@ -26,10 +28,12 @@ export interface InvoiceParserPort {
    * Parse an invoice image and extract transaction data
    * @param imageBase64 Base64 encoded image data (with or without data URI prefix)
    * @param userCategories User's available categories for suggestion
+   * @param userId Optional user ID for LLM call tracking
    * @returns Parsed invoice data or null if parsing failed
    */
   parseInvoice(
     imageBase64: string,
-    userCategories: Array<{ id: string; name: string; icon?: string }>
+    userCategories: Array<{ id: string; name: string; icon?: string }>,
+    userId?: string
   ): Promise<ParsedInvoice | null>;
 }

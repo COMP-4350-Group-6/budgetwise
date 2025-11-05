@@ -1,0 +1,317 @@
+.
+├── ACKNOWLEDGMENTS.md
+├── DESIGN.md
+├── README.md
+├── TESTING-RATIONALE.md
+├── TESTING.md
+├── apps
+│   ├── api
+│   │   ├── package.json
+│   │   ├── src
+│   │   │   ├── app.ts
+│   │   │   ├── container.ts
+│   │   │   ├── index.ts
+│   │   │   ├── middleware
+│   │   │   │   ├── auth.test.ts
+│   │   │   │   ├── auth.ts
+│   │   │   │   └── errors.ts
+│   │   │   └── routes
+│   │   │       ├── auth.ts
+│   │   │       ├── budgets.test.ts
+│   │   │       ├── budgets.ts
+│   │   │       ├── categories.test.ts
+│   │   │       ├── categories.ts
+│   │   │       ├── health.ts
+│   │   │       └── transactions.ts
+│   │   ├── tests
+│   │   │   └── integration
+│   │   │       └── transactions.int.test.ts
+│   │   ├── tsconfig.json
+│   │   ├── vitest.config.ts
+│   │   └── wrangler.jsonc
+│   └── frontend
+│       ├── __tests__
+│       │   └── pages
+│       │       ├── budget.test.tsx
+│       │       ├── home.test.tsx
+│       │       └── transactions.test.tsx
+│       ├── eslint.config.mjs
+│       ├── next-env.d.ts
+│       ├── next.config-SFPC.ts
+│       ├── next.config.ts
+│       ├── open-next.config.ts
+│       ├── package.json
+│       ├── postcss.config.mjs
+│       ├── src
+│       │   ├── app
+│       │   │   ├── (protected)
+│       │   │   │   ├── ProtectedLayoutClient.tsx
+│       │   │   │   ├── budget
+│       │   │   │   │   ├── budget.module.css
+│       │   │   │   │   └── page.tsx
+│       │   │   │   ├── home
+│       │   │   │   │   ├── home.module.css
+│       │   │   │   │   └── page.tsx
+│       │   │   │   ├── layout.tsx
+│       │   │   │   └── transactions
+│       │   │   │       ├── page.tsx
+│       │   │   │       └── transactions.module.css
+│       │   │   ├── (public)
+│       │   │   │   ├── login
+│       │   │   │   │   ├── login.module.css
+│       │   │   │   │   └── page.tsx
+│       │   │   │   └── signup
+│       │   │   │       ├── page.tsx
+│       │   │   │       └── signup.module.css
+│       │   │   ├── favicon.ico
+│       │   │   ├── globals.css
+│       │   │   ├── layout.tsx
+│       │   │   ├── page.tsx
+│       │   │   └── services
+│       │   │       └── authService.ts
+│       │   ├── components
+│       │   │   ├── budgets
+│       │   │   │   ├── categorySpending.module.css
+│       │   │   │   ├── categorySpending.tsx
+│       │   │   │   ├── savingsGoal.module.css
+│       │   │   │   └── savingsGoal.tsx
+│       │   │   ├── dashboard
+│       │   │   │   ├── calendarCard.module.css
+│       │   │   │   ├── calendarCard.tsx
+│       │   │   │   ├── donutChart.module.css
+│       │   │   │   ├── donutChart.tsx
+│       │   │   │   ├── emptyState.module.css
+│       │   │   │   ├── emptyState.tsx
+│       │   │   │   ├── quickActions.module.css
+│       │   │   │   ├── quickActions.tsx
+│       │   │   │   ├── spendingOverview.module.css
+│       │   │   │   ├── spendingOverview.tsx
+│       │   │   │   ├── statCard.module.css
+│       │   │   │   ├── statCard.tsx
+│       │   │   │   ├── trendChart.module.css
+│       │   │   │   └── trendChart.tsx
+│       │   │   ├── sidebar
+│       │   │   │   ├── sidebar.module.css
+│       │   │   │   └── sidebar.tsx
+│       │   │   ├── transactions
+│       │   │   │   ├── categoryBreakdown.module.css
+│       │   │   │   ├── categoryBreakdown.tsx
+│       │   │   │   ├── financialSummary.module.css
+│       │   │   │   └── financialSummary.tsx
+│       │   │   └── validation
+│       │   │       ├── PasswordRequirement.tsx
+│       │   │       └── PasswordRequirements.module.css
+│       │   ├── constants
+│       │   │   └── transactions.ts
+│       │   ├── hooks
+│       │   │   ├── useAuth.test.tsx
+│       │   │   └── useAuth.ts
+│       │   ├── lib
+│       │   │   ├── apiClient.test.ts
+│       │   │   ├── apiClient.ts
+│       │   │   ├── authContainer.ts
+│       │   │   ├── csvParser.ts
+│       │   │   └── test-transactions.csv
+│       │   └── services
+│       │       ├── authService.test.ts
+│       │       ├── budgetService.ts
+│       │       └── transactionsService.ts
+│       ├── tests
+│       │   ├── integration
+│       │   │   ├── auth
+│       │   │   │   ├── PasswordRequirements.test.tsx
+│       │   │   │   ├── login.test.tsx
+│       │   │   │   └── signup.test.tsx
+│       │   │   └── layout
+│       │   │       └── sidebar.test.tsx
+│       │   └── setup
+│       │       └── setupTests.ts
+│       ├── tsconfig.json
+│       ├── vitest.config.ts
+│       └── wrangler.jsonc
+├── course-work
+│   ├── DB_TESTING_GUIDE.md
+│   ├── LOCAL_DEVELOPMENT_GUIDE.md
+│   ├── QUICK_START_LOCAL_DB.md
+│   ├── README_LOCAL_SETUP.md
+│   ├── SETUP_COMPLETE.md
+│   ├── TESTING_PLAN.md
+│   ├── WS1_REPRODUCIBLE_ENVIRONMENTS_FOR_GROUP_2.png
+│   ├── readme.md
+│   ├── sprint1_worksheet.md
+│   ├── sprint2_worksheet.md
+│   └── sprint3_worksheet.md
+├── infra
+│   └── supabase
+│       ├── config.toml
+│       ├── migrations
+│       │   ├── 0001_core_schema.sql
+│       │   └── 0002_llm_calls_tracking.sql
+│       └── seed.sql
+├── package.json
+├── packages
+│   ├── adapters
+│   │   ├── auth-supabase
+│   │   │   ├── package.json
+│   │   │   ├── src
+│   │   │   │   ├── index.test.ts
+│   │   │   │   └── index.ts
+│   │   │   ├── tests
+│   │   │   │   └── integration
+│   │   │   │       └── index.int.test.ts
+│   │   │   └── vitest.config.ts
+│   │   ├── persistence
+│   │   │   ├── local
+│   │   │   │   ├── package.json
+│   │   │   │   └── src
+│   │   │   │       ├── budgets-repo.ts
+│   │   │   │       ├── categories-repo.ts
+│   │   │   │       ├── index.ts
+│   │   │   │       └── transactions-repo.ts
+│   │   │   ├── package.json
+│   │   │   └── supabase
+│   │   │       ├── package.json
+│   │   │       ├── src
+│   │   │       │   ├── budgets-repo.ts
+│   │   │       │   ├── categories-repo.ts
+│   │   │       │   ├── index.ts
+│   │   │       │   ├── llm-calls-repo.ts
+│   │   │       │   ├── mappers.ts
+│   │   │       │   ├── supabase-client.ts
+│   │   │       │   ├── transactions-repo.ts
+│   │   │       │   ├── types.ts
+│   │   │       │   └── users-repo.ts
+│   │   │       └── tsconfig.json
+│   │   ├── services
+│   │   │   └── openrouter
+│   │   │       ├── package.json
+│   │   │       └── src
+│   │   │           └── index.ts
+│   │   └── system
+│   │       ├── package.json
+│   │       └── src
+│   │           ├── clock.ts
+│   │           ├── id.ts
+│   │           └── index.ts
+│   ├── composition
+│   │   ├── cloudflare-worker
+│   │   │   ├── package.json
+│   │   │   └── src
+│   │   │       ├── container.ts
+│   │   │       └── index.ts
+│   │   └── web-auth-client
+│   │       ├── package.json
+│   │       └── src
+│   │           └── index.ts
+│   ├── config
+│   │   ├── package.json
+│   │   └── tsconfig.base.json
+│   ├── domain
+│   │   ├── package.json
+│   │   ├── src
+│   │   │   ├── budget.test.ts
+│   │   │   ├── budget.ts
+│   │   │   ├── category.test.ts
+│   │   │   ├── category.ts
+│   │   │   ├── default-categories.ts
+│   │   │   ├── index.ts
+│   │   │   ├── llm-call.ts
+│   │   │   ├── llm-model.ts
+│   │   │   ├── money.ts
+│   │   │   ├── transaction.test.ts
+│   │   │   ├── transaction.ts
+│   │   │   ├── user.test.ts
+│   │   │   └── user.ts
+│   │   ├── tsconfig.json
+│   │   └── vitest.config.ts
+│   ├── ports
+│   │   ├── package.json
+│   │   └── src
+│   │       ├── auth
+│   │       │   ├── client.ts
+│   │       │   ├── index.ts
+│   │       │   └── server.ts
+│   │       ├── index.ts
+│   │       ├── repositories
+│   │       │   ├── budgets-repo.ts
+│   │       │   ├── categories-repo.ts
+│   │       │   ├── index.ts
+│   │       │   ├── llm-calls-repo.ts
+│   │       │   ├── transactions-repo.ts
+│   │       │   └── users-repo.ts
+│   │       ├── services
+│   │       │   ├── categorization.ts
+│   │       │   ├── index.ts
+│   │       │   ├── invoice-parser.ts
+│   │       │   └── llm-tracker.ts
+│   │       └── system
+│   │           ├── clock.ts
+│   │           ├── id.ts
+│   │           └── index.ts
+│   ├── schemas
+│   │   ├── package.json
+│   │   ├── src
+│   │   │   ├── auth.schema.ts
+│   │   │   ├── budget.schema.ts
+│   │   │   ├── category.schema.ts
+│   │   │   ├── currency.schema.ts
+│   │   │   ├── index.ts
+│   │   │   ├── llm-call.schema.ts
+│   │   │   ├── money.schema.ts
+│   │   │   ├── openapi-stub.cjs
+│   │   │   ├── transaction.schema.ts
+│   │   │   └── user.schema.ts
+│   │   └── tsconfig.json
+│   └── usecases
+│       ├── package.json
+│       ├── src
+│       │   ├── auth
+│       │   │   ├── index.test.ts
+│       │   │   └── index.ts
+│       │   ├── budgets
+│       │   │   ├── budget-edge-cases.test.ts
+│       │   │   ├── create-budget.test.ts
+│       │   │   ├── create-budget.ts
+│       │   │   ├── delete-budget.test.ts
+│       │   │   ├── delete-budget.ts
+│       │   │   ├── get-budget-dashboard.test.ts
+│       │   │   ├── get-budget-dashboard.ts
+│       │   │   ├── get-budget-status.ts
+│       │   │   ├── list-budgets.test.ts
+│       │   │   ├── list-budgets.ts
+│       │   │   ├── update-budget.test.ts
+│       │   │   └── update-budget.ts
+│       │   ├── categories
+│       │   │   ├── category-edge-cases.test.ts
+│       │   │   ├── create-category.test.ts
+│       │   │   ├── create-category.ts
+│       │   │   ├── delete-category.ts
+│       │   │   ├── list-categories.ts
+│       │   │   ├── seed-default-categories.ts
+│       │   │   └── update-category.ts
+│       │   ├── index.ts
+│       │   └── transactions
+│       │       ├── add-transaction.ts
+│       │       ├── categorize-transaction.ts
+│       │       ├── delete-transaction.ts
+│       │       ├── parse-invoice.ts
+│       │       └── update-transaction.ts
+│       ├── tests
+│       │   └── integration
+│       │       └── category-budget-transaction.integration.test.ts
+│       └── vitest.config.ts
+├── pnpm-lock.yaml
+├── pnpm-workspace.yaml
+├── setup.sh
+├── test-coverage
+│   ├── api.png
+│   ├── auth-adapter-supabase.png
+│   ├── domain.png
+│   ├── frontend.png
+│   ├── test-summary.md
+│   └── usecase.png
+├── tree.txt
+├── tsconfig.json
+└── turbo.json
+
+81 directories, 234 files
