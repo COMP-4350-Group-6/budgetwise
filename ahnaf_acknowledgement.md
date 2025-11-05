@@ -61,6 +61,3 @@ Before final sprint submission, function-level attribution comments will be adde
 - AI-assisted implementations
 - Manual implementations  
 - Hybrid (AI-generated, manually refactored) code
-
-This approach balances development efficiency with clear attribution requirements.
-
