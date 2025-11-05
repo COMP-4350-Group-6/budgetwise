@@ -2,7 +2,8 @@
 
 ## AI-Assisted Development
 
-This project was developed primarily through AI-assisted code generation, leveraging modern LLM and vector search technologies to enable rapid, context-aware development.
+This project was developed primarily through AI-assisted code generation, leveraging modern LLM and vector search technologies to enable rapid, context-aware development. Personal AI tool usage is documented at the project level through this acknowledgement file, similar to how academic papers cite sources in a references section rather than inline throughout the text. Granular, line-by-line attribution is available through Git version control (`git blame`, `git log`).
+
 
 ### Primary Development Tools
 
@@ -51,3 +52,15 @@ OpenRouter's intelligent routing maximizes uptime and performance by automatical
 ### Quality Assurance
 
 While integration tests are AI-generated, **all features are manually verified after each push** to ensure correctness, proper user experience, and real-world functionality. This hybrid approach combines the speed of AI-generated tests with the reliability of human validation.
+
+**Current Sprint Work:**
+During active development sprints, code is maintained without inline attribution comments to preserve clean context for AI-assisted development and collaborative work.
+
+**Final Submission:**
+Before final sprint submission, function-level attribution comments will be added to indicate:
+- AI-assisted implementations
+- Manual implementations  
+- Hybrid (AI-generated, manually refactored) code
+
+This approach balances development efficiency with clear attribution requirements.
+
