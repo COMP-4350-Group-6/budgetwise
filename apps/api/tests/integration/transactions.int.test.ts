@@ -11,6 +11,7 @@ vi.mock('jose', () => {
       else if (token.includes('test-token')) sub = 'test-user-123';
       return { payload: { sub } } as any;
     }),
+    decodeProtectedHeader: vi.fn(() => ({ alg: "ES256" })),
   };
 });
 
@@ -69,7 +70,7 @@ describe('Integration: Category + Budget + Transaction -> Dashboard', () => {
     
     const originalFetch = app.fetch.bind(app);
     (app as any).fetch = (req: Request, env?: any, event?: any) =>
-      originalFetch(req, { ...(env || {}), SUPABASE_JWT_SECRET: process.env.SUPABASE_JWT_SECRET }, event);
+      originalFetch(req, { ...(env || {}), SUPABASE_JWT_SECRET: process.env.SUPABASE_JWT_SECRET, SUPABASE_URL: "https://test.supabase.co" }, event);
   });
   const authToken = 'test-token';        // matches existing tests
   const userId = 'test-user-123';        // body-provided for /transactions (no auth middleware there)
