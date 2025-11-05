@@ -3,7 +3,7 @@
  */
 import { render, screen, waitFor } from "@testing-library/react";
 import HomePage from "@/app/(protected)/home/page";
-import { vi } from "vitest";
+import { vi, describe, it, expect, beforeEach } from "vitest";
 import React from "react";
 
 // Mock router 
@@ -25,7 +25,7 @@ vi.mock("@/lib/apiClient", () => ({
 // Mock child dashboard components
 vi.mock("@/components/dashboard/statCard", () => ({
   __esModule: true,
-  default: ({ title, value }: any) => (
+  default: ({ title, value }: { title: string; value: string }) => (
     <div data-testid={`stat-${title}`}>{`${title}: ${value}`}</div>
   ),
 }));
@@ -47,7 +47,7 @@ vi.mock("@/components/dashboard/quickActions", () => ({
 }));
 
 describe("HomePage", () => {
-  const mockDashboard = { totalBudgetCents: 10000, totalSpentCents: 4000 };
+  const mockDashboard = { totalBudgetCents: 10000, totalSpentCents: 4000, categories: [], overBudgetCount: 0, alertCount: 0 };
   const mockTransactions = [
     { id: "1", amountCents: 200, note: "Coffee" },
     { id: "2", amountCents: 300, note: "Groceries" },
@@ -61,8 +61,8 @@ describe("HomePage", () => {
     const { budgetService } = await import("@/services/budgetService");
     const { apiFetch } = await import("@/lib/apiClient");
 
-    (budgetService.getDashboard as any).mockResolvedValueOnce(mockDashboard);
-    (apiFetch as any).mockResolvedValueOnce({ transactions: mockTransactions });
+  vi.mocked(budgetService.getDashboard).mockResolvedValueOnce(mockDashboard);
+  vi.mocked(apiFetch).mockResolvedValueOnce({ transactions: mockTransactions });
 
     render(<HomePage />);
     expect(screen.getByText(/loading dashboard/i)).toBeInTheDocument();
@@ -72,8 +72,8 @@ describe("HomePage", () => {
     const { budgetService } = await import("@/services/budgetService");
     const { apiFetch } = await import("@/lib/apiClient");
 
-    (budgetService.getDashboard as any).mockResolvedValueOnce(mockDashboard);
-    (apiFetch as any).mockResolvedValueOnce({ transactions: mockTransactions });
+  vi.mocked(budgetService.getDashboard).mockResolvedValueOnce(mockDashboard);
+  vi.mocked(apiFetch).mockResolvedValueOnce({ transactions: mockTransactions });
 
     render(<HomePage />);
 
@@ -94,8 +94,8 @@ describe("HomePage", () => {
     const { budgetService } = await import("@/services/budgetService");
     const { apiFetch } = await import("@/lib/apiClient");
 
-    (budgetService.getDashboard as any).mockRejectedValueOnce(new Error("Failed"));
-    (apiFetch as any).mockResolvedValueOnce({ transactions: [] });
+  vi.mocked(budgetService.getDashboard).mockRejectedValueOnce(new Error("Failed"));
+  vi.mocked(apiFetch).mockResolvedValueOnce({ transactions: [] });
 
     render(<HomePage />);
     await waitFor(() =>

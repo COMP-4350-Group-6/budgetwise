@@ -310,7 +310,7 @@ export default function SavingsGoal() {
           <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
             <h2 className={styles.modalTitle}>Delete Goal</h2>
             <p className={styles.deleteText}>
-              Are you sure you want to delete the goal "{showDeleteModal.name}"?
+              Are you sure you want to delete the goal {showDeleteModal.name}?
               This action cannot be undone.
             </p>
             <div className={styles.formActions}>

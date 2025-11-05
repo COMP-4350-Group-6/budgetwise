@@ -4,7 +4,8 @@ import { CurrencySchema } from "./currency.schema";
 export const BudgetPeriodSchema = z.enum(["DAILY", "WEEKLY", "MONTHLY", "YEARLY"]);
 
 export const CreateBudgetInputSchema = z.object({
-  categoryId: z.uuid(),
+  // IDs in the application are ULIDs (not strictly UUIDs). Accept any non-empty string here.
+  categoryId: z.string().min(1),
   name: z.string().min(1).max(100),
   amountCents: z.number().int().min(0),
   currency: CurrencySchema,

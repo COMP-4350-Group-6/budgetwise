@@ -129,6 +129,25 @@ export function makeContainer(env?: Env) {
           })
         : undefined,
     },
-    reset,
+    // Reset helper for tests/development: re-initialize in-memory repos and trackers
+    reset: () => {
+      // If using supabase we don't attempt to reset remote state here.
+      // For in-memory repos, call their `clear()` helpers to reset state so
+      // existing references (used by the returned usecases) remain valid.
+      if (!supabaseUrl || !supabaseServiceRoleKey) {
+        try {
+          (categoriesRepo as any)?.clear?.();
+        } catch {}
+        try {
+          (budgetsRepo as any)?.clear?.();
+        } catch {}
+        try {
+          (txRepo as any)?.clear?.();
+        } catch {}
+        llmCallsRepo = undefined;
+        llmTracker = undefined;
+        id = makeUlid();
+      }
+    },
   };
 }

@@ -15,8 +15,8 @@ export const TransactionRowSchema = z.object({
 export const TransactionDTO = z.object({
   id: z.uuid(),
   userId: z.uuid(),
-  budgetId: z.uuid().nullable(),
-  categoryId: z.uuid().nullable(),
+  budgetId: z.string().nullable(),
+  categoryId: z.string().nullable(),
   amountCents: z.number().int(),
   note: z.string().max(280).nullable(),
   occurredAt: z.coerce.date(),

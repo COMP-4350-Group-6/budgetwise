@@ -7,7 +7,7 @@ export interface ParsedTransactionRow {
   category?: string;
   categoryId?: string;
   budgetId?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface CSVParseResult {

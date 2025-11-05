@@ -96,10 +96,16 @@ budgets.get("/budgets", async (c) => {
 // POST /budgets
 budgets.post(
   "/budgets",
-  zValidator("json", CreateBudgetInputSchema),
   async (c) => {
     const userId = c.get("userId") as string;
-    const input = c.req.valid("json");
+    // Perform validation here so we can inspect validation errors clearly in tests/logs
+    const raw = await c.req.json().catch(() => ({}));
+    const parsed = CreateBudgetInputSchema.safeParse(raw as any);
+    if (!parsed.success) {
+      console.error('CreateBudget validation failed:', parsed.error.format());
+      return c.json({ error: 'Invalid request', details: parsed.error.flatten() }, 400);
+    }
+    const input = parsed.data;
     const { usecases, repos } = container;
     
     try {
@@ -112,6 +118,9 @@ budgets.post(
       const budget = await usecases.createBudget({
         ...input,
         userId,
+        // normalize nullable fields (requests may send `null`) to `undefined` which the domain expects
+        endDate: (input as any).endDate ?? undefined,
+        alertThreshold: (input as any).alertThreshold ?? undefined,
       });
       
       return c.json({

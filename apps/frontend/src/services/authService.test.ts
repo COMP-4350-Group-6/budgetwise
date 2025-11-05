@@ -12,7 +12,7 @@ vi.mock("@/lib/authContainer", () => ({
 }));
 
 describe("authService", () => {
-  const mockUser = { id: "1", email: "user@test.com", name: "User" };
+  const mockUser = { id: "1", email: "user@test.com", name: "User", defaultCurrency: "CAD", createdAt: new Date().toISOString() };
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -20,7 +20,7 @@ describe("authService", () => {
   });
 
   it("signup should call signUp usecase", async () => {
-    (authUsecases.signUp as any).mockResolvedValueOnce();
+  vi.mocked(authUsecases.signUp).mockResolvedValueOnce(undefined);
     const result = await authService.signup("user@test.com", "pass123", "User");
     expect(authUsecases.signUp).toHaveBeenCalledWith({
       email: "user@test.com",
@@ -32,8 +32,8 @@ describe("authService", () => {
   });
 
   it("login should call signIn and getCurrentUser", async () => {
-    (authUsecases.signIn as any).mockResolvedValueOnce();
-    (authUsecases.getCurrentUser as any).mockResolvedValueOnce(mockUser);
+  vi.mocked(authUsecases.signIn).mockResolvedValueOnce(undefined);
+  vi.mocked(authUsecases.getCurrentUser).mockResolvedValueOnce(mockUser);
 
     const result = await authService.login("user@test.com", "pass123");
 
@@ -43,15 +43,15 @@ describe("authService", () => {
   });
 
   it("getMe should call getCurrentUser", async () => {
-    (authUsecases.getCurrentUser as any).mockResolvedValueOnce(mockUser);
+  vi.mocked(authUsecases.getCurrentUser).mockResolvedValueOnce(mockUser);
     const user = await authService.getMe();
 
     expect(authUsecases.getCurrentUser).toHaveBeenCalled();
-    expect(user).toEqual({ ...mockUser, createdAt: undefined });
+  expect(user).toEqual({ id: mockUser.id, email: mockUser.email, name: mockUser.name, createdAt: mockUser.createdAt });
   });
 
   it("logout should call signOut", async () => {
-    (authUsecases.signOut as any).mockResolvedValueOnce();
+  vi.mocked(authUsecases.signOut).mockResolvedValueOnce(undefined);
     await authService.logout();
     expect(authUsecases.signOut).toHaveBeenCalled();
   });

@@ -1,8 +1,9 @@
 import { apiFetch } from "@/lib/apiClient";
 import { authClient } from "@/lib/authContainer";
+import { vi, describe, it, expect, beforeEach } from "vitest";
 
 const mockFetch = vi.fn();
-global.fetch = mockFetch as any;
+global.fetch = mockFetch as unknown as typeof global.fetch;
 
 vi.mock("@/lib/authContainer", () => ({
   authClient: {
@@ -17,7 +18,7 @@ describe("apiFetch", () => {
   beforeEach(() => {
     vi.resetAllMocks();
     localStorage.clear();
-    (process.env as any).NEXT_PUBLIC_API_URL = API_URL;
+    (process.env as unknown as Record<string, string>).NEXT_PUBLIC_API_URL = API_URL;
   });
 
   it("uses NEXT_PUBLIC_API_URL if defined", async () => {
@@ -39,7 +40,7 @@ describe("apiFetch", () => {
   });
 
   it("falls back to localhost when NEXT_PUBLIC_API_URL is undefined", async () => {
-    delete (process.env as any).NEXT_PUBLIC_API_URL;
+  delete (process.env as unknown as Record<string, string>)["NEXT_PUBLIC_API_URL"];
 
     const mockData = { msg: "local ok" };
     mockFetch.mockResolvedValueOnce({
@@ -56,7 +57,7 @@ describe("apiFetch", () => {
   });
 
   it("adds Authorization header when authRequired is true", async () => {
-    (authClient.getSessionToken as any).mockResolvedValueOnce("abc123");
+  vi.mocked(authClient.getSessionToken).mockResolvedValueOnce("abc123");
     const mockData = { id: 1 };
     mockFetch.mockResolvedValueOnce({
       ok: true,

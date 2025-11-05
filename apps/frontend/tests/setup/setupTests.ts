@@ -1,5 +1,5 @@
 import "@testing-library/jest-dom";
-import { vi } from "vitest";
+import { vi, beforeEach } from "vitest";
 import { config } from "dotenv";
 config({ path: ".env.local" });
 vi.mock("next/navigation", () => ({

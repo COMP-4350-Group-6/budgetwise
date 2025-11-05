@@ -1,7 +1,7 @@
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import BudgetPage from "@/app/(protected)/budget/page";
 import React from "react";
-import { vi } from "vitest";
+import { vi, describe, it, expect, beforeEach } from "vitest";
 
 // mock CSS module import
 vi.mock("@/app/(protected)/budget/budget.module.css", () => ({
@@ -44,20 +44,25 @@ describe("BudgetPage", () => {
     totalBudgetCents: 10000,
     totalSpentCents: 4000,
     categories: [
-      { categoryId: "1", totalBudgetCents: 5000, totalSpentCents: 1000 },
+      { categoryId: "1", totalBudgetCents: 5000, totalSpentCents: 1000, categoryName: "Food", categoryIcon: undefined, categoryColor: "#4ECDC4", budgets: [], totalRemainingCents: 4000, overallPercentageUsed: 20, hasOverBudget: false },
     ],
-    savingsGoals: [{ id: "goal1", name: "Vacation", target: 500000 }],
+    savingsGoals: [{ id: "goal1", name: "Vacation", targetCents: 500000, savedCents: 0 }],
+    overBudgetCount: 0,
+    alertCount: 0,
   };
 
   const mockCategories = [
-    { id: "1", name: "Food", description: "Meals", color: "#4ECDC4" },
+    { id: "1", name: "Food", description: "Meals", color: "#4ECDC4", userId: "u1", isDefault: false, isActive: true, sortOrder: 0, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
   ];
 
   const mockTransactions = [
     {
       id: "tx1",
+      userId: "u1",
       amountCents: 2000,
       occurredAt: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
       categoryId: "1",
     },
   ];
@@ -70,9 +75,9 @@ describe("BudgetPage", () => {
     const { budgetService, categoryService } = await import("@/services/budgetService");
     const { transactionsService } = await import("@/services/transactionsService");
 
-    (categoryService.listCategories as any).mockResolvedValueOnce([]);
-    (budgetService.getDashboard as any).mockResolvedValueOnce(mockDashboard);
-    (transactionsService.listTransactions as any).mockResolvedValueOnce(mockTransactions);
+  vi.mocked(categoryService.listCategories).mockResolvedValueOnce([]);
+  vi.mocked(budgetService.getDashboard).mockResolvedValueOnce(mockDashboard);
+  vi.mocked(transactionsService.listTransactions).mockResolvedValueOnce(mockTransactions);
 
     render(<BudgetPage />);
     expect(screen.getByText(/loading budget data/i)).toBeInTheDocument();
@@ -82,9 +87,9 @@ describe("BudgetPage", () => {
     const { budgetService, categoryService } = await import("@/services/budgetService");
     const { transactionsService } = await import("@/services/transactionsService");
 
-    (categoryService.listCategories as any).mockResolvedValueOnce(mockCategories);
-    (budgetService.getDashboard as any).mockResolvedValueOnce(mockDashboard);
-    (transactionsService.listTransactions as any).mockResolvedValueOnce(mockTransactions);
+  vi.mocked(categoryService.listCategories).mockResolvedValueOnce(mockCategories);
+  vi.mocked(budgetService.getDashboard).mockResolvedValueOnce(mockDashboard);
+  vi.mocked(transactionsService.listTransactions).mockResolvedValueOnce(mockTransactions);
 
     render(<BudgetPage />);
 
@@ -101,9 +106,9 @@ describe("BudgetPage", () => {
     const { budgetService, categoryService } = await import("@/services/budgetService");
     const { transactionsService } = await import("@/services/transactionsService");
 
-    (categoryService.listCategories as any).mockResolvedValueOnce(mockCategories);
-    (budgetService.getDashboard as any).mockResolvedValueOnce(mockDashboard);
-    (transactionsService.listTransactions as any).mockResolvedValueOnce(mockTransactions);
+  vi.mocked(categoryService.listCategories).mockResolvedValueOnce(mockCategories);
+  vi.mocked(budgetService.getDashboard).mockResolvedValueOnce(mockDashboard);
+  vi.mocked(transactionsService.listTransactions).mockResolvedValueOnce(mockTransactions);
 
     render(<BudgetPage />);
 
@@ -127,11 +132,9 @@ describe("BudgetPage", () => {
     const { budgetService, categoryService } = await import("@/services/budgetService");
     const { transactionsService } = await import("@/services/transactionsService");
 
-    (categoryService.listCategories as any).mockRejectedValueOnce(
-      new Error("Network error")
-    );
-    (budgetService.getDashboard as any).mockResolvedValueOnce(mockDashboard);
-    (transactionsService.listTransactions as any).mockResolvedValueOnce(mockTransactions);
+    vi.mocked(categoryService.listCategories).mockRejectedValueOnce(new Error("Network error"));
+    vi.mocked(budgetService.getDashboard).mockResolvedValueOnce(mockDashboard);
+    vi.mocked(transactionsService.listTransactions).mockResolvedValueOnce(mockTransactions);
 
     render(<BudgetPage />);
 

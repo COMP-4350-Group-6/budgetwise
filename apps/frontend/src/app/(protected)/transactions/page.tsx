@@ -5,7 +5,7 @@ import styles from "./transactions.module.css";
 import { categoryService, budgetService } from "@/services/budgetService";
 import { transactionsService } from "@/services/transactionsService";
 import type { Category, Budget } from "@/services/budgetService";
-import type { TransactionDTO } from "@/services/transactionsService";
+import type { TransactionDTO, AddTransactionInput } from "@/services/transactionsService";
 import FinancialSummary from "@/components/transactions/financialSummary";
 import CategoryBreakdown from "@/components/transactions/categoryBreakdown";
 import { apiFetch } from "@/lib/apiClient";
@@ -49,13 +49,13 @@ export default function TransactionsPage() {
   // ===== CSV Import State =====
   const [showCSVModal, setShowCSVModal] = useState(false);
   const [csvFile, setCsvFile] = useState<File | null>(null);
-  const [parsedTransactions, setParsedTransactions] = useState<any[]>([]);
+  const [parsedTransactions, setParsedTransactions] = useState<AddTransactionInput[]>([]);
   const [parseErrors, setParseErrors] = useState<Array<{ row: number; error: string }>>([]);
   const [importing, setImporting] = useState(false);
   const [importResult, setImportResult] = useState<{
     imported: number;
     failed: number;
-    errors: Array<{ index: number; error: string; data: any }>;
+    errors: Array<{ index: number; error: string; data: unknown }>;
   } | null>(null);
 
   // ===== Edit Modal State =====

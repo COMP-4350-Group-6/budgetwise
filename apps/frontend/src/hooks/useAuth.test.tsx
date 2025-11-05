@@ -18,7 +18,7 @@ describe("useAuth hook", () => {
   });
 
   it("should start with loading = true initially, then false", async () => {
-    (authUsecases.getCurrentUser as any).mockResolvedValueOnce(null);
+    vi.mocked(authUsecases.getCurrentUser).mockResolvedValueOnce(null);
     const { result } = renderHook(() => useAuth());
     expect(result.current.loading).toBe(true);
     await waitFor(() => {
@@ -27,7 +27,7 @@ describe("useAuth hook", () => {
   });
 
   it("should fetch user when user exists", async () => {
-    (authUsecases.getCurrentUser as any).mockResolvedValueOnce(mockUser);
+    vi.mocked(authUsecases.getCurrentUser).mockResolvedValueOnce(mockUser);
 
     const { result } = renderHook(() => useAuth());
 
@@ -36,12 +36,12 @@ describe("useAuth hook", () => {
     });
 
     expect(authUsecases.getCurrentUser).toHaveBeenCalled();
-    expect(result.current.user).toEqual(mockUser);
+  expect(result.current.user).toEqual(mockUser);
     expect(result.current.isAuthenticated).toBe(true);
   });
 
   it("should set user to null when fetch fails", async () => {
-    (authUsecases.getCurrentUser as any).mockRejectedValueOnce(new Error("Unauthorized"));
+    vi.mocked(authUsecases.getCurrentUser).mockRejectedValueOnce(new Error("Unauthorized"));
 
     const { result } = renderHook(() => useAuth());
 
@@ -54,7 +54,7 @@ describe("useAuth hook", () => {
   });
 
   it("should set user to null when no user exists", async () => {
-    (authUsecases.getCurrentUser as any).mockResolvedValueOnce(null);
+    vi.mocked(authUsecases.getCurrentUser).mockResolvedValueOnce(null);
 
     const { result } = renderHook(() => useAuth());
 

@@ -1,7 +1,9 @@
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import TransactionsPage from "@/app/(protected)/transactions/page";
 import React from "react";
-import { vi } from "vitest";
+import { vi, describe, it, expect, beforeEach } from "vitest";
+import type { Budget } from "@/services/budgetService";
+import type { TransactionDTO } from "@/services/transactionsService";
 
 // mock CSS module
 vi.mock("@/app/(protected)/transactions/transactions.module.css", () => ({
@@ -55,21 +57,62 @@ vi.mock("@/lib/apiClient", () => ({
 
 describe("TransactionsPage", () => {
   const mockCategories = [
-    { id: "c1", name: "Food" },
-    { id: "c2", name: "Travel" },
+    {
+      id: "c1",
+      userId: "u1",
+      name: "Food",
+      description: undefined,
+      icon: undefined,
+      color: undefined,
+      isDefault: false,
+      isActive: true,
+      sortOrder: 0,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    },
+    {
+      id: "c2",
+      userId: "u1",
+      name: "Travel",
+      description: undefined,
+      icon: undefined,
+      color: undefined,
+      isDefault: false,
+      isActive: true,
+      sortOrder: 1,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    },
   ];
 
-  const mockBudgets = [
-    { id: "b1", name: "Monthly", totalBudgetCents: 100000 },
+  const mockBudgets: Budget[] = [
+    {
+      id: "b1",
+      userId: "u1",
+      categoryId: "c1",
+      name: "Monthly",
+      amountCents: 100000,
+      currency: "USD",
+      period: "MONTHLY",
+      startDate: new Date().toISOString(),
+      endDate: undefined,
+      isActive: true,
+      alertThreshold: undefined,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    },
   ];
 
-  const mockTransactions = [
+  const mockTransactions: TransactionDTO[] = [
     {
       id: "t1",
+      userId: "u1",
       amountCents: -1200,
       occurredAt: new Date().toISOString(),
       categoryId: "c1",
       note: "Starbucks Coffee",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     },
   ];
 
@@ -81,9 +124,9 @@ describe("TransactionsPage", () => {
     const { categoryService, budgetService } = await import("@/services/budgetService");
     const { apiFetch } = await import("@/lib/apiClient");
 
-    (categoryService.listCategories as any).mockResolvedValue(mockCategories);
-    (budgetService.listBudgets as any).mockResolvedValue(mockBudgets);
-    (apiFetch as any).mockResolvedValue({ transactions: mockTransactions });
+  vi.mocked(categoryService.listCategories).mockResolvedValue(mockCategories);
+  vi.mocked(budgetService.listBudgets).mockResolvedValue(mockBudgets);
+  vi.mocked(apiFetch).mockResolvedValue({ transactions: mockTransactions });
 
     render(<TransactionsPage />);
     expect(screen.getByRole("heading", { name: /^transactions$/i })).toBeInTheDocument();
@@ -102,9 +145,9 @@ describe("TransactionsPage", () => {
     const { categoryService, budgetService } = await import("@/services/budgetService");
     const { apiFetch } = await import("@/lib/apiClient");
 
-    (categoryService.listCategories as any).mockResolvedValue(mockCategories);
-    (budgetService.listBudgets as any).mockResolvedValue(mockBudgets);
-    (apiFetch as any).mockResolvedValue({ transactions: mockTransactions });
+  vi.mocked(categoryService.listCategories).mockResolvedValue(mockCategories);
+  vi.mocked(budgetService.listBudgets).mockResolvedValue(mockBudgets);
+  vi.mocked(apiFetch).mockResolvedValue({ transactions: mockTransactions });
 
     render(<TransactionsPage />);
 
@@ -118,9 +161,9 @@ describe("TransactionsPage", () => {
     const { categoryService, budgetService } = await import("@/services/budgetService");
     const { apiFetch } = await import("@/lib/apiClient");
 
-    (categoryService.listCategories as any).mockResolvedValue(mockCategories);
-    (budgetService.listBudgets as any).mockResolvedValue(mockBudgets);
-    (apiFetch as any).mockResolvedValue({ transactions: [] });
+  vi.mocked(categoryService.listCategories).mockResolvedValue(mockCategories);
+  vi.mocked(budgetService.listBudgets).mockResolvedValue(mockBudgets);
+  vi.mocked(apiFetch).mockResolvedValue({ transactions: [] });
 
     render(<TransactionsPage />);
     await waitFor(() =>
@@ -132,9 +175,9 @@ describe("TransactionsPage", () => {
     const { categoryService, budgetService } = await import("@/services/budgetService");
     const { apiFetch } = await import("@/lib/apiClient");
 
-    (categoryService.listCategories as any).mockResolvedValue(mockCategories);
-    (budgetService.listBudgets as any).mockResolvedValue(mockBudgets);
-    (apiFetch as any).mockResolvedValue({ transactions: [] });
+  vi.mocked(categoryService.listCategories).mockResolvedValue(mockCategories);
+  vi.mocked(budgetService.listBudgets).mockResolvedValue(mockBudgets);
+  vi.mocked(apiFetch).mockResolvedValue({ transactions: [] });
 
     render(<TransactionsPage />);
     await waitFor(() =>
@@ -157,9 +200,9 @@ describe("TransactionsPage", () => {
     const { categoryService, budgetService } = await import("@/services/budgetService");
     const { apiFetch } = await import("@/lib/apiClient");
 
-    (categoryService.listCategories as any).mockResolvedValue(mockCategories);
-    (budgetService.listBudgets as any).mockResolvedValue(mockBudgets);
-    (apiFetch as any).mockResolvedValue({ transactions: [] });
+  vi.mocked(categoryService.listCategories).mockResolvedValue(mockCategories);
+  vi.mocked(budgetService.listBudgets).mockResolvedValue(mockBudgets);
+  vi.mocked(apiFetch).mockResolvedValue({ transactions: [] });
 
     global.alert = vi.fn();
 

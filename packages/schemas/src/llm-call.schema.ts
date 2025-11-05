@@ -16,13 +16,13 @@ export type LLMCallStatus = z.infer<typeof LLMCallStatusSchema>;
  * LLM Call Schema
  */
 export const LLMCallSchema = z.object({
-  id: z.string().uuid(),
-  userId: z.string().uuid(),
+  id: z.uuid(),
+  userId: z.uuid(),
   provider: z.string().min(1),
   model: z.string().min(1),
   callType: LLMCallTypeSchema,
-  requestPayload: z.record(z.unknown()),
-  responsePayload: z.record(z.unknown()).optional(),
+  requestPayload: z.record(z.string(), z.unknown()),
+  responsePayload: z.record(z.string(), z.unknown()).optional(),
   promptTokens: z.number().int().nonnegative().optional(),
   completionTokens: z.number().int().nonnegative().optional(),
   totalTokens: z.number().int().nonnegative().optional(),

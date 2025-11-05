@@ -31,9 +31,9 @@ export class SupabaseLLMCallsRepository implements LLMCallsRepository {
       created_at: call.props.createdAt.toISOString(),
     };
 
-    const { error } = await this.supabase
-      .from('llm_calls')
-      .insert(row);
+    // Supabase client types in this workspace are strict and may make `.from()` inference narrow to `never`.
+    // Cast the query builder to `any` for the insert call to avoid complex type gymnastics here.
+    const { error } = await (this.supabase.from('llm_calls') as any).insert(row);
 
     if (error) {
       throw new Error(`Failed to save LLM call: ${error.message}`);
@@ -81,13 +81,14 @@ export class SupabaseLLMCallsRepository implements LLMCallsRepository {
       query = query.range(options.offset, options.offset + (options.limit || 10) - 1);
     }
 
-    const { data, error } = await query;
+  const { data, error } = await query;
 
     if (error) {
       throw new Error(`Failed to list LLM calls: ${error.message}`);
     }
 
-    return data.map(row => this.rowToDomain(row));
+  const rows = data as LLMCallRow[];
+  return rows.map(row => this.rowToDomain(row));
   }
 
   async getUserStats(
@@ -121,13 +122,14 @@ export class SupabaseLLMCallsRepository implements LLMCallsRepository {
       query = query.lte('created_at', options.endDate.toISOString());
     }
 
-    const { data, error } = await query;
+  const { data, error } = await query;
 
     if (error) {
       throw new Error(`Failed to get user stats: ${error.message}`);
     }
 
-    const stats = data.reduce(
+    const rows = data as LLMCallRow[];
+    const stats = rows.reduce(
       (acc, row) => {
         acc.totalCalls++;
         acc.totalTokens += row.total_tokens || 0;
@@ -181,14 +183,15 @@ export class SupabaseLLMCallsRepository implements LLMCallsRepository {
       query = query.lte('created_at', options.endDate.toISOString());
     }
 
-    const { data, error } = await query;
+  const { data, error } = await query;
 
     if (error) {
       throw new Error(`Failed to get global stats: ${error.message}`);
     }
 
     const uniqueUsers = new Set<string>();
-    const stats = data.reduce(
+    const rows2 = data as LLMCallRow[];
+    const stats = rows2.reduce(
       (acc, row) => {
         acc.totalCalls++;
         acc.totalTokens += row.total_tokens || 0;

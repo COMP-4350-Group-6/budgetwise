@@ -149,14 +149,14 @@ export const transactionsService = {
     failed: number;
     total: number;
     success: TransactionDTO[];
-    errors: Array<{ index: number; error: string; data: any }>;
+    errors: Array<{ index: number; error: string; data: unknown }>;
   }> {
     const response = await apiFetch<{
       imported: number;
       failed: number;
       total: number;
       success: TransactionDTO[];
-      errors: Array<{ index: number; error: string; data: any }>;
+      errors: Array<{ index: number; error: string; data: unknown }>;
     }>(
       "/transactions/bulk-import",
       {
