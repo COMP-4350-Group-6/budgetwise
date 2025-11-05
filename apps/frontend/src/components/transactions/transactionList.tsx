@@ -11,7 +11,6 @@ interface TransactionListProps {
   transactions: TransactionDTO[];
   loading: boolean;
   onEdit: (tx: TransactionDTO) => void;
-  categorizingId: string | null;
   categories?: Category[];
 }
 
@@ -26,7 +25,6 @@ export default function TransactionList({
   transactions,
   loading,
   onEdit,
-  categorizingId,
   categories = [],
 }: TransactionListProps) {
   // Safely resolve a readable category label
@@ -66,9 +64,7 @@ export default function TransactionList({
                   </div>
                   <div className={styles.transactionMeta}>
                     <span className={styles.categoryBadge}>
-                      {categorizingId === tx.id
-                        ? TRANSACTION_STRINGS.messages.categorizing ?? "Categorizing…"
-                        : getCategoryLabel(tx.categoryId)}
+                      {getCategoryLabel(tx.categoryId)}
                     </span>
                     <span className={styles.transactionDate}>
                       {new Date(tx.occurredAt).toLocaleDateString()}
@@ -78,23 +74,23 @@ export default function TransactionList({
 
                 {/* Right Amount + Edit */}
                 <div className={styles.transactionRight}>
-                <div
-                  className={`${styles.transactionAmount} ${
-                    isExpense ? styles.expense : styles.income
-                  }`}
-                >
-                  {isExpense ? "-" : "+"}${amount}
-                </div>
+                  <div
+                    className={`${styles.transactionAmount} ${
+                      isExpense ? styles.expense : styles.income
+                    }`}
+                  >
+                    {isExpense ? "-" : "+"}${amount}
+                  </div>
 
-                <button
-                  className={styles.editBtn}
-                  onClick={() => onEdit(tx)}
-                  aria-label={TRANSACTION_STRINGS.edit}
-                >
-                  <Pencil size={16} />
-                </button>
-              </div>
+                  <button
+                    className={styles.editBtn}
+                    onClick={() => onEdit(tx)}
+                    aria-label={TRANSACTION_STRINGS.edit}
+                  >
+                    <Pencil size={16} />
+                  </button>
                 </div>
+              </div>
             );
           })
         )}

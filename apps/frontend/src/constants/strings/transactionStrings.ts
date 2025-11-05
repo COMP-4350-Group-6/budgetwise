@@ -11,7 +11,8 @@ export const TRANSACTION_STRINGS = {
     totalSpent: "Total Spent",
     totalTransaction: "Total Transactions",
     averageTransaction: "Average Transaction",
-    uncategorized: "Uncategorized"
+    uncategorized: "Uncategorized",
+    importCsv: "Import CSV",
   },
 
   calendarTitle: "Spending Calendar",
@@ -20,14 +21,26 @@ export const TRANSACTION_STRINGS = {
   weekOf: "Week of",
 
   messages: {
-    todayTransactions: "Today's Transactions",
+    todayTransactions: "Transactions",
     noTransactions: "No transactions logged.",
     confirmDelete: "Are you sure you want to delete this transaction?",
     successAdd: "Transaction added successfully!",
     successUpdate: "Transaction updated successfully!",
     failure: "Failed to save transaction. Please try again.",
     categorizing: "Categorizing…",
-    searchPlaceholder: "Search transactions..."
+    searchPlaceholder: "Search transactions...",
+  },
+
+  importCsv: {
+    title: "Import Transactions from CSV",
+    importNow: "Import Now",
+    selectFile: "Select CSV File",
+    parseErrors: "Errors found in the CSV file:",
+    importing: "Importing transactions...",
+    importResultSuccess: "Successfully imported {count} transactions.",
+    importResultFailure: "No transactions were imported.",
+    importSuccess: "Transactions imported successfully!",
+    importFailure: "Failed to import transactions. Please check the file format.",
   },
   trend: {
     title: "Monthly Spending Trend",
