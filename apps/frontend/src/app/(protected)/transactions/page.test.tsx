@@ -167,7 +167,7 @@ describe("TransactionsPage", () => {
 
     render(<TransactionsPage />);
     await waitFor(() =>
-      expect(screen.getByText(/no transactions found/i)).toBeInTheDocument()
+      expect(screen.getByText(/no transactions logged/i)).toBeInTheDocument()
     );
   });
 
@@ -181,7 +181,7 @@ describe("TransactionsPage", () => {
 
     render(<TransactionsPage />);
     await waitFor(() =>
-      expect(screen.queryByText(/no transactions found/i)).toBeInTheDocument()
+      expect(screen.queryByText(/no transactions logged/i)).toBeInTheDocument()
     );
 
     const addBtn = screen.getByRole("button", { name: /add transaction/i })
@@ -207,7 +207,7 @@ describe("TransactionsPage", () => {
     global.alert = vi.fn();
 
     render(<TransactionsPage />);
-    await waitFor(() => screen.getByText(/no transactions found/i));
+    await waitFor(() => screen.getByText(/no transactions logged/i));
 
     const exportBtn = screen.getByRole("button", { name: /export csv/i });
     fireEvent.click(exportBtn);

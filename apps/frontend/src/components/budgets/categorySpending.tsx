@@ -18,7 +18,6 @@ import {
   Plus,
   Trash2,
   Lightbulb,
-  
   Wallet,
 } from "lucide-react";
 
@@ -104,7 +103,9 @@ export default function CategorySpendingSection({
   // Separate categories into budgeted and non-budgeted
   const categoriesWithBudgets = categories
     .filter((category) => {
-      const summary = dashboard?.categories.find((c) => c.categoryId === category.id);
+      const summary = dashboard?.categories.find(
+        (c) => c.categoryId === category.id
+      );
       return (summary?.budgets?.length || 0) > 0;
     })
     .sort((a, b) => {
@@ -112,13 +113,15 @@ export default function CategorySpendingSection({
       const periodOrder = { DAILY: 1, WEEKLY: 2, MONTHLY: 3, YEARLY: 4 };
       const aSummary = dashboard?.categories.find((c) => c.categoryId === a.id);
       const bSummary = dashboard?.categories.find((c) => c.categoryId === b.id);
-      const aPeriod = aSummary?.budgets?.[0]?.budget?.period || 'YEARLY';
-      const bPeriod = bSummary?.budgets?.[0]?.budget?.period || 'YEARLY';
+      const aPeriod = aSummary?.budgets?.[0]?.budget?.period || "YEARLY";
+      const bPeriod = bSummary?.budgets?.[0]?.budget?.period || "YEARLY";
       return periodOrder[aPeriod] - periodOrder[bPeriod];
     });
 
   const categoriesWithoutBudgets = categories.filter((category) => {
-    const summary = dashboard?.categories.find((c) => c.categoryId === category.id);
+    const summary = dashboard?.categories.find(
+      (c) => c.categoryId === category.id
+    );
     return (summary?.budgets?.length || 0) === 0;
   });
 
@@ -128,11 +131,11 @@ export default function CategorySpendingSection({
     );
     const hasBudgets = (categorySummary?.budgets?.length || 0) > 0;
     const singleBudget = hasBudgets ? categorySummary!.budgets[0] : null;
-    
+
     const totalSpentCents = categorySummary?.totalSpentCents || 0;
     const totalBudgetCents = categorySummary?.totalBudgetCents || 0;
     const progress =
-totalBudgetCents > 0
+      totalBudgetCents > 0
         ? Math.min((totalSpentCents / totalBudgetCents) * 100, 100)
         : 0;
 
@@ -171,9 +174,7 @@ totalBudgetCents > 0
               <Plus size={16} />
             </button>
             <button
-              onClick={() =>
-                handleDeleteCategory(category.id, category.name)
-              }
+              onClick={() => handleDeleteCategory(category.id, category.name)}
               className={`${styles.iconBtn} ${styles.deleteBtn}`}
               title="Delete Category"
             >
@@ -186,12 +187,18 @@ totalBudgetCents > 0
         {!hasBudgets && (
           <>
             <p className={styles.statText}>
-              Spent: {formatMoney(totalSpentCents, "CAD")} of total monthly spending
+              Spent: {formatMoney(totalSpentCents, "CAD")} of total monthly
+              spending
             </p>
             <div className={styles.progressBar}>
               <div
                 className={`${styles.progressFill} ${styles.green}`}
-                style={{ width: `${Math.min((totalSpentCents / (dashboard?.totalSpentCents || 1)) * 100, 100)}%` }}
+                style={{
+                  width: `${Math.min(
+                    (totalSpentCents / (dashboard?.totalSpentCents || 1)) * 100,
+                    100
+                  )}%`,
+                }}
               />
             </div>
           </>
@@ -202,9 +209,14 @@ totalBudgetCents > 0
           <div className={styles.budgetList}>
             <div className={styles.budgetItem}>
               <div className={styles.budgetMeta}>
-                {singleBudget.budget.name} – {singleBudget.budget.period.charAt(0) + singleBudget.budget.period.slice(1).toLowerCase().replace(/_/g, ' ')}
-              </div>
-              <div className={styles.amountRow}>
+                {singleBudget?.budget?.name || ""} 
+                {singleBudget?.budget?.period
+                  ? singleBudget.budget.period.charAt(0) +
+                    singleBudget.budget.period
+                      .slice(1)
+                      .toLowerCase()
+                      .replace(/_/g, " ")
+                  : ""}
                 <span className={styles.spentAmount}>
                   {formatMoney(totalSpentCents, "CAD")}
                 </span>
@@ -218,38 +230,66 @@ totalBudgetCents > 0
                     const amt = singleBudget.budget.amountCents;
                     const spent = totalSpentCents;
                     const pct = amt > 0 ? (spent / amt) * 100 : 0;
-                    return pct >= 100 ? styles.red : pct >= 80 ? styles.yellow : styles.green;
+                    return pct >= 100
+                      ? styles.red
+                      : pct >= 80
+                      ? styles.yellow
+                      : styles.green;
                   })()}`}
-                  style={{ width: `${Math.min(
-                    singleBudget.budget.amountCents > 0
-                      ? (totalSpentCents / singleBudget.budget.amountCents) * 100
-                      : 0,
-                    100
-                  )}%` }}
+                  style={{
+                    width: `${Math.min(
+                      singleBudget.budget.amountCents > 0
+                        ? (totalSpentCents / singleBudget.budget.amountCents) *
+                            100
+                        : 0,
+                      100
+                    )}%`,
+                  }}
                 />
               </div>
               <div className={styles.statusRow}>
-                <div className={`${styles.statusBadge} ${(() => {
-                  const amt = singleBudget.budget.amountCents;
-                  const spent = totalSpentCents;
-                  const pct = amt > 0 ? (spent / amt) * 100 : 0;
-                  return pct >= 100 ? styles.danger : pct >= 80 ? styles.warning : styles.safe;
-                })()}`}>
+                <div
+                  className={`${styles.statusBadge} ${(() => {
+                    const amt = singleBudget.budget.amountCents;
+                    const spent = totalSpentCents;
+                    const pct = amt > 0 ? (spent / amt) * 100 : 0;
+                    return pct >= 100
+                      ? styles.danger
+                      : pct >= 80
+                      ? styles.warning
+                      : styles.safe;
+                  })()}`}
+                >
                   <span className={styles.statusIndicator}></span>
                   <span>
                     {(() => {
                       const amt = singleBudget.budget.amountCents;
                       const spent = totalSpentCents;
                       const pct = amt > 0 ? (spent / amt) * 100 : 0;
-                      return pct >= 100 ? 'Over budget' : pct >= 80 ? 'Watch spending' : 'On track';
+                      return pct >= 100
+                        ? "Over budget"
+                        : pct >= 80
+                        ? "Watch spending"
+                        : "On track";
                     })()}
                   </span>
                 </div>
-                <span className={`${styles.remaining} ${totalSpentCents > singleBudget.budget.amountCents ? styles.over : ''}`}>
-                  {totalSpentCents > singleBudget.budget.amountCents 
-                    ? `${formatMoney(totalSpentCents - singleBudget.budget.amountCents, "CAD")} over`
-                    : `${formatMoney(singleBudget.budget.amountCents - totalSpentCents, "CAD")} left`
-                  }
+                <span
+                  className={`${styles.remaining} ${
+                    totalSpentCents > singleBudget.budget.amountCents
+                      ? styles.over
+                      : ""
+                  }`}
+                >
+                  {totalSpentCents > singleBudget.budget.amountCents
+                    ? `${formatMoney(
+                        totalSpentCents - singleBudget.budget.amountCents,
+                        "CAD"
+                      )} over`
+                    : `${formatMoney(
+                        singleBudget.budget.amountCents - totalSpentCents,
+                        "CAD"
+                      )} left`}
                 </span>
               </div>
             </div>
@@ -263,12 +303,16 @@ totalBudgetCents > 0
               </button>
               <button
                 type="button"
-                className={`${styles.btn} ${styles.btnDanger || styles.deleteBtn}`}
+                className={`${styles.btn} ${
+                  styles.btnDanger || styles.deleteBtn
+                }`}
                 onClick={() => {
                   const budgetId = singleBudget.budget?.id;
                   if (!budgetId) {
                     console.error("Budget ID not found:", singleBudget);
-                    alert("Error: Budget ID is missing. Please refresh the page.");
+                    alert(
+                      "Error: Budget ID is missing. Please refresh the page."
+                    );
                     return;
                   }
                   onDeleteBudget(budgetId);
@@ -282,10 +326,7 @@ totalBudgetCents > 0
 
         {/* Inline Add Budget */}
         {addingBudgetForCategory === category.id && (
-          <form
-            onSubmit={handleSubmitBudget}
-            className={styles.addBudgetForm}
-          >
+          <form onSubmit={handleSubmitBudget} className={styles.addBudgetForm}>
             <input
               type="number"
               placeholder="Amount (e.g. 1000)"
@@ -351,9 +392,7 @@ totalBudgetCents > 0
       {/* Budgeted Categories */}
       {categoriesWithBudgets.length > 0 && (
         <>
-          <h2 className={styles.subheading}>
-            Budgeted Categories
-          </h2>
+          <h2 className={styles.subheading}>Budgeted Categories</h2>
           <div className={styles.grid}>
             {categoriesWithBudgets.map(renderCategory)}
           </div>
@@ -363,7 +402,12 @@ totalBudgetCents > 0
       {/* Non-Budgeted Categories */}
       {categoriesWithoutBudgets.length > 0 && (
         <>
-          <h2 className={styles.subheading} style={{ marginTop: categoriesWithBudgets.length > 0 ? '40px' : '0' }}>
+          <h2
+            className={styles.subheading}
+            style={{
+              marginTop: categoriesWithBudgets.length > 0 ? "40px" : "0",
+            }}
+          >
             Categories Without Budgets
           </h2>
           <div className={styles.grid}>

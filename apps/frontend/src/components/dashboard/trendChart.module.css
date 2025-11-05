@@ -1,10 +1,13 @@
+/* Trend Chart Card - Follows unified dashboard style */
 .card {
   composes: card from "../../app/(protected)/home/home.module.css";
 }
 
+/* Layout for title and subtitle */
 .header {
   display: flex;
   flex-direction: column;
+  gap: 0.25rem;
 }
 
 .subtitle {
@@ -12,6 +15,7 @@
   font-size: 0.75rem;
 }
 
+/* Message shown when there are no transactions */
 .empty {
   text-align: center;
   font-size: 0.8rem;

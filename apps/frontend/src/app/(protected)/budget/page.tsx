@@ -330,7 +330,9 @@ export default function BudgetPage() {
       amount: String(budget.budget.amountCents / 100),
       currency: budget.budget.currency,
       period: budget.budget.period,
-      startDate: budget.budget.startDate.split("T")[0],
+      startDate: budget.budget?.startDate
+        ? budget.budget.startDate.split("T")[0]
+        : new Date().toISOString().split("T")[0],
       alertThreshold: String(budget.budget.alertThreshold ?? 80),
     });
   };

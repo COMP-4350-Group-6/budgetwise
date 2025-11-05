@@ -2,44 +2,74 @@
 
 import React from "react";
 import styles from "./statCard.module.css";
-import { Wallet, TrendingDown, TrendingUp, ShieldCheck } from "lucide-react";
+import { DASHBOARD_STRINGS,StatusLevel, DASHBOARD_ICONS,COLORS } from "@/constants";
+
+/**
+ * StatCard Component
+ * 
+ * Displays financial metrics with icons and status indicators.
+ * Used across dashboard for consistent metric presentation.
+ * 
+ * This component was developed with claud.ai AI assistance
+ * for code structure and accessibility features.
+ */
+
+/**
+ * Props for the StatCard component
+ */
 
 interface StatCardProps {
-  title: string;
-  value: string;
-  icon?: "budget" | "spent" | "remaining" | "health";
-  status?: "good" | "warning" | "bad" | "neutral";
-  subtitle?: string;
+  title: string;      // Metric title (e.g., "Total Budget")
+  value: string;      // Formatted value (e.g., "$1,000.00")
+  icon?: "budget" | "spent" | "remaining" | "health";  // Visual icon type
+  status?: StatusLevel;     // Color-coded status indicator
+  subtitle?: string;        // Additional status text
 }
 
-const StatCard: React.FC<StatCardProps> = ({ title, value, icon, status = "neutral", subtitle }) => {
-  const iconMap = {
-    budget: <Wallet size={18} color="#4E7C66" />,
-    spent: <TrendingDown size={18} color="#4E7C66" />,
-    remaining: <TrendingUp size={18} color="#4E7C66" />,
-    health: <ShieldCheck size={18} color="#4E7C66" />,
-  };
+/**
+ * Reusable card component for financial metrics
+ * - Displays icon, value, and optional status
+ */
+const StatCard: React.FC<StatCardProps> = ({
+  title,
+  value,
+  icon = "budget",
+  status = "neutral",
+  subtitle,
+}) => {
+  const IconComponent = DASHBOARD_ICONS[icon];
 
+  
   const statusClass =
     status === "good"
       ? styles.statusGood
       : status === "warning"
       ? styles.statusWarning
-      : status === "bad"
-      ? styles.statusBad
+      : status === "danger"
+      ? styles.statusDanger
       : styles.statusNeutral;
 
   return (
-    <div className={styles.card}>
-      <div className={styles.header}>
-        <div className={styles.iconWrapper}>{icon && iconMap[icon]}</div>
-        <p className={styles.title}>{title}</p>
-      </div>
+    <div className={styles.card} aria-label={`${title} statistic`}>
+      {/* Header with icon and title */}
+      <header className={styles.header}>
+        {IconComponent && (
+          <div className={styles.iconWrapper}>
+            <IconComponent size={18} color={COLORS.primary} />
+          </div>
+        )}
+        <p className={styles.title}>{title || DASHBOARD_STRINGS.noData}</p>
+      </header>
 
-      <h2 className={styles.value}>{value}</h2>
+      {/* Main metric value */}
+      <h2 className={styles.value}>{value || ""}</h2>
 
+      {/* Status indicator with colored dot */}
       {subtitle && (
-        <div className={`${styles.statusRow} ${statusClass}`}>
+        <div
+          className={`${styles.statusRow} ${statusClass}`}
+          aria-label={`Status: ${subtitle}`}
+        >
           <span className={styles.statusDot}></span>
           <span className={styles.subtitle}>{subtitle}</span>
         </div>
@@ -48,4 +78,4 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, icon, status = "neutr
   );
 };
 
-export default StatCard;
+export default React.memo(StatCard);
