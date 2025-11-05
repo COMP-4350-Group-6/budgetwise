@@ -11,6 +11,7 @@
     "test": "vitest run",
     "test:unit": "vitest run src/**/*.test.ts",
     "test:int": "vitest run tests/integration/**/*.int.test.{ts,tsx}",
+    "test:critical": "vitest run -t @critical",
     "test:auth": "vitest run src/middleware/auth.test.ts"
   },
   "devDependencies": {

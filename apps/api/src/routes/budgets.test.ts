@@ -101,7 +101,7 @@ describe('Budgets API Integration Tests', () => {
   });
 
   describe('POST /budgets - Create Budget', () => {
-    it('should create a budget with valid data', async () => {
+    it('@critical should create a budget with valid data', async () => {
       const res = await app.request('/budgets', {
         method: 'POST',
         headers: {
@@ -254,7 +254,7 @@ describe('Budgets API Integration Tests', () => {
   });
 
   describe('GET /budgets - List Budgets', () => {
-    it('should list all budgets for user', async () => {
+    it('@critical should list all budgets for user', async () => {
       // Create a few budgets
       await app.request('/budgets', {
         method: 'POST',
@@ -333,7 +333,7 @@ describe('Budgets API Integration Tests', () => {
   });
 
   describe('GET /budgets/dashboard - Dashboard', () => {
-    it('should return dashboard data', async () => {
+    it('@critical should return dashboard data', async () => {
       const res = await app.request('/budgets/dashboard', {
         method: 'GET',
         headers: {
@@ -359,7 +359,7 @@ describe('Budgets API Integration Tests', () => {
   });
 
   describe('PUT /budgets/:id - Update Budget', () => {
-    it('should update budget amount', async () => {
+    it('@critical should update budget amount', async () => {
       // Create budget first
       const createRes = await app.request('/budgets', {
         method: 'POST',

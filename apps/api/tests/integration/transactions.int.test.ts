@@ -75,7 +75,7 @@ describe('Integration: Category + Budget + Transaction -> Dashboard', () => {
   const authToken = 'test-token';        // matches existing tests
   const userId = 'test-user-123';        // body-provided for /transactions (no auth middleware there)
 
-  it('should reflect added transaction in dashboard totals', async () => {
+  it('@critical should reflect added transaction in dashboard totals', async () => {
     // 1) Create category
     const catRes = await app.request('/categories', {
       method: 'POST',
