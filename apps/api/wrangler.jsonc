@@ -10,7 +10,7 @@
   "compatibility_date": "2025-05-05",
   "vars": {
     // Local development: Use local Supabase instance
-    "SUPABASE_URL": "http://127.0.0.1:54321"
+    // "SUPABASE_URL": "http://127.0.0.1:54321"
     
     // Production/Remote: Uncomment and use your hosted Supabase URL
     // "SUPABASE_URL": "https://yikylzhrskotiqnaitwz.supabase.co"

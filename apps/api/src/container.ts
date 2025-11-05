@@ -4,6 +4,7 @@ import { makeContainer } from "@budget/composition-cloudflare-worker";
 // Environment interface for Cloudflare Workers
 interface Env {
   OPENROUTER_API_KEY?: string;
+  SUPABASE_JWT_SECRET: string;
   SUPABASE_URL?: string;
   SUPABASE_SERVICE_ROLE_KEY?: string;
 }
