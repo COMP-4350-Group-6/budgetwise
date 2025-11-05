@@ -45,7 +45,7 @@ describe.skipIf(!jwtSecret)("auth middleware", () => {
     expect(res.status).toBe(401);
   });
 
-  it("allows request when token is valid", async () => {
+  it("@critical allows request when token is valid", async () => {
     const app = new Hono();
     app.use("/auth/me", authMiddleware);
     app.get("/auth/me", (c) => c.json({ ok: true }));

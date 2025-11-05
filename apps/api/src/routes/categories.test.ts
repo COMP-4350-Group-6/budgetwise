@@ -75,7 +75,7 @@ describe('Categories API Integration Tests', () => {
   });
 
   describe('POST /categories - Create Category', () => {
-    it('should create a category with minimal data', async () => {
+    it('@critical should create a category with minimal data', async () => {
       const res = await app.request('/categories', {
         method: 'POST',
         headers: {
@@ -167,7 +167,7 @@ describe('Categories API Integration Tests', () => {
   });
 
   describe('GET /categories - List Categories', () => {
-    it('should list all categories', async () => {
+    it('@critical should list all categories', async () => {
       // Create some categories first
       const res1 = await app.request('/categories', {
         method: 'POST',
