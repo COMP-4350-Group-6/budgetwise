@@ -1,5 +1,3 @@
-@reference "tailwindcss";
-
 /* page Wrapper */
 .page {
   background: linear-gradient(180deg, #FAF9F5 0%, #F3F2EE 100%);
@@ -17,12 +15,6 @@
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
-}
-
-.breadcrumb {
-  font-size: 0.8rem;
-  font-weight: 500;
-  color: var(--accent-green);
 }
 
 .pageTitle {

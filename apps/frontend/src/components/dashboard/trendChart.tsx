@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useMemo } from "react";
 import styles from "./trendChart.module.css";
 import {
@@ -11,66 +12,91 @@ import {
 } from "recharts";
 import type { TransactionDTO } from "@/services/transactionsService";
 
-function formatLocalYMD(date: Date) {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, "0");
-  const d = String(date.getDate()).padStart(2, "0");
-  return `${y}-${m}-${d}`;
-}
+// Utilities
+import { formatLocalYMD } from "@/utils/dateHelpers";
+import { TRANSACTION_STRINGS } from "@/constants/strings/transactionStrings";
 
-export default function TrendChart({ transactions }: { transactions: TransactionDTO[] }) {
-  // group spend per local calendar day
+/**
+ * TrendChart Component
+ * ----------------------------------------------------------
+ * Displays a line chart of daily spending for the current month.
+ * Uses Recharts for visualization.
+ * 
+ * Responsibilities:
+ * - Groups transaction data by date
+ * - Calculates total amount spent per day
+ * - Provides a visual representation of spending patterns
+ * ----------------------------------------------------------
+ */
+export default function TrendChart({
+  transactions,
+}: {
+  transactions: TransactionDTO[];
+}) {
+  /**
+   * Groups transaction totals by day.
+   * 
+   * Memoized to avoid unnecessary recalculations on re-render.
+   */
   const trendData = useMemo(() => {
     const totalsByDay = new Map<string, number>();
 
+    // Aggregate transactions by local date
     for (const tx of transactions) {
       const dayKey = formatLocalYMD(new Date(tx.occurredAt));
-      const prev = totalsByDay.get(dayKey) ?? 0;
-      totalsByDay.set(dayKey, prev + Math.abs(tx.amountCents) / 100);
+      const previous = totalsByDay.get(dayKey) ?? 0;
+      totalsByDay.set(dayKey, previous + Math.abs(tx.amountCents) / 100);
     }
 
+    // Convert to sorted array of { date, amount } objects
+    const points = Array.from(totalsByDay, ([date, amount]) => ({ date, amount }));
+    points.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-    const pts = Array.from(totalsByDay, ([date, amount]) => ({ date, amount }));
-
-    // sort by date ascending
-    pts.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-
-    return pts;
+    return points;
   }, [transactions]);
 
+  // ------------------- RENDER -------------------
   return (
     <div className={styles.card}>
+      {/* Header Section */}
       <div className={styles.header}>
-        <h3>Monthly Spending Trend</h3>
-        <p className={styles.subtitle}>This month’s daily spend</p>
+        <h3>{TRANSACTION_STRINGS.trend.title}</h3>
+        <p className={styles.subtitle}>{TRANSACTION_STRINGS.trend.subtitle}</p>
       </div>
 
+      {/* Empty State */}
       {trendData.length === 0 ? (
-        <p className={styles.empty}>No transaction data yet 📉</p>
+        <p className={styles.empty}>
+          {TRANSACTION_STRINGS.trend.noData}
+        </p>
       ) : (
+        /* Recharts Visualization */
         <ResponsiveContainer width="100%" height={220}>
           <LineChart data={trendData}>
             <XAxis dataKey="date" stroke="#7a7a7a" fontSize={10} />
             <YAxis stroke="#7a7a7a" fontSize={10} />
             <Tooltip
-              formatter={(v: unknown) => {
-                const num =
-                  typeof v === "number"
-                    ? v
-                    : typeof v === "string"
-                    ? parseFloat(v)
-                    : 0;
-                return `$${num.toFixed(2)}`;
+              formatter={(value: unknown) => {
+                const numericValue =
+                  typeof value === "number"
+                    ? value
+                    : parseFloat(value as string);
+                return `$${numericValue.toFixed(2)}`;
               }}
               labelFormatter={(label) => label}
             />
             <Line
               type="monotone"
               dataKey="amount"
-              stroke="#4e7c66"
+              stroke="#4E7C66"
               strokeWidth={3}
-              dot={{ r: 4, fill: "#4e7c66" }}
-              activeDot={{ r: 6, fill: "#4e7c66", stroke: "#2f4f3f", strokeWidth: 2 }}
+              dot={{ r: 4, fill: "#4E7C66" }}
+              activeDot={{
+                r: 6,
+                fill: "#4E7C66",
+                stroke: "#2F4F3F",
+                strokeWidth: 2,
+              }}
             />
           </LineChart>
         </ResponsiveContainer>

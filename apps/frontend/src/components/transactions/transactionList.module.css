@@ -1,0 +1,107 @@
+.card {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
+  padding: 1rem;
+  display: block;
+}
+
+/* Each transaction row */
+.transactionItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fffaf4;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  border-radius: 10px;
+  padding: 0.9rem 1rem;
+  margin-bottom: 0.6rem;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+
+.transactionItem:hover {
+  background: #f8f7f2;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.05);
+}
+
+/* Content container */
+.transactionContent {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex: 1;
+  min-width: 0;
+  margin-right: 1rem;
+}
+
+.transactionMerchant {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #222;
+}
+
+.transactionMeta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #6a6a5a;
+  font-size: 0.8rem;
+}
+
+.categoryBadge {
+  background: rgba(78, 124, 102, 0.1);
+  color: #4E7C66;
+  border-radius: 999px;
+  padding: 0.25rem 0.6rem;
+  font-weight: 600;
+  font-size: 0.75rem;
+}
+
+/* Right-hand area (amount + pencil) */
+.transactionRight {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+.transactionAmount {
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.expense {
+  color: #d55c5a;
+}
+
+.income {
+  color: #4E7C66;
+}
+
+.editBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #4E7C66;
+  display: flex;
+  align-items: center;
+  padding: 0.25rem;
+  border-radius: 6px;
+  transition: background 0.2s, color 0.2s;
+}
+
+.editBtn:hover {
+  background: rgba(78, 124, 102, 0.08);
+  color: #2f5f4d;
+}
+
+/* Empty state */
+.emptyState {
+  text-align: center;
+  padding: 3rem;
+  color: #6a6a5a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

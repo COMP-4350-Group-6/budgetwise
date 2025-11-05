@@ -1,3 +1,4 @@
+/* Main card container */
 .card {
   background: var(--bg-card);
   border-radius: 12px;
@@ -10,17 +11,20 @@
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
+/* Hover effect for interactivity */
 .card:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
 }
 
+/* Card header with icon and title */
 .header {
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
+/* Icon background container */
 .iconWrapper {
   background-color: rgba(78, 124, 102, 0.08);
   border-radius: 8px;
@@ -30,18 +34,21 @@
   justify-content: center;
 }
 
+/* Metric title */
 .title {
   font-size: 0.85rem;
   font-weight: 600;
   color: var(--text-muted);
 }
 
+/* Main value display */
 .value {
   font-size: 1.6rem;
   font-weight: 700;
   color: var(--text-main);
 }
 
+/* Status indicator row */
 .statusRow {
   display: flex;
   align-items: center;
@@ -50,28 +57,20 @@
   font-weight: 600;
 }
 
+/* Status indicator dot */
 .statusDot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
 }
 
-.statusGood .statusDot {
-  background-color: var(--accent-green);
-}
+/* Status color variants */
+.statusGood .statusDot { background-color: var(--accent-green); }
+.statusWarning .statusDot { background-color: var(--accent-yellow); }
+.statusDanger .statusDot { background-color: var(--accent-red); }
+.statusNeutral .statusDot { background-color: #ccc; }
 
-.statusWarning .statusDot {
-  background-color: var(--accent-yellow);
-}
-
-.statusBad .statusDot {
-  background-color: var(--accent-red);
-}
-
-.statusNeutral .statusDot {
-  background-color: #ccc;
-}
-
+/* Status text */
 .subtitle {
   color: var(--text-main);
 }
