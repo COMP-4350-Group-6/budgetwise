@@ -3,6 +3,44 @@
 - Project commissioned for group project
 - Initial concept for app from @ahnafaf
 
+
+## AI
+
+> [!NOTE]
+> A significant proportion of this project was generated both directly & indirectly by AI tools.
+> 
+> Total proportion generated is unknown. AI use varies section to section, and from contributor to contributor.
+> 
+> No formal standard is in place nor enforced for citing AI. However some form of citation is expected.
+>
+> This is a general acknowledgement.
+
+
+**Known AI models and tools used:**
+
+- OpenAI - Chat GPT5
+
+- Open Router AI
+
+- Azure AI foundry
+
+- Copilot
+
+- Cursor
+
+
+**Specific cases:**
+
+- Used to generate inital project structure
+
+- Implementing user authentication, unit tests, integration tests (GPT5)
+
+
+**Misc. AI citation:**
+
+It is known that this project is not a novel concept, and that this repo shares similarities with a number of other repositories created the same year. The sudden influx of similar repositories may suggest AI could have played a notable part during the design phase.
+
+
 ## Inspiration for folder structure
 
 root project structure was created with the help of chatgpt
@@ -30,11 +68,6 @@ Setup:
 - Issue tag format from: <https://se-education.org/guides/guidelines/labels.html>
 - Misc. repo structure (@Von-Seth): <https://github.com/COMP-4350-Group-8/comp4350-project>
 
-## AI
-
-used to generate inital project structure
-
-- implementing user authentication, unit tests, integration tests (GPT5)
 
 ## Misc. tools used outside of repo
 
