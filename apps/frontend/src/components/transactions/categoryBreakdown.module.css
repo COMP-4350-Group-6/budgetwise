@@ -1,48 +1,80 @@
 .card {
-  background: #fffaf4;
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  border-radius: 14px;
-  padding: 1.75rem 2rem;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid rgba(0,0,0,0.05);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+  padding: 1rem;
 }
 
 .title {
-  font-size: 1.35rem;
+  font-size: 1rem;
   font-weight: 700;
-  color: #101030;
-  margin-bottom: 1.25rem;
+  margin-bottom: 0.75rem;
 }
 
 .list {
-  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
   margin: 0;
   padding: 0;
+  list-style: none;
 }
 
 .item {
   display: flex;
   justify-content: space-between;
-  padding: 0.75rem 0;
-  border-bottom: 1px solid #f0f0f0;
+  align-items: center;
+  background: #fffaf4;
+  border: 1px solid rgba(0,0,0,0.05);
+  border-radius: 10px;
+  padding: 0.9rem 1rem;
+  transition: background 0.2s, box-shadow 0.2s;
 }
 
-.item:last-child {
-  border-bottom: none;
+.item:hover {
+  background: #f8f7f2;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+}
+
+.left {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.iconDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #4e7c66;
 }
 
 .name {
-  color: #3b3b3b;
-  font-weight: 500;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #1f1f1f;
 }
 
 .amount {
   font-weight: 700;
+  font-size: 0.9rem;
   color: #1f1f1f;
 }
 
 .emptyState {
   text-align: center;
   color: #6a6a5a;
-  font-size: 0.95rem;
-  padding: 1.25rem 0;
+  padding: 2rem 0 0.5rem;
+}
+
+.cta {
+  margin-top: 0.6rem;
+  background: rgba(78, 124, 102, 0.08);
+  color: #4e7c66;
+  border: none;
+  border-radius: 6px;
+  padding: 0.45rem 0.9rem;
+  font-size: 0.8rem;
+  cursor: pointer;
 }

@@ -2,9 +2,13 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import styles from "./transactions.module.css";
+
+import { useRouter } from "next/navigation";
+import { Camera, Download, Plus } from "lucide-react";
+
 import { categoryService, budgetService } from "@/services/budgetService";
-import { transactionsService } from "@/services/transactionsService";
 import type { Category, Budget } from "@/services/budgetService";
+<<<<<<< HEAD
 import type { TransactionDTO, AddTransactionInput } from "@/services/transactionsService";
 import FinancialSummary from "@/components/transactions/financialSummary";
 import CategoryBreakdown from "@/components/transactions/categoryBreakdown";
@@ -12,26 +16,39 @@ import { apiFetch } from "@/lib/apiClient";
 import { useRouter } from "next/navigation";
 import { Camera, Download, Plus, Pencil, Upload } from "lucide-react";
 import { parseCSV } from "@/lib/csvParser";
+=======
+
+import { transactionsService } from "@/services/transactionsService";
+import type { TransactionDTO } from "@/services/transactionsService";
+
+import { apiFetch } from "@/lib/apiClient";
+
+import TransactionFilters from "@/components/transactions/transactionFilters";
+import TransactionList from "@/components/transactions/transactionList";
+import FinancialSummary from "@/components/transactions/financialSummary";
+import CategoryBreakdown from "@/components/transactions/categoryBreakdown";
+
+import AddTransactionModal from "@/components/transactions/modals/addTransactionModal";
+import EditTransactionModal from "@/components/transactions/modals/editTransactionModal";
+import UploadInvoiceModal from "@/components/transactions/modals/uploadInvoiceModal";
+
+import { TRANSACTION_STRINGS } from "@/constants/strings";
+>>>>>>> 238ba6f (Refactor: transactions page + UI improvements before LLM observation work (#117))
 
 export default function TransactionsPage() {
   const router = useRouter();
 
+  // ===== Data =====
   const [categories, setCategories] = useState<Category[]>([]);
   const [budgets, setBudgets] = useState<Budget[]>([]);
   const [transactions, setTransactions] = useState<TransactionDTO[]>([]);
   const [loading, setLoading] = useState(false);
   const [categorizingId, setCategorizingId] = useState<string | null>(null);
 
-  // ===== Add Modal State =====
+  // ===== Modals =====
   const [showAddModal, setShowAddModal] = useState(false);
-  const [description, setDescription] = useState("");
-  const [amount, setAmount] = useState("");
-  const [selectedCategoryId, setSelectedCategoryId] = useState("");
-  const [selectedBudgetId, setSelectedBudgetId] = useState("");
-  const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
-  const [note, setNote] = useState("");
-  const [message, setMessage] = useState("");
-  const [submitting, setSubmitting] = useState(false);
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [parsedInvoiceItems, setParsedInvoiceItems] = useState<Array<{ description: string; quantity?: number; price?: number; categoryId?: string }>>([]);
   const [showItemsTable, setShowItemsTable] = useState(false);
@@ -40,12 +57,17 @@ export default function TransactionsPage() {
   const [editingItemIndex, setEditingItemIndex] = useState<number | null>(null);
   const [itemEditForm, setItemEditForm] = useState({ description: '', quantity: '', price: '', categoryId: '' });
 
-  // ===== Invoice Upload State =====
-  const [showUploadModal, setShowUploadModal] = useState(false);
-  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
-  const [parsingInvoice, setParsingInvoice] = useState(false);
-  const [uploadMessage, setUploadMessage] = useState("");
+  // ===== Add Transaction form =====
+  const [description, setDescription] = useState("");
+  const [amount, setAmount] = useState("");
+  const [note, setNote] = useState("");
+  const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+  const [selectedCategoryId, setSelectedCategoryId] = useState("");
+  const [selectedBudgetId, setSelectedBudgetId] = useState(""); // kept for compatibility
+  const [message, setMessage] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
+<<<<<<< HEAD
   // ===== CSV Import State =====
   const [showCSVModal, setShowCSVModal] = useState(false);
   const [csvFile, setCsvFile] = useState<File | null>(null);
@@ -60,14 +82,22 @@ export default function TransactionsPage() {
 
   // ===== Edit Modal State =====
   const [showEditModal, setShowEditModal] = useState(false);
+=======
+  // ===== Edit Transaction form =====
+>>>>>>> 238ba6f (Refactor: transactions page + UI improvements before LLM observation work (#117))
   const [editTx, setEditTx] = useState<TransactionDTO | null>(null);
   const [editAmount, setEditAmount] = useState("");
   const [editCategoryId, setEditCategoryId] = useState("");
   const [editDate, setEditDate] = useState("");
   const [editNote, setEditNote] = useState("");
-  const [editSubmitting, setEditSubmitting] = useState(false);
   const [editMessage, setEditMessage] = useState("");
+  const [editSubmitting, setEditSubmitting] = useState(false);
   const [deleting, setDeleting] = useState(false);
+
+  // ===== Upload Invoice =====
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [parsingInvoice, setParsingInvoice] = useState(false);
+  const [uploadMessage, setUploadMessage] = useState("");
 
   // ===== Filters =====
   const [searchQuery, setSearchQuery] = useState("");
@@ -89,11 +119,13 @@ export default function TransactionsPage() {
         {},
         true
       );
-      setTransactions(resp.transactions);
+      setTransactions(resp.transactions || []);
     } catch (e) {
       console.error("Failed to load transactions", e);
     } finally {
       setLoading(false);
+      // reset pagination when reloading a different result set
+      setCurrentPage(1);
     }
   };
 
@@ -112,72 +144,147 @@ export default function TransactionsPage() {
     load();
   }, []);
 
-  // ===== Derived: Month / Budget Stats for Snapshot =====
+  // ===== Current month window =====
   const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth(); // 0-based
+  const startOfMonth = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    1,
+    0,
+    0,
+    0,
+    0
+  );
+  const endOfMonth = new Date(
+    now.getFullYear(),
+    now.getMonth() + 1,
+    0,
+    23,
+    59,
+    59,
+    999
+  );
 
-  const startOfMonth = new Date(year, month, 1, 0, 0, 0, 0);
-  const endOfMonth = new Date(year, month + 1, 0, 23, 59, 59, 999);
-  const daysElapsed = Math.min(now.getDate(), new Date(year, month + 1, 0).getDate());
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-
+  // All transactions this month (income + expense)
   const monthTx = useMemo(
     () =>
       transactions.filter((tx) => {
         const t = new Date(tx.occurredAt);
         return t >= startOfMonth && t <= endOfMonth;
       }),
-    [transactions, month, year]
+    [transactions, startOfMonth.getTime(), endOfMonth.getTime()]
   );
 
-  const totalSpentThisMonth = monthTx
-    .reduce((sum, tx) => sum + (tx.amountCents > 0 ? tx.amountCents : 0), 0) / 100;
+  // Split by type
+  const expenseTx = useMemo(() => monthTx.filter((tx) => tx.amountCents < 0), [
+    monthTx,
+  ]);
 
+  // ===== FINANCIAL SUMMARY =====
   const totalTransactions = monthTx.length;
+
+  // Use absolute values of all transactions (income + expense)
+  const totalSpentThisMonth = monthTx.reduce(
+    (sum, tx) => sum + Math.abs(tx.amountCents) / 100,
+    0
+  );
+
   const averageTransaction =
     totalTransactions > 0 ? totalSpentThisMonth / totalTransactions : 0;
 
-  const lastMonthStart = new Date(year, month - 1, 1, 0, 0, 0, 0);
-  const lastMonthEnd = new Date(year, month, 0, 23, 59, 59, 999);
-  const lastMonthTx = useMemo(
-    () =>
-      transactions.filter((tx) => {
-        const t = new Date(tx.occurredAt);
-        return t >= lastMonthStart && t <= lastMonthEnd;
-      }),
-    [transactions, month, year]
-  );
 
-  const totalSpentLastMonth = lastMonthTx
-    .filter((tx) => tx.amountCents < 0)
-    .reduce((s, tx) => s + Math.abs(tx.amountCents) / 100, 0);
-
-  // Sum all active budgets (fallback to 0)
-  const totalBudgetThisMonth =
-    budgets?.reduce((s, b) => s + (b.amountCents ?? 0), 0) / 100 || 0;
-
-  // ===== Category Totals (for breakdown) =====
-  const categoryMap = useMemo(() => {
-    const m = new Map<string, string>();
-    categories.forEach((c) => m.set(c.id, c.name));
-    return m;
-  }, [categories]);
+  // ----- CATEGORY TOTALS -----
+  // Use expenses if they exist; otherwise fall back to all transactions
+  const baseForCategories = expenseTx.length > 0 ? expenseTx : monthTx;
 
   const categoryTotals = useMemo(() => {
     const totals = new Map<string, number>();
-    monthTx.forEach((tx) => {
-      if (tx.categoryId) {
-        const name = categoryMap.get(tx.categoryId) || "Uncategorized";
-        totals.set(name, (totals.get(name) ?? 0) + Math.abs(tx.amountCents) / 100);
-      }
+    baseForCategories.forEach((tx) => {
+      const name =
+        (tx.categoryId &&
+          categories.find((c) => c.id === tx.categoryId)?.name) ||
+        TRANSACTION_STRINGS.labels.uncategorized;
+      const amt = Math.abs(tx.amountCents) / 100; // always positive for charts
+      totals.set(name, (totals.get(name) ?? 0) + amt);
     });
     return Array.from(totals.entries())
       .map(([name, total]) => ({ name, total }))
       .sort((a, b) => b.total - a.total);
-  }, [monthTx, categoryMap]);
+  }, [baseForCategories, categories]);
+  // ===== Filters =====
+  const filteredTransactions = transactions.filter((tx) => {
+    const matchesCategory = !filterCategory || tx.categoryId === filterCategory;
 
-  // ===== Add & Edit Transactions =====
+    const matchesSearch =
+      !searchQuery ||
+      (tx.note && tx.note.toLowerCase().includes(searchQuery.toLowerCase()));
+
+    const txDate = new Date(tx.occurredAt).getTime();
+    const nowMs = Date.now();
+    let withinRange = true;
+    if (dateRange === "7") withinRange = txDate >= nowMs - 7 * 86400000;
+    else if (dateRange === "30") withinRange = txDate >= nowMs - 30 * 86400000;
+    else if (dateRange === "90") withinRange = txDate >= nowMs - 90 * 86400000;
+    else if (dateRange === "custom" && customStart && customEnd) {
+      withinRange =
+        txDate >= new Date(customStart).getTime() &&
+        txDate <= new Date(customEnd).getTime();
+    }
+
+    return matchesCategory && matchesSearch && withinRange;
+  });
+
+  // ===== Pagination =====
+  const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
+  const currentTransactions = filteredTransactions.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filteredTransactions.length, itemsPerPage]);
+
+  const goToPage = (page: number) => {
+    if (page >= 1 && page <= totalPages) setCurrentPage(page);
+  };
+
+  // ===== Export CSV =====
+  const handleExport = () => {
+    if (filteredTransactions.length === 0) {
+      alert(TRANSACTION_STRINGS.errors.noTransactions);
+      return;
+    }
+
+    const headers = ["Date", "Category", "Amount ($)", "Type", "Note"];
+    const rows = filteredTransactions.map((tx) => {
+      const cat =
+        categories.find((c) => c.id === tx.categoryId)?.name ||
+        TRANSACTION_STRINGS.labels.uncategorized;
+      const amount = (Math.abs(tx.amountCents) / 100).toFixed(2);
+      const type = tx.amountCents < 0 ? "Expense" : "Income";
+      const date = new Date(tx.occurredAt).toLocaleDateString();
+      return [date, cat, amount, type, tx.note || ""];
+    });
+
+    const csvContent = [headers, ...rows]
+      .map((r) => r.map((v) => `"${v}"`).join(","))
+      .join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.setAttribute(
+      "download",
+      `transactions_${new Date().toISOString().split("T")[0]}.csv`
+    );
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
+
+  // ===== Add Transaction =====
   const handleAddTransaction = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -195,8 +302,10 @@ export default function TransactionsPage() {
       setMessage("Please provide amount and description.");
       return;
     }
+
     try {
       setSubmitting(true);
+
       const hadCategorySelected = Boolean(selectedCategoryId);
       const hadNoteOrDescription = Boolean(note || description);
 
@@ -209,8 +318,10 @@ export default function TransactionsPage() {
       });
 
       const newTx = result.transaction;
+
+      // Merge into list (keep newest first)
       setTransactions((prev) => {
-        const withoutCurrent = prev.filter((tx) => tx.id !== newTx.id);
+        const withoutCurrent = prev.filter((t) => t.id !== newTx.id);
         const merged = [newTx, ...withoutCurrent];
         return merged.sort(
           (a, b) =>
@@ -218,17 +329,22 @@ export default function TransactionsPage() {
         );
       });
 
-      // Clear form
+      // clear form
       setDescription("");
       setAmount("");
       setNote("");
       setSelectedCategoryId("");
       setSelectedBudgetId("");
+<<<<<<< HEAD
       setParsedInvoiceItems([]);
       setShowItemsTable(false);
+=======
+      setDate(new Date().toISOString().split("T")[0]);
+      setMessage("");
+>>>>>>> 238ba6f (Refactor: transactions page + UI improvements before LLM observation work (#117))
       setShowAddModal(false);
 
-      // Auto-categorize if needed
+      // Auto-categorize (if no category picked but we have text to infer)
       if (!hadCategorySelected && newTx.id && hadNoteOrDescription) {
         const txId = newTx.id;
         setCategorizingId(txId);
@@ -237,14 +353,14 @@ export default function TransactionsPage() {
           .then((response) => {
             if (response) {
               setTransactions((prev) =>
-                prev.map((tx) =>
-                  tx.id === txId
+                prev.map((t) =>
+                  t.id === txId
                     ? {
-                        ...tx,
+                        ...t,
                         categoryId: response.categoryId,
                         updatedAt: new Date().toISOString(),
                       }
-                    : tx
+                    : t
                 )
               );
             }
@@ -252,16 +368,18 @@ export default function TransactionsPage() {
           .catch((err) => console.error("Auto-categorization failed:", err))
           .finally(() => setCategorizingId(null));
       }
-    } catch {
-      setMessage("Failed to add transaction.");
+    } catch (err) {
+      console.error(err);
+      setMessage(TRANSACTION_STRINGS.messages.failure);
     } finally {
       setSubmitting(false);
     }
   };
 
+  // ===== Edit Transaction =====
   const openEditModal = (tx: TransactionDTO) => {
     setEditTx(tx);
-    setEditAmount((tx.amountCents / 100).toFixed(2));
+    setEditAmount((Math.abs(tx.amountCents) / 100).toFixed(2));
     setEditCategoryId(tx.categoryId || "");
     setEditDate(tx.occurredAt.split("T")[0]);
     setEditNote(tx.note || "");
@@ -274,23 +392,26 @@ export default function TransactionsPage() {
   const handleEditTransaction = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editTx) return;
+
     const cents = Math.round(parseFloat(editAmount || "0") * 100);
     if (!editCategoryId || cents <= 0) {
       setEditMessage("Please fill all required fields.");
       return;
     }
+
     try {
       setEditSubmitting(true);
       await transactionsService.updateTransaction(editTx.id, {
-        amountCents: cents,
+        amountCents: editTx.amountCents < 0 ? -cents : cents, // preserve sign
         categoryId: editCategoryId,
         note: editNote,
         occurredAt: new Date(editDate),
       });
       await loadTransactions();
       setShowEditModal(false);
-    } catch {
-      setEditMessage("Failed to update transaction.");
+    } catch (err) {
+      console.error(err);
+      setEditMessage(TRANSACTION_STRINGS.messages.failure);
     } finally {
       setEditSubmitting(false);
     }
@@ -301,19 +422,20 @@ export default function TransactionsPage() {
     try {
       setDeleting(true);
       await transactionsService.deleteTransaction(editTx.id);
-      setTransactions((prev) => prev.filter((tx) => tx.id !== editTx.id));
+      setTransactions((prev) => prev.filter((t) => t.id !== editTx.id));
       setShowDeleteConfirm(false);
       setShowEditModal(false);
       setEditTx(null);
     } catch (err) {
       console.error("Failed to delete transaction", err);
-      setEditMessage("Failed to delete transaction.");
+      setEditMessage(TRANSACTION_STRINGS.messages.failure);
       setShowDeleteConfirm(false);
     } finally {
       setDeleting(false);
     }
   };
 
+<<<<<<< HEAD
   // ===== Handle CSV Import =====
   const handleCSVFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -438,6 +560,10 @@ export default function TransactionsPage() {
 
   // ===== Handle Invoice Upload =====
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+=======
+  // ===== Upload Invoice =====
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+>>>>>>> 238ba6f (Refactor: transactions page + UI improvements before LLM observation work (#117))
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -452,12 +578,10 @@ export default function TransactionsPage() {
 
     const reader = new FileReader();
     reader.onloadend = () => {
-      setUploadedImage(reader.result as string);
+      setUploadedImage(reader.result as string); // ✅ preview shows
       setUploadMessage("");
     };
-    reader.onerror = () => {
-      setUploadMessage("Failed to read image");
-    };
+    reader.onerror = () => setUploadMessage("Failed to read image");
     reader.readAsDataURL(file);
   };
 
@@ -473,15 +597,24 @@ export default function TransactionsPage() {
 
       const parsed = await transactionsService.parseInvoice(uploadedImage);
       if (!parsed) {
-        setUploadMessage("Could not parse invoice. Please try again or enter manually.");
+        setUploadMessage(
+          "Could not parse invoice. Please try again or enter manually."
+        );
         return;
       }
 
+<<<<<<< HEAD
       // Use the AI-generated description as the note (includes merchant and items)
       setDescription(parsed.description || parsed.merchant);
       setAmount((parsed.total / 100).toFixed(2));
       setNote(parsed.description || parsed.merchant);
       setDate(parsed.date);
+=======
+      setDescription(parsed.merchant ?? "");
+      setAmount(((parsed.total ?? 0) / 100).toFixed(2));
+      setNote(parsed.invoiceNumber ? `Invoice #${parsed.invoiceNumber}` : "");
+      setDate(parsed.date ?? new Date().toISOString().split("T")[0]);
+>>>>>>> 238ba6f (Refactor: transactions page + UI improvements before LLM observation work (#117))
 
       // Store parsed items for display (default closed)
       if (parsed.items && parsed.items.length > 0) {
@@ -494,13 +627,22 @@ export default function TransactionsPage() {
 
       // suggestedCategory is now the category ID (UUID), not the name
       if (parsed.suggestedCategory) {
+<<<<<<< HEAD
         setSelectedCategoryId(parsed.suggestedCategory);
+=======
+        const matched = categories.find(
+          (c) =>
+            c.name.toLowerCase() === parsed.suggestedCategory!.toLowerCase()
+        );
+        if (matched) setSelectedCategoryId(matched.id);
+>>>>>>> 238ba6f (Refactor: transactions page + UI improvements before LLM observation work (#117))
       }
 
+      // Close upload, open add
       setShowUploadModal(false);
       setUploadedImage(null);
-      setShowAddModal(true);
       setUploadMessage("");
+      setShowAddModal(true);
     } catch (error) {
       console.error("Invoice parsing error:", error);
       setUploadMessage("Failed to parse invoice. Please try again.");
@@ -509,6 +651,7 @@ export default function TransactionsPage() {
     }
   };
 
+<<<<<<< HEAD
   // ===== Filter + Search =====
   const filteredTransactions = transactions.filter((tx) => {
     const matchesCategory = !filterCategory || tx.categoryId === filterCategory;
@@ -614,6 +757,9 @@ export default function TransactionsPage() {
     document.body.removeChild(link);
   };
 
+=======
+  // ===== Render =====
+>>>>>>> 238ba6f (Refactor: transactions page + UI improvements before LLM observation work (#117))
   return (
     <div className={styles.pageContainer}>
       {/* ===== HEADER ===== */}
@@ -621,10 +767,15 @@ export default function TransactionsPage() {
         <div className={styles.headerLeft}>
           <h1 className={styles.pageTitle}>Transactions</h1>
         </div>
+
         <div className={styles.headerRight}>
-          <button className={`${styles.btn} ${styles.btnSecondary}`} onClick={handleExport}>
+          <button
+            className={`${styles.btn} ${styles.btnSecondary}`}
+            onClick={handleExport}
+          >
             <Download size={16} style={{ marginRight: 6 }} /> Export CSV
           </button>
+
           <button
             className={`${styles.btn} ${styles.btnSecondary}`}
             onClick={() => {
@@ -640,130 +791,51 @@ export default function TransactionsPage() {
           >
             <Camera size={16} style={{ marginRight: 6 }} /> Upload Invoice
           </button>
+
           <button
             className={`${styles.btn} ${styles.btnPrimary}`}
             onClick={() => setShowAddModal(true)}
           >
-            <Plus size={16} style={{ marginRight: 6 }} /> Add Transaction
+            <Plus size={16} style={{ marginRight: 6 }} />{" "}
+            {TRANSACTION_STRINGS.add}
           </button>
         </div>
-      </div> 
+      </div>
 
       {/* ===== FILTERS ===== */}
-      <div className={styles.filterRow}>
-        <input
-          type="text"
-          placeholder="Search..."
-          className={styles.searchInput}
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-        <div className={styles.filterGroup}>
-          <select
-            className={styles.filterSelect}
-            value={filterCategory}
-            onChange={(e) => setFilterCategory(e.target.value)}
-          >
-            <option value="">All Categories</option>
-            {categories.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
+      <TransactionFilters
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        filterCategory={filterCategory}
+        setFilterCategory={setFilterCategory}
+        dateRange={dateRange}
+        setDateRange={setDateRange}
+        customStart={customStart}
+        setCustomStart={setCustomStart}
+        customEnd={customEnd}
+        setCustomEnd={setCustomEnd}
+        categories={categories}
+      />
 
-          <select
-            className={styles.filterSelect}
-            value={dateRange}
-            onChange={(e) => setDateRange(e.target.value)}
-          >
-            <option value="7">Last 7 Days</option>
-            <option value="30">Last 30 Days</option>
-            <option value="90">Last 90 Days</option>
-            <option value="custom">Custom Range</option>
-          </select>
+      {/* ===== TRANSACTION LIST ===== */}
+      <TransactionList
+        transactions={currentTransactions}
+        loading={loading}
+        onEdit={openEditModal}
+        categorizingId={categorizingId}
+        categories={categories}
+      />
 
-          {dateRange === "custom" && (
-            <>
-              <input
-                type="date"
-                value={customStart}
-                onChange={(e) => setCustomStart(e.target.value)}
-                className={styles.dateInput}
-              />
-              <input
-                type="date"
-                value={customEnd}
-                onChange={(e) => setCustomEnd(e.target.value)}
-                className={styles.dateInput}
-              />
-            </>
-          )}
-        </div>
-      </div>
-
-      {/* ===== TRANSACTIONS LIST ===== */}
-    <div className={styles.sectionBlock}>
-      <div className={styles.card}>
-        {loading ? (
-          <div className={styles.emptyState}>Loading...</div>
-        ) : currentTransactions.length === 0 ? (
-          <div className={styles.emptyState}>No transactions found.</div>
-        ) : (
-          currentTransactions.map((tx) => {
-            const cat = categories.find((c) => c.id === tx.categoryId);
-            const amount = (Math.abs(tx.amountCents) / 100).toFixed(2);
-            const isExpense = tx.amountCents < 0;
-
-            return (
-              <div key={tx.id} className={styles.transactionItem}>
-                <div className={styles.transactionIcon} aria-hidden>
-                  
-                  <div className={styles.iconDot} />
-                </div>
-                <div className={styles.transactionContent}>
-                  <div className={styles.transactionMerchant}>
-                    {tx.note || "Transaction"}
-                  </div>
-                  <div className={styles.transactionMeta}>
-                    <span className={styles.categoryBadge}>
-                      {categorizingId === tx.id ? "Categorizing…" : cat?.name || "Uncategorized"}
-                    </span>
-                    <span className={styles.transactionDate}>
-                      {new Date(tx.occurredAt).toLocaleDateString()}
-                    </span>
-                  </div>
-                </div>
-                <div
-                  className={`${styles.transactionAmount} ${
-                    isExpense ? styles.expense : styles.income
-                  }`}
-                >
-                  {isExpense ? "-" : "+"}${amount}
-                </div>
-                <button
-                  className={styles.editBtn}
-                  onClick={() => openEditModal(tx)}
-                  aria-label="Edit"
-                >
-                  <Pencil size={16} />
-                </button>
-              </div>
-            );
-          })
-        )}
-      </div>
-    </div>
-        {/* ===== FINANCIAL SUMMARY SECTION ===== */}
-
+      {/* ===== FINANCIAL SUMMARY ===== */}
       <div className={styles.sectionBlock}>
         <FinancialSummary
-          totalTransactions={monthTx.length}
+          totalTransactions={totalTransactions}
           totalSpent={totalSpentThisMonth}
           averageTransaction={averageTransaction}
         />
       </div>
 
+      {/* ===== CATEGORY BREAKDOWN ===== */}
       <div className={styles.sectionBlock}>
         <CategoryBreakdown
           categories={categoryTotals}
@@ -771,61 +843,28 @@ export default function TransactionsPage() {
         />
       </div>
 
-    
-      {/* ===== PAGINATION ===== */}
-      {totalPages > 1 && (
-        <div className={styles.paginationContainer}>
-          <div className={styles.pagination}>
-            <button
-              onClick={() => goToPage(currentPage - 1)}
-              disabled={currentPage === 1}
-              className={styles.arrowBtn}
-              aria-label="Previous page"
-            >
-              ←
-            </button>
-
-            {getPageNumbers().map((p, i) =>
-              p === "…" ? (
-                <span key={`dots-${i}`} className={styles.ellipsis}>
-                  …
-                </span>
-              ) : (
-                <button
-                  key={p}
-                  onClick={() => goToPage(p as number)}
-                  className={`${styles.pageNumberBtn} ${p === currentPage ? styles.activePage : ""}`}
-                >
-                  {p}
-                </button>
-              )
-            )}
-
-            <button
-              onClick={() => goToPage(currentPage + 1)}
-              disabled={currentPage === totalPages}
-              className={styles.arrowBtn}
-              aria-label="Next page"
-            >
-              →
-            </button>
-          </div>
-
-          <div className={styles.pageSizeControl}>
-            <label>Items per page:</label>
-            <select value={itemsPerPage} onChange={(e) => setItemsPerPage(Number(e.target.value))}>
-              <option value={5}>5</option>
-              <option value={10}>10</option>
-              <option value={20}>20</option>
-              <option value={50}>50</option>
-            </select>
-          </div>
-        </div>
-      )}
-
-
+      {/* ===== ADD MODAL ===== */}
+      <AddTransactionModal
+        show={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onSubmit={handleAddTransaction}
+        description={description}
+        setDescription={setDescription}
+        amount={amount}
+        setAmount={setAmount}
+        note={note}
+        setNote={setNote}
+        date={date}
+        setDate={setDate}
+        selectedCategoryId={selectedCategoryId}
+        setSelectedCategoryId={setSelectedCategoryId}
+        categories={categories}
+        submitting={submitting}
+        message={message}
+      />
 
       {/* ===== EDIT MODAL ===== */}
+<<<<<<< HEAD
       {showEditModal && editTx && (
         <div className={styles.modal} onClick={() => setShowEditModal(false)}>
           <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
@@ -1507,6 +1546,43 @@ export default function TransactionsPage() {
           </div>
         </div>
       )}
+=======
+      <EditTransactionModal
+        show={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        onSubmit={handleEditTransaction}
+        onDelete={handleDeleteTransaction}
+        editTx={editTx}
+        editAmount={editAmount}
+        editCategoryId={editCategoryId}
+        editDate={editDate}
+        editNote={editNote}
+        editMessage={editMessage}
+        setEditAmount={setEditAmount}
+        setEditCategoryId={setEditCategoryId}
+        setEditDate={setEditDate}
+        setEditNote={setEditNote}
+        setEditMessage={setEditMessage}
+        editSubmitting={editSubmitting}
+        deleting={deleting}
+        showDeleteConfirm={showDeleteConfirm}
+        setShowDeleteConfirm={setShowDeleteConfirm}
+        categories={categories}
+      />
+
+      {/* ===== UPLOAD INVOICE MODAL ===== */}
+      <UploadInvoiceModal
+        show={showUploadModal}
+        onClose={() => setShowUploadModal(false)}
+        onImageUpload={handleImageUpload}
+        onParseInvoice={handleParseInvoice}
+        uploadedImage={uploadedImage}
+        uploadMessage={uploadMessage}
+        parsingInvoice={parsingInvoice}
+        setUploadedImage={setUploadedImage}
+        setUploadMessage={setUploadMessage}
+      />
+>>>>>>> 238ba6f (Refactor: transactions page + UI improvements before LLM observation work (#117))
     </div>
   );
 }

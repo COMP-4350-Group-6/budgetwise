@@ -1,0 +1,137 @@
+/* Overlay */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.25);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+/* Modal container */
+.modalContent {
+  background: #fff;
+  border-radius: 16px;
+  padding: 1.75rem 2rem;
+  width: 100%;
+  max-width: 520px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15);
+  animation: fadeIn 0.2s ease;
+}
+
+/* Header */
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+
+.modalTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1f1f1f;
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  font-size: 1.4rem;
+  cursor: pointer;
+  color: #444;
+}
+
+/* Form */
+.formGroup {
+  margin-bottom: 1.25rem;
+}
+
+.formLabel {
+  display: block;
+  font-weight: 600;
+  color: #1f1f1f;
+  margin-bottom: 0.35rem;
+}
+
+.formInput {
+  width: 100%;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  background: #fdfdfc;
+}
+
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+/* Buttons */
+.btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0.55rem 1rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s ease-in-out;
+}
+
+.btnPrimary {
+  background: linear-gradient(90deg, #4E7C66 0%, #5E8F74 100%);
+  color: #fff;
+}
+
+.btnSecondary {
+  background: #fff;
+  color: #4E7C66;
+  border: 1px solid rgba(78, 124, 102, 0.25);
+}
+
+.btnDanger {
+  background: #a33f3d;
+  color: #fff;
+}
+
+/* Upload section */
+.uploadSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.uploadArea {
+  border: 2px dashed rgba(78, 124, 102, 0.3);
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-align: center;
+  cursor: pointer;
+}
+
+.uploadArea:hover {
+  border-color: #4E7C66;
+}
+
+.uploadHint {
+  color: #6a6a6a;
+  font-size: 0.85rem;
+}
+
+.previewImage {
+  max-width: 100%;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
