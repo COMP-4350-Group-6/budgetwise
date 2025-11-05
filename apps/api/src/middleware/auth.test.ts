@@ -8,11 +8,12 @@ vi.mock("jose", () => {
   return {
     createRemoteJWKSet: vi.fn(() => ({})),
     jwtVerify: vi.fn(async () => ({ payload: { sub: "user-123" } })),
+    decodeProtectedHeader: vi.fn(() => ({ alg: "ES256" })),
   };
 });
 
 // Import mocked symbols after vi.mock so we can control behavior
-import { jwtVerify } from "jose";
+import { jwtVerify, decodeProtectedHeader } from "jose";
 
 const jwtSecret = process.env.SUPABASE_JWT_SECRET;
 

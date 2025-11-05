@@ -12,6 +12,7 @@ vi.mock('jose', () => {
       else if (token.includes('test-token')) sub = 'test-user-123';
       return { payload: { sub } } as any;
     }),
+    decodeProtectedHeader: vi.fn(() => ({ alg: "ES256" })),
   };
 });
 
@@ -60,7 +61,7 @@ describe('Categories API Integration Tests', () => {
   beforeAll(() => {
     const originalFetch = app.fetch.bind(app);
     (app as any).fetch = (req: Request, env?: any, event?: any) =>
-      originalFetch(req, { ...(env || {}), SUPABASE_JWT_SECRET: process.env.SUPABASE_JWT_SECRET }, event);
+      originalFetch(req, { ...(env || {}), SUPABASE_JWT_SECRET: process.env.SUPABASE_JWT_SECRET, SUPABASE_URL: "https://test.supabase.co" }, event);
   });
   let authToken: string;
   let userId: string;
