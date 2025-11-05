@@ -32,5 +32,10 @@ export function makeInMemCategoriesRepo(): CategoriesRepo {
     async delete(id: string): Promise<void> {
       categories.delete(id);
     },
+
+    // For testing
+    clear() {
+      categories.clear();
+    },
   };
 }

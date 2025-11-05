@@ -36,5 +36,10 @@ export function makeInMemBudgetsRepo(): BudgetsRepo {
     async delete(id: string): Promise<void> {
       budgets.delete(id);
     },
+
+    // For testing
+    clear() {
+      budgets.clear();
+    },
   };
 }

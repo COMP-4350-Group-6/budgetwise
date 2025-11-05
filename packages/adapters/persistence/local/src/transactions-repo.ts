@@ -18,6 +18,11 @@ export function makeInMemTransactionsRepo(): TransactionsRepo {
     },
     async create(tx) { byId.set(tx.props.id, tx); },
     async update(tx) { byId.set(tx.props.id, tx); },
-    async delete(id) { byId.delete(id); }
+    async delete(id) { byId.delete(id); },
+
+    // For testing
+    clear() {
+      byId.clear();
+    },
   };
 }

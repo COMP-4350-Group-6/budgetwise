@@ -15,6 +15,7 @@ vi.mock('jose', () => {
 });
 
 import { app } from '../app';
+import { container } from '../container';
 
 interface BudgetDTO {
   id: string;
@@ -73,6 +74,9 @@ describe('Budgets API Integration Tests', () => {
   let categoryId: string;
 
   beforeEach(async () => {
+    // Reset database for test isolation
+    (container as any).reset();
+    
     // Note: In a real scenario, you'd set up test authentication
     // For now, we'll mock the auth token
     authToken = `test-token-${++testCounter}`;

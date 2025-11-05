@@ -8,4 +8,5 @@ export interface BudgetsRepo {
   create(budget: Budget): Promise<void>;
   update(budget: Budget): Promise<void>;
   delete(id: string): Promise<void>;
+  clear?(): void; // For testing
 }

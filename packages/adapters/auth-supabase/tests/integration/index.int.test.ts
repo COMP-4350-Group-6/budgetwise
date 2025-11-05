@@ -1,7 +1,7 @@
 import "dotenv/config"; // <-- Add this line at the very top
 
 import { describe, it, expect } from "vitest";
-import { makeSupabaseAuthClient } from "./index";
+import { makeSupabaseAuthClient } from "@budget/adapters-auth-supabase";
 
 const SUPABASE_URL = process.env.SUPABASE_URL || "";
 const SUPABASE_PUBLISHABLE_KEY = process.env.SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_ANON_KEY || "";

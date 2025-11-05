@@ -1,11 +1,11 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import { makeCreateCategory } from '../categories/create-category';
-import { makeCreateBudget } from '../budgets/create-budget';
-import { makeGetBudgetDashboard } from '../budgets/get-budget-dashboard';
-import { makeAddTransaction } from '../transactions/add-transaction';
-import { makeUpdateTransaction } from '../transactions/update-transaction';
-import { makeDeleteTransaction } from '../transactions/delete-transaction';
+import { makeCreateCategory } from '@budget/usecases/categories/create-category';
+import { makeCreateBudget } from '@budget/usecases/budgets/create-budget';
+import { makeGetBudgetDashboard } from '@budget/usecases/budgets/get-budget-dashboard';
+import { makeAddTransaction } from '@budget/usecases/transactions/add-transaction';
+import { makeUpdateTransaction } from '@budget/usecases/transactions/update-transaction';
+import { makeDeleteTransaction } from '@budget/usecases/transactions/delete-transaction';
 
 import { makeInMemCategoriesRepo, makeInMemBudgetsRepo, makeInMemTransactionsRepo } from '@budget/adapters-persistence-local';
 import { makeUlid } from '@budget/adapters-system';

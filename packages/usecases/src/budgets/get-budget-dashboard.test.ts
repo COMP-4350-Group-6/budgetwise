@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { makeGetBudgetDashboard } from './get-budget-dashboard';
 import { makeCreateBudget } from './create-budget';
-import { makeCreateCategory } from '../categories/create-category';
-import { makeAddTransaction } from '../transactions/add-transaction';
+import { makeCreateCategory } from '@budget/usecases/categories/create-category';
+import { makeAddTransaction } from '@budget/usecases/transactions/add-transaction';
 import { makeInMemBudgetsRepo, makeInMemCategoriesRepo, makeInMemTransactionsRepo } from '@budget/adapters-persistence-local';
 import { makeSystemClock, makeUlid } from '@budget/adapters-system';
 

@@ -1,53 +1,56 @@
-# Testing Guide (Quick Start)
+# Testing Guide
 
-Run these first:
+This monorepo uses a consistent testing structure to separate unit, integration, and E2E tests.
 
-- All tests (monorepo): `pnpm test`
-- Domain tests with coverage: `pnpm test --filter @budget/domain -- --coverage`
-- Usecases tests with coverage: `pnpm test --filter @budget/usecases -- --coverage`
-- API tests: `pnpm test --filter api`
-- Frontend: `pnpm test --filter frontend` 
-- Open coverage report (HTML):
-  - Domain: `open packages/domain/coverage/index.html`
-  - Usecases: `open packages/usecases/coverage/index.html`
+## Test Types
 
-Notes:
+- **Unit Tests**: Test individual functions, classes, or components in isolation. No external dependencies, network calls, or file I/O. Use mocks/stubs for dependencies.
+- **Integration Tests**: Test interactions between multiple modules or with external systems (e.g., databases, APIs). May use in-memory adapters or test environments.
+- **E2E Tests**: Full end-to-end tests that simulate user interactions with the deployed application. Use Playwright for browser-based testing.
 
-- Coverage is per-package. API tests do not raise Domain coverage and vice versa.
-- Barrel files like [`index.ts`](budgetwise/packages/usecases/src/index.ts:1) may show 0% (re-exports only) — this is normal.
-- If API tests fail resolving schemas or due to auth, run packages individually (Domain/Usecases) for coverage.
+## File Locations
 
----
+- **Unit Tests**: Co-located with source code in `src/**/*.{test,spec}.{ts,tsx}`
+- **Integration Tests**: In `tests/integration/**/*.int.test.{ts,tsx}` per app/package
+- **E2E Tests**: At repo root in `e2e/**/*.e2e.spec.ts`
 
-## What Each Layer Tests
+## Running Tests
 
-- Domain (unit, zero dependencies)
-  - Entities and invariants only.
-  - Tests:
-    - [`budget.test.ts`](budgetwise/packages/domain/src/budget.test.ts:1)
-    - [`category.test.ts`](budgetwise/packages/domain/src/category.test.ts:1)
-    - [`transaction.test.ts`](budgetwise/packages/domain/src/transaction.test.ts:1)
-    - [`user.test.ts`](budgetwise/packages/domain/src/user.test.ts:1)
-  - Targets in code:
-    - [`Budget`](budgetwise/packages/domain/src/budget.ts:22)
-      - [`Budget.shouldAlert()`](budgetwise/packages/domain/src/budget.ts:71)
-      - [`Budget.isActive()`](budgetwise/packages/domain/src/budget.ts:64)
-      - [`Budget.amount`](budgetwise/packages/domain/src/budget.ts:52)
-    - [`Category`](budgetwise/packages/domain/src/category.ts:16)
-    - [`Transaction`](budgetwise/packages/domain/src/transaction.ts:12)
-    - [`User`](budgetwise/packages/domain/src/user.ts:10)
+### All Tests
+- `pnpm test` - Run all tests in the monorepo
+- `pnpm test:unit` - Run only unit tests
+- `pnpm test:int` - Run only integration tests
+- `pnpm test:e2e` - Run E2E tests
 
-- Usecases (application behavior, in-memory adapters)
-  - CRUD flows, guards, aggregations.
-  - Tests (examples):
-    - Categories: [`create-category.test.ts`](budgetwise/packages/usecases/src/categories/create-category.test.ts:1), [`category-edge-cases.test.ts`](budgetwise/packages/usecases/src/categories/category-edge-cases.test.ts:1)
-    - Budgets: [`create-budget.test.ts`](budgetwise/packages/usecases/src/budgets/create-budget.test.ts:1), [`budget-edge-cases.test.ts`](budgetwise/packages/usecases/src/budgets/budget-edge-cases.test.ts:1), [`get-budget-dashboard.test.ts`](budgetwise/packages/usecases/src/budgets/get-budget-dashboard.test.ts:1)
-    - Focused additions: [`list-budgets.test.ts`](budgetwise/packages/usecases/src/budgets/list-budgets.test.ts:1), [`delete-budget.test.ts`](budgetwise/packages/usecases/src/budgets/delete-budget.test.ts:1), [`update-budget.test.ts`](budgetwise/packages/usecases/src/budgets/update-budget.test.ts:1)
-  - Core usecases:
-    - [`create-budget.ts`](budgetwise/packages/usecases/src/budgets/create-budget.ts:1)
-    - [`list-budgets.ts`](budgetwise/packages/usecases/src/budgets/list-budgets.ts:1)
-    - [`update-budget.ts`](budgetwise/packages/usecases/src/budgets/update-budget.ts:1)
-    - [`delete-budget.ts`](budgetwise/packages/usecases/src/budgets/delete-budget.ts:1)
+### Per Package/App
+- `pnpm test --filter <package>` - Run all tests for a specific package
+- `pnpm test:unit --filter <package>` - Run unit tests for a package
+- `pnpm test:int --filter <package>` - Run integration tests for a package
+
+## Examples
+
+### API (Workers/Miniflare)
+- **Unit**: `apps/api/src/routes/budgets.test.ts` - Test route handlers with mocked dependencies
+- **Integration**: `apps/api/tests/integration/transactions.int.test.ts` - Test full request flow with Miniflare runtime
+
+### Frontend (MSW)
+- **Unit**: `apps/frontend/src/hooks/useAuth.test.tsx` - Test hook logic with mocked API
+- **Integration**: `apps/frontend/tests/integration/auth/login.int.test.tsx` - Test login page with MSW for API mocking
+
+### Usecases (In-Memory Ports)
+- **Unit**: `packages/usecases/src/budgets/create-budget.test.ts` - Test usecase with mocked ports
+- **Integration**: `packages/usecases/tests/integration/category-budget-transaction.integration.test.ts` - Test multiple usecases with in-memory adapters
+
+### Adapters (Contract Tests)
+- **Unit**: `packages/adapters/auth-supabase/src/index.test.ts` - Test adapter methods with mocked Supabase
+- **Integration**: `packages/adapters/auth-supabase/tests/integration/index.int.test.ts` - Test against real Supabase emulator or test DB
+
+## Configuration
+
+- Vitest configs include the appropriate globs for each test type
+- Frontend uses `jsdom` environment and loads `tests/setup/setupTests.ts`
+- API/Workers use `node` environment
+- Coverage is collected per package
     - [`get-budget-status.ts`](budgetwise/packages/usecases/src/budgets/get-budget-status.ts:1)
     - [`get-budget-dashboard.ts`](budgetwise/packages/usecases/src/budgets/get-budget-dashboard.ts:1)
 
