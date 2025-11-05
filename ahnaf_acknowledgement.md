@@ -10,6 +10,7 @@ This project was developed primarily through AI-assisted code generation, levera
 - **Primary AI Assistant:** Claude Sonnet 4.5 (Anthropic) unless otherwise specified
 - **IDE Integration:** [RooCode](https://roo-code.com/) VS Code extension
 - **API Gateway:** [OpenRouter](https://openrouter.ai/) for LLM access and provider routing
+- **Configuration:** Extended thinking mode with 16,000 thinking tokens (50% of 32,000 total response length) to enable deeper reasoning and problem-solving
 
 **Code Indexing & Retrieval:**
 - **Vector Database:** Qdrant
