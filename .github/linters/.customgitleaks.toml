@@ -1,18 +1,7 @@
-# Template from: https://github.com/gitleaks/gitleaks#configuration
-
 # Title for the gitleaks configuration file.
 title = "Custom Gitleaks configuration"
 
 [extend]
-
+# Use the default gitleaks config and disable only the generic-api-key rule
 useDefault = true
-
-[[rules]]
-id = "generic-api-key"
-
-    [[rules.allowlists]]
-    # This is to suppress the false possitive occuring in TESTING-RATIONALE.md:generic-api-key:166
-    paths = ['''TESTING-RATIONALE\.md''']
-    condition = "AND"
-    regexTarget = "line"
-    regexes = ['''(?:budgetwise\/apps\/api\/src\/middleware\/auth\.ts:17)''']
+disabledRules = ["generic-api-key"]

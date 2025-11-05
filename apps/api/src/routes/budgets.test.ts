@@ -11,10 +11,12 @@ vi.mock('jose', () => {
       else if (token.includes('different-user')) sub = 'different-user';
       return { payload: { sub } } as any;
     }),
+    decodeProtectedHeader: vi.fn(() => ({ alg: "ES256" })),
   };
 });
 
 import { app } from '../app';
+import { container } from '../container';
 
 interface BudgetDTO {
   id: string;
@@ -66,13 +68,16 @@ describe('Budgets API Integration Tests', () => {
   beforeAll(() => {
     const originalFetch = app.fetch.bind(app);
     (app as any).fetch = (req: Request, env?: any, event?: any) =>
-      originalFetch(req, { ...(env || {}), SUPABASE_JWT_SECRET: process.env.SUPABASE_JWT_SECRET }, event);
+      originalFetch(req, { ...(env || {}), SUPABASE_JWT_SECRET: process.env.SUPABASE_JWT_SECRET, SUPABASE_URL: "https://test.supabase.co" }, event);
   });
   let authToken: string;
   let userId: string;
   let categoryId: string;
 
   beforeEach(async () => {
+    // Reset database for test isolation
+    (container as any).reset();
+    
     // Note: In a real scenario, you'd set up test authentication
     // For now, we'll mock the auth token
     authToken = `test-token-${++testCounter}`;

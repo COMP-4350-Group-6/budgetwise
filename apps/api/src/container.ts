@@ -4,6 +4,9 @@ import { makeContainer } from "@budget/composition-cloudflare-worker";
 // Environment interface for Cloudflare Workers
 interface Env {
   OPENROUTER_API_KEY?: string;
+  SUPABASE_JWT_SECRET: string;
+  SUPABASE_URL?: string;
+  SUPABASE_SERVICE_ROLE_KEY?: string;
 }
 
 // Get environment from global context (set in index.ts)
@@ -18,7 +21,7 @@ function getContainerInstance() {
   if (!cachedContainer) {
     const env = getEnv();
     cachedContainer = makeContainer(env);
-    console.log('Container initialized with OpenRouter:', !!env?.OPENROUTER_API_KEY);
+    console.log('Container initialized with Supabase:', !!env?.SUPABASE_URL);
   }
   return cachedContainer;
 }

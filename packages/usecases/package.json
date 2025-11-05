@@ -3,15 +3,21 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:unit": "vitest run src/**/*.test.ts",
+    "test:int": "vitest run tests/integration/**/*.int.test.{ts,tsx}"
   },
-  "exports": { ".": "./src/index.ts" },
+  "exports": { 
+    ".": "./src/index.ts",
+    "./*": "./src/*"
+  },
   "dependencies": {
     "@budget/domain": "workspace:*",
     "@budget/ports": "workspace:*"
   },
   "devDependencies": {
     "@budget/adapters-persistence-local": "workspace:*",
-    "@budget/adapters-system": "workspace:*"
+    "@budget/adapters-system": "workspace:*",
+    "vitest": "^3.2.4"
   }
 }

@@ -8,6 +8,9 @@
     "typecheck": "turbo run typecheck",
     "lint": "turbo run lint",
     "test": "turbo run test",
+    "test:unit": "turbo run test:unit",
+    "test:int": "turbo run test:int",
+    "test:e2e": "playwright test",
     "test:auth": "pnpm run test:auth:unit && pnpm run test:auth:integration",
     "test:auth:unit": "pnpm --filter api run test:auth",
     "test:auth:integration": "pnpm --filter @budget/adapters-auth-supabase run test:integration",
@@ -25,8 +28,5 @@
     "typescript": "^5.9.3",
     "vitest": "^3.2.4",
     "zod": "^4.1.12"
-  },
-  "dependencies": {
-    "recharts": "^3.3.0"
   }
 }

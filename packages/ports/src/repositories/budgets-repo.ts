@@ -7,5 +7,6 @@ export interface BudgetsRepo {
   listByCategory(userId: string, categoryId: string): Promise<Budget[]>;
   create(budget: Budget): Promise<void>;
   update(budget: Budget): Promise<void>;
-  delete(id: string): Promise<void>;
+  delete(id: string, userId?: string): Promise<void>;
+  clear?(): void; // For testing
 }

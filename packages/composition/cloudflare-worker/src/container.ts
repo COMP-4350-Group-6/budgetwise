@@ -1,10 +1,18 @@
-import { makeSystemClock, makeUlid } from "../../../adapters/system/src";
+import { makeSystemClock, makeUlid, makeUuid } from "../../../adapters/system/src";
 import {
   makeInMemTransactionsRepo,
   makeInMemCategoriesRepo,
   makeInMemBudgetsRepo
 } from "@budget/adapters-persistence-local";
+import {
+  makeSupabaseBudgetsRepo,
+  makeSupabaseCategoriesRepo,
+  makeSupabaseTransactionsRepo,
+  makeSupabaseServiceClient,
+  SupabaseLLMCallsRepository,
+} from "@budget/adapters-persistence-supabase";
 import { OpenRouterCategorization, OpenRouterInvoiceParser } from "@budget/adapters-openrouter";
+import { LLMTracker } from "@budget/ports";
 import {
   makeCreateCategory,
   makeListCategories,
@@ -26,24 +34,49 @@ import {
 
 interface Env {
   OPENROUTER_API_KEY?: string;
+  SUPABASE_URL?: string;
+  SUPABASE_SERVICE_ROLE_KEY?: string;
 }
 
 export function makeContainer(env?: Env) {
   const clock = makeSystemClock();
-  const id = makeUlid();
+  let id = makeUlid();
   
-  // Repositories - Swap to Firebase repo later:
-  const categoriesRepo = makeInMemCategoriesRepo();
-  const budgetsRepo = makeInMemBudgetsRepo();
-  const txRepo = makeInMemTransactionsRepo();
+  let categoriesRepo = makeInMemCategoriesRepo();
+  let budgetsRepo = makeInMemBudgetsRepo();
+  let txRepo = makeInMemTransactionsRepo();
+  let llmCallsRepo: SupabaseLLMCallsRepository | undefined;
+  let llmTracker: LLMTracker | undefined;
+
+  const supabaseUrl = env?.SUPABASE_URL;
+  const supabaseServiceRoleKey = env?.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (supabaseUrl && supabaseServiceRoleKey) {
+    console.log(`[Container] Using Supabase at ${supabaseUrl}`);
+    
+    const supabaseClient = makeSupabaseServiceClient({
+      supabaseUrl,
+      serviceRoleKey: supabaseServiceRoleKey,
+    });
+
+    categoriesRepo = makeSupabaseCategoriesRepo({ client: supabaseClient });
+    budgetsRepo = makeSupabaseBudgetsRepo({ client: supabaseClient });
+    txRepo = makeSupabaseTransactionsRepo({ client: supabaseClient });
+    id = makeUuid();
+    llmCallsRepo = new SupabaseLLMCallsRepository(supabaseClient);
+    llmTracker = new LLMTracker(llmCallsRepo, id);
+  } else {
+    console.log('[Container] Using in-memory repositories (no Supabase configured)');
+  }
   
   // Optional AI services (only if API key is provided)
+  // Pass the LLM tracker if available for automatic call tracking
   const categorization = env?.OPENROUTER_API_KEY
-    ? new OpenRouterCategorization(env.OPENROUTER_API_KEY)
+    ? new OpenRouterCategorization(env.OPENROUTER_API_KEY, { tracker: llmTracker })
     : undefined;
   
   const invoiceParser = env?.OPENROUTER_API_KEY
-    ? new OpenRouterInvoiceParser(env.OPENROUTER_API_KEY)
+    ? new OpenRouterInvoiceParser(env.OPENROUTER_API_KEY, { tracker: llmTracker })
     : undefined;
   
   return {
@@ -51,6 +84,10 @@ export function makeContainer(env?: Env) {
       categoriesRepo,
       budgetsRepo,
       txRepo,
+      llmCallsRepo,
+    },
+    services: {
+      llmTracker,
     },
     usecases: {
       // Category use cases
@@ -91,6 +128,26 @@ export function makeContainer(env?: Env) {
             invoiceParser
           })
         : undefined,
-    }
+    },
+    // Reset helper for tests/development: re-initialize in-memory repos and trackers
+    reset: () => {
+      // If using supabase we don't attempt to reset remote state here.
+      // For in-memory repos, call their `clear()` helpers to reset state so
+      // existing references (used by the returned usecases) remain valid.
+      if (!supabaseUrl || !supabaseServiceRoleKey) {
+        try {
+          (categoriesRepo as any)?.clear?.();
+        } catch {}
+        try {
+          (budgetsRepo as any)?.clear?.();
+        } catch {}
+        try {
+          (txRepo as any)?.clear?.();
+        } catch {}
+        llmCallsRepo = undefined;
+        llmTracker = undefined;
+        id = makeUlid();
+      }
+    },
   };
 }

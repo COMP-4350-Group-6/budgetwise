@@ -12,10 +12,12 @@ vi.mock('jose', () => {
       else if (token.includes('test-token')) sub = 'test-user-123';
       return { payload: { sub } } as any;
     }),
+    decodeProtectedHeader: vi.fn(() => ({ alg: "ES256" })),
   };
 });
 
 import { app } from '../app';
+import { container } from '../container';
 
 interface CategoryDTO {
   id: string;
@@ -59,7 +61,7 @@ describe('Categories API Integration Tests', () => {
   beforeAll(() => {
     const originalFetch = app.fetch.bind(app);
     (app as any).fetch = (req: Request, env?: any, event?: any) =>
-      originalFetch(req, { ...(env || {}), SUPABASE_JWT_SECRET: process.env.SUPABASE_JWT_SECRET }, event);
+      originalFetch(req, { ...(env || {}), SUPABASE_JWT_SECRET: process.env.SUPABASE_JWT_SECRET, SUPABASE_URL: "https://test.supabase.co" }, event);
   });
   let authToken: string;
   let userId: string;
@@ -68,6 +70,8 @@ describe('Categories API Integration Tests', () => {
     // Note: In a real scenario, you'd set up test authentication
     authToken = 'test-token';
     userId = 'test-user-123';
+    // Reset database for test isolation
+    (container as any).reset();
   });
 
   describe('POST /categories - Create Category', () => {
@@ -165,23 +169,25 @@ describe('Categories API Integration Tests', () => {
   describe('GET /categories - List Categories', () => {
     it('should list all categories', async () => {
       // Create some categories first
-      await app.request('/categories', {
+      const res1 = await app.request('/categories', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${authToken}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ name: 'Category 1' }),
+        body: JSON.stringify({ name: 'Category One' }),
       });
+      expect(res1.status).toBe(201);
 
-      await app.request('/categories', {
+      const res2 = await app.request('/categories', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${authToken}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ name: 'Category 2' }),
+        body: JSON.stringify({ name: 'Category Two' }),
       });
+      expect(res2.status).toBe(201);
 
       const res = await app.request('/categories', {
         method: 'GET',
@@ -628,7 +634,7 @@ describe('Categories API Integration Tests', () => {
             'Authorization': `Bearer ${authToken}`,
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ name: `Category ${i}` }),
+          body: JSON.stringify({ name: `Category ${String.fromCharCode(65 + i)}` }),
         })
       );
 
