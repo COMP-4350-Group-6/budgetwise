@@ -1,8 +1,21 @@
 # Usage: ./scripts/getAuthToken.sh <email> <password>
 #
 
+# Get script directory and determine project root
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+
+# Try to load from apps/frontend/.env.local first (local development)
+ENV_LOCAL="$PROJECT_ROOT/apps/frontend/.env.local"
+if [ -f "$ENV_LOCAL" ]; then
+  echo "Loading local Supabase config from apps/frontend/.env.local"
+  export $(grep -E '^NEXT_PUBLIC_SUPABASE_URL=' "$ENV_LOCAL" | xargs)
+  export $(grep -E '^NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=' "$ENV_LOCAL" | xargs)
+fi
+
+# Use environment variables with fallbacks
 SUPABASE_URL="${SUPABASE_URL:-${NEXT_PUBLIC_SUPABASE_URL}}"
-SUPABASE_PUBLISHABLE_KEY="${SUPABASE_ANON_KEY:-${NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY}}"
+SUPABASE_ANON_KEY="${SUPABASE_ANON_KEY:-${NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY}}"
 
 EMAIL="$1"
 PASSWORD="$2"
@@ -10,15 +23,18 @@ PASSWORD="$2"
 if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
   echo "Error: Missing Supabase credentials"
   echo ""
-  echo "Set these environment variables:"
-  echo "  SUPABASE_URL (or NEXT_PUBLIC_SUPABASE_URL)"
-  echo "  SUPABASE_ANON_KEY (or NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY)"
+  echo "Make sure apps/frontend/.env.local exists with:"
+  echo "  NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321"
+  echo "  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<your-anon-key>"
   echo ""
-  echo "Or export them:"
-  echo "  export SUPABASE_URL='https://your-project.supabase.co'"
+  echo "Or export them manually:"
+  echo "  export SUPABASE_URL='http://127.0.0.1:54321'"
   echo "  export SUPABASE_ANON_KEY='your-anon-key'"
   exit 1
 fi
+
+echo "Using Supabase URL: $SUPABASE_URL"
+echo ""
 
 if [ -z "$EMAIL" ] || [ -z "$PASSWORD" ]; then
   echo "Usage: $0 <email> <password>"

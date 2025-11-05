@@ -1,27 +1,27 @@
+# Get script directory and determine project root
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+
+# Default to standard Wrangler dev server port
 API_URL="${API_URL:-http://localhost:8787}"
 AUTH_TOKEN="$1"
 
 if [ -z "$AUTH_TOKEN" ]; then
   echo "Usage: $0 <auth-token>"
   echo ""
-  echo "To get auth token, choose one method:"
+  echo "To get auth token, run:"
+  echo "  bash scripts/getAuthToken.sh <email> <password>"
   echo ""
-  echo "METHOD 1: Browser DevTools (Easiest)"
-  echo "  1. Login to Budgetwise in your browser"
-  echo "  2. Open DevTools (F12)"
-  echo "  3. Application tab -> Local Storage -> your site URL"
-  echo "  4. Find key: sb-<project-id>-auth-token"
-  echo "  5. Copy the entire token value"
+  echo "Example:"
+  echo "  bash scripts/getAuthToken.sh ahnaf.ahsan1123@gmail.com Testing112#"
   echo ""
-  echo "METHOD 2: Browser Console"
-  echo "  Run: node scripts/get-auth-token.js"
-  echo "  Follow the instructions shown"
-  echo ""
-  echo "METHOD 3: Login Script (requires @supabase/supabase-js)"
-  echo "  node scripts/get-auth-token.js <email> <password>"
+  echo "This will automatically use local Supabase config from apps/frontend/.env.local"
   echo ""
   exit 1
 fi
+
+echo "Using API URL: $API_URL"
+echo ""
 
 # Get script directory and determine profiler directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
