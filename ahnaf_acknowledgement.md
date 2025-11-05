@@ -41,13 +41,23 @@ OpenRouter's intelligent routing maximizes uptime and performance by automatical
 - Integration testing code
 
 **Manual Contributions (Ahnaf):**
-- Code refactoring for consistency and maintainability
+- Feature ideation and conceptual design
+- Research into implementation techniques and architectural approaches
+- Evaluation and comparison of technical solutions
+- Strategic planning for regression testing approaches
+- Balancing application requirements, technical specifications, and team capacity constraints
 - Architectural verification and design pattern adherence
 - Time-sensitive implementation decisions under project deadlines
 - **Manual feature verification after each push** (all features tested by hand)
 - Edge case handling and bug fixes
 - Deployment configuration and monitoring
-- Git pushes verification for any leaks or secrets.
+- Git push verification for any leaks or secrets
+
+**Division of Responsibility:**
+In essence, **all strategic, creative, and decision-making work is performed by humans**. AI is used specifically for code implementation based on human-defined requirements and architecture. The workflow is:
+1. **Human:** Ideate feature, define requirements, design architecture
+2. **AI:** Generate code implementation based on specifications
+3. **Human:** Review, test, refine, and verify functionality
 
 ### Quality Assurance
 
