@@ -4,6 +4,7 @@ import React from "react";
 import styles from "./modals.module.css";
 import { TRANSACTION_STRINGS, GENERAL_STRINGS } from "@/constants/strings";
 import type { Category } from "@/services/budgetService";
+import type { TransactionDTO } from "@/services/transactionsService";
 
 interface EditTransactionModalProps {
   show: boolean;
@@ -11,7 +12,7 @@ interface EditTransactionModalProps {
   onSubmit: (e: React.FormEvent) => void;
   onDelete: () => void;
 
-  editTx: any;
+  editTx: TransactionDTO | null;
   editAmount: string;
   editCategoryId: string;
   editDate: string;
