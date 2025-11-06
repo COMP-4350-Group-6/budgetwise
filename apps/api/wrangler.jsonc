@@ -8,6 +8,7 @@
   
   // Date to use for Workers Runtime compatibility
   "compatibility_date": "2025-05-05",
+  "preview_urls": true,
   "vars": {
     // Local development: Use local Supabase instance
     // "SUPABASE_URL": "http://127.0.0.1:54321"

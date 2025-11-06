@@ -12,7 +12,8 @@
     "test:unit": "vitest run src/**/*.test.ts",
     "test:int": "vitest run tests/integration/**/*.int.test.{ts,tsx}",
     "test:critical": "vitest run -t @critical",
-    "test:auth": "vitest run src/middleware/auth.test.ts"
+    "test:auth": "vitest run src/middleware/auth.test.ts",
+    "deploy": "wrangler deploy"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20251011.0",
