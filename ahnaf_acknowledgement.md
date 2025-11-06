@@ -36,7 +36,7 @@ OpenRouter's intelligent routing maximizes uptime and performance by automatical
 - Core application functionality and business logic
 - API integrations and data processing pipelines
 - Boilerplate code and initial implementations
-- Database schemas and ORM models
+- Database schemas and ORM models (verified manually)
 - Integration testing code
 
 **Manual Contributions (Ahnaf):**
