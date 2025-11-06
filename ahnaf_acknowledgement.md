@@ -2,8 +2,7 @@
 
 ## AI-Assisted Development
 
-This project was developed primarily through AI-assisted code generation, leveraging modern LLM and vector search technologies to enable rapid, context-aware development. Personal AI tool usage is documented at the project level through this acknowledgement file, similar to how academic papers cite sources in a references section rather than inline throughout the text. Granular, line-by-line attribution is available through Git version control (`git blame`, `git log`).
-
+This project was developed primarily through AI-assisted code generation, leveraging modern LLM and vector search technologies to enable rapid, context-aware development. Personal AI tool usage is documented at the project level through this acknowledgement file.
 
 ### Primary Development Tools
 
