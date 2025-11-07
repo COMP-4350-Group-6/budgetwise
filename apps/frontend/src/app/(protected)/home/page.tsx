@@ -1,12 +1,11 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./home.module.css";
 
-// Services
-import { budgetService, BudgetDashboard } from "@/services/budgetService";
-import { apiFetch } from "@/lib/apiClient";
+// Hooks
+import { useDashboard, useRecentTransactions } from "@/hooks/apiQueries";
 import type { TransactionDTO } from "@/services/transactionsService";
 
 // Components
@@ -47,37 +46,13 @@ const mapHealthToStatus = (health: string): StatusLevel => {
 export default function HomePage() {
   const router = useRouter();
 
-  // State: Dashboard data and transactions
-  const [dashboard, setDashboard] = useState<BudgetDashboard | null>(null);
-  const [transactions, setTransactions] = useState<TransactionDTO[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  /**
-   * Fetches dashboard metrics and recent transactions.
-   * Handles API errors gracefully and ensures loading state synchronization.
-   */
-  useEffect(() => {
-    const loadDashboardData = async () => {
-      try {
-        const [dash, tx] = await Promise.all([
-          budgetService.getDashboard(),
-          apiFetch<{ transactions: TransactionDTO[] }>(
-            "/transactions?days=90",
-            {},
-            true
-          ),
-        ]);
-        setDashboard(dash);
-        setTransactions(tx.transactions || []);
-      } catch (err) {
-        console.error(DASHBOARD_STRINGS.errors.loadFailed, err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadDashboardData();
-  }, []);
+  const { data: dashboard, isLoading: dashLoading } = useDashboard();
+  const {
+    data: tx,
+    isLoading: txLoading,
+  } = useRecentTransactions(90);
+  const transactions = tx ?? [];
+  const loading = dashLoading || txLoading;
 
   /**
    * Computes aggregate budget statistics for summary cards.
@@ -171,7 +146,7 @@ export default function HomePage() {
 
       <div className={styles.gridRow}>
         <TrendChart transactions={transactions} />
-        <DonutChart dashboard={dashboard} />
+        <DonutChart dashboard={dashboard ?? null} />
       </div>
 
       {/* ===== Quick Actions ===== */}

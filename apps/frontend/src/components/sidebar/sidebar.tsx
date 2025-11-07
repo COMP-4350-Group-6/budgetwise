@@ -7,6 +7,7 @@ import { FaHome, FaChartLine, FaWallet } from "react-icons/fa";
 import { FaSignOutAlt } from "react-icons/fa";
 import { useSidebarState } from "@/app/(protected)/ProtectedLayoutClient";
 import styles from "./sidebar.module.css";
+import { queryClient } from "@/lib/queryClient";
 
 export default function Sidebar() {
   const router = useRouter();
@@ -16,6 +17,7 @@ export default function Sidebar() {
   const handleLogout = () => {
     localStorage.removeItem("bw_access");
     localStorage.removeItem("bw_refresh");
+    queryClient.clear();
     router.push("/login");
   };
 

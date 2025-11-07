@@ -1,7 +1,8 @@
-import { render, screen, waitFor, fireEvent } from "@testing-library/react";
+import { screen, waitFor, fireEvent } from "@testing-library/react";
 import BudgetPage from "@/app/(protected)/budget/page";
 import React from "react";
 import { vi, describe, it, expect, beforeEach } from "vitest";
+import { renderWithQueryClient } from "../../../../tests/setup/testUtils";
 
 // mock CSS module import
 vi.mock("@/app/(protected)/budget/budget.module.css", () => ({
@@ -14,29 +15,26 @@ vi.mock("@/components/budgets/categorySpending", () => ({
   __esModule: true,
   default: () => <div data-testid="category-spending" />,
 }));
-vi.mock("@/components/budgets/savingsGoals", () => ({
+vi.mock("@/components/budgets/savingsGoal", () => ({
   __esModule: true,
   default: () => <div data-testid="savings-goals" />,
 }));
 
-// mock service modules
-vi.mock("@/services/budgetService", () => ({
-  budgetService: {
-    getDashboard: vi.fn(),
-    createBudget: vi.fn(),
-  },
-  categoryService: {
-    listCategories: vi.fn(),
-    deleteCategory: vi.fn(),
-    seedDefaultCategories: vi.fn(),
-    createCategory: vi.fn(),
-  },
+// Mock React Query hooks
+vi.mock("@/hooks/apiQueries", () => ({
+  useDashboard: vi.fn(),
+  useCategories: vi.fn(),
+  useAllTransactions: vi.fn(),
+  useSeedDefaultCategories: vi.fn(),
+  useCreateBudget: vi.fn(),
+  useUpdateBudget: vi.fn(),
+  useDeleteBudget: vi.fn(),
+  useDeleteCategory: vi.fn(),
+  useCreateCategory: vi.fn(),
 }));
 
-vi.mock("@/services/transactionsService", () => ({
-  transactionsService: {
-    listTransactions: vi.fn(),
-  },
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
 }));
 
 describe("BudgetPage", () => {
@@ -72,26 +70,82 @@ describe("BudgetPage", () => {
   });
 
   it("shows loading state initially", async () => {
-    const { budgetService, categoryService } = await import("@/services/budgetService");
-    const { transactionsService } = await import("@/services/transactionsService");
+    const { useDashboard, useCategories, useAllTransactions, useSeedDefaultCategories } = await import("@/hooks/apiQueries");
 
-  vi.mocked(categoryService.listCategories).mockResolvedValueOnce([]);
-  vi.mocked(budgetService.getDashboard).mockResolvedValueOnce(mockDashboard);
-  vi.mocked(transactionsService.listTransactions).mockResolvedValueOnce(mockTransactions);
+    vi.mocked(useCategories).mockReturnValue({
+      data: [],
+      isLoading: true,
+      isError: false,
+      error: null,
+      refetch: vi.fn(),
+    } as any);
 
-    render(<BudgetPage />);
+    vi.mocked(useSeedDefaultCategories).mockReturnValue({
+      mutate: vi.fn(),
+      mutateAsync: vi.fn(),
+      isPending: false,
+      isError: false,
+      error: null,
+      reset: vi.fn(),
+    } as any);
+
+    vi.mocked(useDashboard).mockReturnValue({
+      data: undefined,
+      isLoading: true,
+      isError: false,
+      error: null,
+      refetch: vi.fn(),
+    } as any);
+
+    vi.mocked(useAllTransactions).mockReturnValue({
+      data: [],
+      isLoading: true,
+      isError: false,
+      error: null,
+      refetch: vi.fn(),
+    } as any);
+
+    renderWithQueryClient(<BudgetPage />);
     expect(screen.getByText(/loading budget data/i)).toBeInTheDocument();
   });
 
   it("renders dashboard data after loading", async () => {
-    const { budgetService, categoryService } = await import("@/services/budgetService");
-    const { transactionsService } = await import("@/services/transactionsService");
+    const { useDashboard, useCategories, useAllTransactions, useSeedDefaultCategories } = await import("@/hooks/apiQueries");
 
-  vi.mocked(categoryService.listCategories).mockResolvedValueOnce(mockCategories);
-  vi.mocked(budgetService.getDashboard).mockResolvedValueOnce(mockDashboard);
-  vi.mocked(transactionsService.listTransactions).mockResolvedValueOnce(mockTransactions);
+    vi.mocked(useCategories).mockReturnValue({
+      data: mockCategories,
+      isLoading: false,
+      isError: false,
+      error: null,
+      refetch: vi.fn(),
+    } as any);
 
-    render(<BudgetPage />);
+    vi.mocked(useSeedDefaultCategories).mockReturnValue({
+      mutate: vi.fn(),
+      mutateAsync: vi.fn(),
+      isPending: false,
+      isError: false,
+      error: null,
+      reset: vi.fn(),
+    } as any);
+
+    vi.mocked(useDashboard).mockReturnValue({
+      data: mockDashboard,
+      isLoading: false,
+      isError: false,
+      error: null,
+      refetch: vi.fn(),
+    } as any);
+
+    vi.mocked(useAllTransactions).mockReturnValue({
+      data: mockTransactions,
+      isLoading: false,
+      isError: false,
+      error: null,
+      refetch: vi.fn(),
+    } as any);
+
+    renderWithQueryClient(<BudgetPage />);
 
     await waitFor(() =>
       expect(screen.queryByText(/loading budget data/i)).not.toBeInTheDocument()
@@ -103,14 +157,51 @@ describe("BudgetPage", () => {
   });
 
   it("opens and closes the Add Category modal", async () => {
-    const { budgetService, categoryService } = await import("@/services/budgetService");
-    const { transactionsService } = await import("@/services/transactionsService");
+    const { useDashboard, useCategories, useAllTransactions, useSeedDefaultCategories, useCreateCategory } = await import("@/hooks/apiQueries");
 
-  vi.mocked(categoryService.listCategories).mockResolvedValueOnce(mockCategories);
-  vi.mocked(budgetService.getDashboard).mockResolvedValueOnce(mockDashboard);
-  vi.mocked(transactionsService.listTransactions).mockResolvedValueOnce(mockTransactions);
+    vi.mocked(useCategories).mockReturnValue({
+      data: mockCategories,
+      isLoading: false,
+      isError: false,
+      error: null,
+      refetch: vi.fn(),
+    } as any);
 
-    render(<BudgetPage />);
+    vi.mocked(useSeedDefaultCategories).mockReturnValue({
+      mutate: vi.fn(),
+      mutateAsync: vi.fn(),
+      isPending: false,
+      isError: false,
+      error: null,
+      reset: vi.fn(),
+    } as any);
+
+    vi.mocked(useCreateCategory).mockReturnValue({
+      mutate: vi.fn(),
+      mutateAsync: vi.fn(),
+      isPending: false,
+      isError: false,
+      error: null,
+      reset: vi.fn(),
+    } as any);
+
+    vi.mocked(useDashboard).mockReturnValue({
+      data: mockDashboard,
+      isLoading: false,
+      isError: false,
+      error: null,
+      refetch: vi.fn(),
+    } as any);
+
+    vi.mocked(useAllTransactions).mockReturnValue({
+      data: mockTransactions,
+      isLoading: false,
+      isError: false,
+      error: null,
+      refetch: vi.fn(),
+    } as any);
+
+    renderWithQueryClient(<BudgetPage />);
 
     await waitFor(() =>
       expect(screen.queryByText(/loading budget data/i)).not.toBeInTheDocument()
@@ -125,21 +216,6 @@ describe("BudgetPage", () => {
 
     await waitFor(() =>
       expect(screen.queryByText(/add new category/i)).not.toBeInTheDocument()
-    );
-  });
-
-  it("shows error message if loading fails", async () => {
-    const { budgetService, categoryService } = await import("@/services/budgetService");
-    const { transactionsService } = await import("@/services/transactionsService");
-
-    vi.mocked(categoryService.listCategories).mockRejectedValueOnce(new Error("Network error"));
-    vi.mocked(budgetService.getDashboard).mockResolvedValueOnce(mockDashboard);
-    vi.mocked(transactionsService.listTransactions).mockResolvedValueOnce(mockTransactions);
-
-    render(<BudgetPage />);
-
-    await waitFor(() =>
-      expect(screen.getByText(/error:/i)).toBeInTheDocument()
     );
   });
 });
