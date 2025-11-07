@@ -84,7 +84,7 @@ The following components have **no test coverage (0%)**:
 
 **API Tier:**
 - **Integration Tests:**
-  - Currently failing due to environment configuration issues (Supabase JWT secret not loaded)
+  - Currently failing due to environment configuration issues (Supabase JWT secret not being loaded)
   - Tests exist but are not passing in CI
 
 **Low Coverage Areas (0-20%):**
@@ -152,7 +152,7 @@ This diagram shows all four architectural tiers (Presentation, Application, Doma
   - Barrel export files (index.ts) - pure re-exports
   - Some helper utilities
 
-**Note:** The domain tier has high branch coverage (95.5%) which is the most important metric for business logic. The lower line coverage is primarily due to barrel files being included in coverage reports.
+**Note:** The domain tier has high branch coverage (95.5%) which is the most important metric for business logic. The lower line coverage is primarily due to barrel files (pure re-exports in `index.ts`) being included in coverage reports, as noted in the [TESTING.md](../TESTING.md) documentation.
 
 ##### **Infrastructure Tier**
 

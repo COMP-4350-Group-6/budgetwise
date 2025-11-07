@@ -13,8 +13,9 @@
 │  │  - Services              │  │                            │   │
 │  │  - Utils/Lib             │  │                            │   │
 │  │                          │  │                            │   │
-│  │  Coverage: ~36% lines    │  │  Coverage: Failing tests   │   │
-│  │  Status: Mostly Tested   │  │  Status: Mostly Tested     │   │
+│  │  Coverage: ~36% lines    │  │  Tests exist but failing   │   │
+│  │  Status: Mostly Tested   │  │  (env config issues)       │   │
+│  │                          │  │  Status: Mostly Tested     │   │
 │  └─────────────────────────┘  └────────────────────────────┘   │
 └─────────────────────────────────────────────────────────────────┘
                               ↓
