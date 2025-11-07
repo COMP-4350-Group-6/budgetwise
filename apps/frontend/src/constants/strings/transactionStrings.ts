@@ -13,6 +13,7 @@ export const TRANSACTION_STRINGS = {
     averageTransaction: "Average Transaction",
     uncategorized: "Uncategorized",
     importCsv: "Import CSV",
+    categorizing: "Categorizing…",
   },
 
   calendarTitle: "Spending Calendar",
