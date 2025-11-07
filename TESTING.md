@@ -7,6 +7,7 @@ This monorepo uses a consistent testing structure to separate unit, integration,
 - **Unit Tests**: Test individual functions, classes, or components in isolation. No external dependencies, network calls, or file I/O. Use mocks/stubs for dependencies.
 - **Integration Tests**: Test interactions between multiple modules or with external systems (e.g., databases, APIs). May use in-memory adapters or test environments.
 - **E2E Tests**: Full end-to-end tests that simulate user interactions with the deployed application. Use Playwright for browser-based testing.
+- **Critical Regression Tests**: Fast, lightweight subset of tests covering high-impact, high-risk core functionality (auth, budgets CRUD, categories, transaction flow). Tagged with `@critical` and suitable for smoke testing after deployments.
 
 ## File Locations
 
@@ -20,12 +21,14 @@ This monorepo uses a consistent testing structure to separate unit, integration,
 - `pnpm test` - Run all tests in the monorepo
 - `pnpm test:unit` - Run only unit tests
 - `pnpm test:int` - Run only integration tests
+- `pnpm test:critical` - Run critical regression tests (fast smoke checks for core functionality)
 - `pnpm test:e2e` - Run E2E tests
 
 ### Per Package/App
 - `pnpm test --filter <package>` - Run all tests for a specific package
 - `pnpm test:unit --filter <package>` - Run unit tests for a package
 - `pnpm test:int --filter <package>` - Run integration tests for a package
+- `pnpm test:critical --filter <package>` - Run critical regression tests for a package
 
 ## Examples
 
@@ -101,11 +104,53 @@ This monorepo uses a consistent testing structure to separate unit, integration,
 
 ---
 
+## Critical Regression Tests
+
+Critical regression tests are a prioritized subset of tests tagged with `@critical` that cover:
+- **High Impact**: Core business functionality (authentication, budget CRUD, categories, transactions)
+- **High Risk**: Features prone to breaking with changes (auth middleware, dashboard aggregation, transaction flow)
+
+### Usage
+
+**Suggested times to run critical tests:**
+- After every deployment (smoke testing)
+- On every PR (fast feedback loop, <5 minutes)
+- Before releases as a gate check
+- When time-constrained and full suite is expensive
+
+**Suggested times to run full suite:**
+- Nightly builds
+- Pre-release validation
+- When making architectural changes
+
+**Current critical tests:**
+- `@critical allows request when token is valid` - Auth middleware validation
+- `@critical should create a budget with valid data` - Budget creation
+- `@critical should list all budgets for user` - Budget listing
+- `@critical should return dashboard data` - Dashboard aggregation
+- `@critical should update budget amount` - Budget updates
+- `@critical should create a category with minimal data` - Category creation
+- `@critical should list all categories` - Category listing
+- `@critical should reflect added transaction in dashboard totals` - Full transaction flow
+
+**Adding new critical tests:**
+Tag any test with `@critical` in its description:
+```typescript
+it('@critical should handle core feature', async () => {
+  // test implementation
+});
+```
+
+---
+
 ## Commands (Cheat Sheet)
 
 ```bash
 # Run all tests
 pnpm test
+
+# Run critical regression tests (fast smoke checks)
+pnpm test:critical
 
 # Focus a package
 pnpm test --filter @budget/domain
