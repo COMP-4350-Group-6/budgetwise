@@ -87,7 +87,7 @@ This is normal performance for POST operations. No optimization needed.
 
 **Profiler Output:**
 
-Results saved to: profiler/profiler-results/curl-results-20251105-153415.txt
+[Profiler Results](profiler/profiler-results/output-20251105-153415.txt)
 
 
 
