@@ -52,20 +52,6 @@ Format: Markdown file in your repository. Include links to relevant code, script
 
 ## 4. Profiler
 
-> [!IMPORTANT]
-> ### Worksheet Question
->
-> 1. [ ] Run a profiler on your API while exercising every endpoint.
->
-> 2. [ ] Identify:
->
->    - [ ] Which endpoint is the slowest.
->
->    - [ ] Whether the slowdown is fixable — and why/why not.
->
-> 3. [ ] Include profiler output (linked or attached).
->
-> 
 ### Profiler Implementation
 
 We implemented a bash API profiler that exercises all endpoints. The profiler uses curl to make HTTP requests and measures response times
@@ -100,15 +86,6 @@ This is normal performance for POST operations. No optimization needed.
 
 
 ## 6. Show Off
-
-> [!IMPORTANT]
-> ### Worksheet Question
->
-> 1. [ ] Each team member highlights their best work (code, UI, design, integration, mocks, etc.).
->
-> Remember: good refactored code should be simple and elegant.
->
-> 2. [ ] Each member must commit their own update — commit logs will be checked.
 
 ### Ahnaf
 
@@ -153,7 +130,7 @@ This feature saves users time by allowing them to import many transactions at on
 
 
 ### Stephanie
-### Frontend Refactor & UI/UX redesign
+#### Frontend Refactor & UI/UX redesign
 
 #### Overview
 I refactored and modernized the entire pages (based on feedback given) mostly to improve performance, maintainability, and user experience. The new layout separates logic into smaller, reusable components (filters, lists, modals, summaries) for clarity and scalability.
