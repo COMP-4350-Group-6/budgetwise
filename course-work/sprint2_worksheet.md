@@ -74,9 +74,9 @@ We implemented a bash API profiler that exercises all endpoints. The profiler us
 
 **Which endpoint is the slowest?**
 
-`POST /transactions` - 7ms
+POST /transactions - 7ms
 
-**Is the slowdown fixable — and why/why not?**
+**Is the slowdown fixable - and why/why not?**
 
 Yes but it's not necessary. The 7ms response time is excellent and well within acceptable performance thresholds. The slight delay is expected for write operations due to:
 - Database write operations for inserting the transactions
