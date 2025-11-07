@@ -153,7 +153,30 @@ This feature saves users time by allowing them to import many transactions at on
 
 
 ### Stephanie
+### Frontend Refactor & UI/UX redesign
 
+#### Overview
+I refactored and modernized the entire pages (based on feedback given) mostly to improve performance, maintainability, and user experience. The new layout separates logic into smaller, reusable components (filters, lists, modals, summaries) for clarity and scalability.
+
+#### What It Does
+- **Redesigned category and spending sections** for better readability and usability. Added smooth budget creation/edit flows, integrated category color indicators, and improved progress bar visuals.
+- **Rebuilt the transaction and home page** into modular, readable components (`TransactionList`, `TransactionFilters`, etc.)
+- **Added a constant folder to eliminate string literals in codebase**
+- **Simplified and optimized the data flow** between modals and services
+- **Enhanced the page visuals** with new responsive CSS layouts
+- **Fixed category editing and modal update states**
+  
+#### Current Status & Next Steps
+ **Note: Refactoring not fully completed due to time constraints**
+#### Key Files
+- [`apps/frontend/src/app/(protected)/home/page.tsx`](../../apps/frontend/src/app/(protected)/home/page.tsx)  
+- [`apps/frontend/src/app/(protected)/transactions/page.tsx`](../../apps/frontend/src/app/(protected)/transaction/page.tsx) — Main page refactor and logic flow
+- [`apps/frontend/src/components/transactions/transactionList.tsx`](../../apps/frontend/src/app/components/transaction/transactionList.tsx) — Redesigned list UI with live edit buttons
+- [`apps/frontend/src/components/transactions/modals`](../../apps/frontend/src/app/components/transactions/modals) — Modularized add/edit/import/upload modals
+- [`apps/frontend/src/app/constants/strings`](../../apps/frontend/src/app/constants/strings)  - Removal of string literals in code
+
+#### Commit
+**Commit**: (https://github.com/COMP-4350-Group-6/budgetwise/pull/118/commits/76fc006d38c4bf517819c97781d05c5ebf48fa23) [https://github.com/COMP-4350-Group-6/budgetwise/pull/137/commits/5ce025aa9a095ba7f770e7971f7477f315f7454d]
 
 
 
