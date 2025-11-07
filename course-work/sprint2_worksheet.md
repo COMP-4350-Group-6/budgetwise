@@ -90,6 +90,25 @@ Format: Markdown file in your repository. Include links to relevant code, script
 
 
 ### Bryce
+**CSV Transaction Import Feature**
+
+I implemented a CSV upload feature that allows users to bulk import transactions from spreadsheet files. Users can upload a CSV file with their transaction data, and the system automatically parses it and imports the transactions.
+
+**What it does**
+- Parses CSV files with flexible column names (works with "amount", "price", "total", etc.)
+- Handles different date formats automatically
+- Automatically categorizes transactions using AI based on the description
+- Shows a preview before importing
+- Displays errors for any rows that fail to import
+- Shows imported transactions immediately after import
+
+**Key files:**
+- [`apps/frontend/src/lib/csvParser.ts`](../../apps/frontend/src/lib/csvParser.ts) for CSV parsing logic
+- [`apps/frontend/src/services/transactionsService.ts`](../../apps/frontend/src/services/transactionsService.ts)  API service for bulk import
+- [`apps/api/src/routes/transactions.ts`](../../apps/api/src/routes/transactions.ts) Backend endpoint for the bulk import
+- [`apps/frontend/src/app/(protected)/transactions/page.tsx`](../../apps/frontend/src/app/(protected)/transactions/page.tsx) UI component
+
+**Commit**: [https://github.com/COMP-4350-Group-6/budgetwise/pull/130/commits/a58c5777a7b07d61260f1cdf08157f762be0edee]
 
 
 
