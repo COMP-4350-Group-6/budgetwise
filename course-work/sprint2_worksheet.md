@@ -87,10 +87,6 @@ This is normal performance for POST operations. No optimization needed.
 
 ## 6. Show Off
 
-### Ahnaf
-
-
-
 ### Bryce
 **CSV Upload Feature**
 
@@ -177,8 +173,8 @@ I refactored and modernized the entire pages (based on feedback given) mostly to
 **Commit**: [https://github.com/COMP-4350-Group-6/budgetwise/pull/118/commits/76fc006d38c4bf517819c97781d05c5ebf48fa23](https://github.com/COMP-4350-Group-6/budgetwise/pull/137/commits/5ce025aa9a095ba7f770e7971f7477f315f7454d)
 
 
-# Ahnaf
-## Why I Love the Auto-Categorization Feature (commit #96)
+### Ahnaf
+#### Why I Love the Auto-Categorization Feature (commit #96)
 
 I'm incredibly proud of the auto-categorization feature because it's **fast and smooth**. When a user adds a transaction, they see "Categorizing..." for maybe half a second, then boom! it's done! No waiting, no spinning wheels, just instant categorization. 
 
@@ -202,7 +198,7 @@ The smoothness comes from three key architectural decisions I made:
 I created a comprehensive **"How to Choose an LLM Model 101"** wiki page that teaches the team the "Three Bears Principle" for model selection. It explains when to use small/medium/large models, includes cost calculations, decision trees, and real-world examples from our codebase. This documentation ensures anyone on the team can make informed LLM choices without wasting money or sacrificing performance.
 
 
-### LLM Choice Cost Rationale
+#### LLM Choice Cost Rationale
 
 ```math
 \begin{aligned}
@@ -234,7 +230,7 @@ Key insights:
 - Claude is 38.6× more expensive for this use case
 
 
-### Practical Value Calculations
+#### Practical Value Calculations
 
 Some math I did to demonstrate this features practical value.
 
