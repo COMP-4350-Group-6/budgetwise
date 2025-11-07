@@ -1,15 +1,24 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import styles from "./budget.module.css";
 import { useRouter } from "next/navigation";
-import { budgetService, categoryService } from "@/services/budgetService";
 import type { BudgetDashboard, Category } from "@/services/budgetService";
 import CategorySpendingSection from "@/components/budgets/categorySpending";
 import SavingsGoal from "@/components/budgets/savingsGoal";
 import { CreateBudgetInput, Currency } from "@budget/schemas";
-import { transactionsService } from "@/services/transactionsService";
 import type { UpdateBudgetInput } from "@/services/budgetService";
+import {
+  useDashboard,
+  useCategories,
+  useAllTransactions,
+  useSeedDefaultCategories,
+  useCreateBudget,
+  useUpdateBudget,
+  useDeleteBudget,
+  useDeleteCategory,
+  useCreateCategory,
+} from "@/hooks/apiQueries";
 import {
   Home,
   Building2,
@@ -45,11 +54,79 @@ import {
 } from "lucide-react";
 
 export default function BudgetPage() {
-  const [dashboard, setDashboard] = useState<BudgetDashboard | null>(null);
-  const [categories, setCategories] = useState<Category[]>([]);
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  
+  // ===== Data Loading with React Query =====
+  const { data: dashboardData, isLoading: dashboardLoading } = useDashboard();
+  const { data: categoriesData = [], isLoading: categoriesLoading } = useCategories(true);
+  const { data: transactions = [], isLoading: transactionsLoading } = useAllTransactions(90, 500);
+  const seedCategoriesMutation = useSeedDefaultCategories();
+  const createBudgetMutation = useCreateBudget();
+  const updateBudgetMutation = useUpdateBudget();
+  const deleteBudgetMutation = useDeleteBudget();
+  const deleteCategoryMutation = useDeleteCategory();
+  const createCategoryMutation = useCreateCategory();
+
+  const loading = dashboardLoading || categoriesLoading || transactionsLoading;
+
+  // Auto-seed categories if none exist
+  useEffect(() => {
+    if (!categoriesLoading && categoriesData.length === 0) {
+      seedCategoriesMutation.mutate();
+    }
+  }, [categoriesData.length, categoriesLoading, seedCategoriesMutation]);
+
+  // Process dashboard data with monthly transactions
+  const dashboard = useMemo(() => {
+    if (!dashboardData) return null;
+
+    const now = new Date();
+    const month = now.getMonth();
+    const year = now.getFullYear();
+
+    const monthlyTx = transactions.filter((t) => {
+      const d = new Date(t.occurredAt);
+      return d.getMonth() === month && d.getFullYear() === year;
+    });
+
+    const totalSpentCents = monthlyTx.reduce(
+      (sum, t) => sum + t.amountCents,
+      0
+    );
+
+    const categorySpentMap: Record<string, number> = {};
+    for (const t of monthlyTx) {
+      const catId = t.categoryId;
+      if (!catId) continue;
+      categorySpentMap[catId] =
+        (categorySpentMap[catId] || 0) + t.amountCents;
+    }
+
+    const updatedCats = dashboardData.categories.map((c) => {
+      const catKey = c.categoryId;
+      const spent = categorySpentMap[catKey] || 0;
+
+      const remaining = Math.max(c.totalBudgetCents - spent, 0);
+      const percent =
+        c.totalBudgetCents > 0 ? (spent / c.totalBudgetCents) * 100 : 0;
+
+      return {
+        ...c,
+        totalSpentCents: spent,
+        totalRemainingCents: remaining,
+        overallPercentageUsed: percent,
+        hasOverBudget: remaining < 0,
+      };
+    });
+
+    return {
+      ...dashboardData,
+      categories: updatedCats,
+      totalSpentCents,
+    };
+  }, [dashboardData, transactions]);
+
+  const categories = categoriesData;
   const [showCategoryForm, setShowCategoryForm] = useState(false);
   const [addingBudgetForCategory, setAddingBudgetForCategory] = useState<
     string | null
@@ -180,80 +257,6 @@ export default function BudgetPage() {
 
   const SelectedIcon = getIconComponent(categoryFormData.icon);
 
-  useEffect(() => {
-    loadDashboard();
-  }, []);
-
-  const loadDashboard = async () => {
-    try {
-      setLoading(true);
-
-      // Auto seed default categories if none exist
-      let cats = await categoryService.listCategories(true);
-      if (cats.length === 0) {
-        await categoryService.seedDefaultCategories();
-        cats = await categoryService.listCategories(true);
-      }
-      setCategories(cats);
-
-      const [dash, transactions] = await Promise.all([
-        budgetService.getDashboard(),
-        transactionsService.listTransactions(),
-      ]);
-      const now = new Date();
-      const month = now.getMonth();
-      const year = now.getFullYear();
-
-      const monthlyTx = transactions.filter((t) => {
-        const d = new Date(t.occurredAt);
-        return d.getMonth() === month && d.getFullYear() === year;
-      });
-
-      const totalSpentCents = monthlyTx.reduce(
-        (sum, t) => sum + t.amountCents,
-        0
-      );
-
-      const categorySpentMap: Record<string, number> = {};
-      for (const t of monthlyTx) {
-        const catId = t.categoryId;
-        if (!catId) continue;
-        categorySpentMap[catId] =
-          (categorySpentMap[catId] || 0) + t.amountCents;
-      }
-
-      const updatedCats = dash.categories.map((c) => {
-        const catKey = c.categoryId;
-        const spent = categorySpentMap[catKey] || 0;
-
-        const remaining = Math.max(c.totalBudgetCents - spent, 0);
-        const percent =
-          c.totalBudgetCents > 0 ? (spent / c.totalBudgetCents) * 100 : 0;
-
-        return {
-          ...c,
-          totalSpentCents: spent,
-          totalRemainingCents: remaining,
-          overallPercentageUsed: percent,
-          hasOverBudget: remaining < 0,
-        };
-      });
-
-      setDashboard({
-        ...dash,
-        categories: updatedCats,
-        totalSpentCents,
-      });
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to load budget data"
-      );
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const formatMoney = (cents: number, currency = "CAD"): string =>
     new Intl.NumberFormat("en-CA", {
       style: "currency",
@@ -293,7 +296,7 @@ export default function BudgetPage() {
           startDate: new Date(formData.startDate),
           alertThreshold: parseInt(formData.alertThreshold),
         };
-        await budgetService.updateBudget(editingBudgetId, updateData);
+        await updateBudgetMutation.mutateAsync({ id: editingBudgetId, updates: updateData });
       } else {
         // Create budget - send all required fields
         const budgetData: CreateBudgetInput = {
@@ -305,11 +308,10 @@ export default function BudgetPage() {
           startDate: new Date(formData.startDate),
           alertThreshold: parseInt(formData.alertThreshold),
         };
-        await budgetService.createBudget(budgetData);
+        await createBudgetMutation.mutateAsync(budgetData);
       }
       setAddingBudgetForCategory(null);
       setEditingBudgetId(null);
-      await loadDashboard();
     } catch (err) {
       alert(
         `Failed to ${editingBudgetId ? "update" : "create"} budget: ` +
@@ -345,8 +347,7 @@ export default function BudgetPage() {
     }
     if (!confirm("Delete this budget? This cannot be undone.")) return;
     try {
-      await budgetService.deleteBudget(budgetId);
-      await loadDashboard();
+      await deleteBudgetMutation.mutateAsync(budgetId);
     } catch (err) {
       console.error("Delete budget error:", err);
       alert(
@@ -367,8 +368,7 @@ export default function BudgetPage() {
     )
       return;
     try {
-      await categoryService.deleteCategory(categoryId);
-      loadDashboard();
+      await deleteCategoryMutation.mutateAsync(categoryId);
     } catch (err) {
       alert(
         "Failed to delete category: " +
@@ -380,7 +380,7 @@ export default function BudgetPage() {
   const handleCreateCategory = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const newCategory = await categoryService.createCategory({
+      await createCategoryMutation.mutateAsync({
         name: categoryFormData.name,
         description: categoryFormData.description || "",
         icon: categoryFormData.icon || "",
@@ -388,7 +388,6 @@ export default function BudgetPage() {
         isActive: true,
       });
 
-      setCategories((prev) => [newCategory, ...prev]); // add to top
       setShowCategoryForm(false);
       setCategoryFormData({
         name: "",
@@ -405,7 +404,6 @@ export default function BudgetPage() {
 
   if (loading)
     return <div className={styles.loading}>Loading budget data...</div>;
-  if (error) return <div className={styles.error}>Error: {error}</div>;
 
   return (
     <div className={styles.pageContainer}>

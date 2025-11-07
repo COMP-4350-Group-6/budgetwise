@@ -1,16 +1,13 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Camera, Download, Plus, Upload } from "lucide-react";
 import styles from "./transactions.module.css";
 
-import { apiFetch } from "@/lib/apiClient";
 import { parseCSV } from "@/lib/csvParser";
-import { categoryService, budgetService } from "@/services/budgetService";
 import { transactionsService } from "@/services/transactionsService";
 
-import type { Category, Budget } from "@/services/budgetService";
 import type {
   TransactionDTO,
   AddTransactionInput,
@@ -28,15 +25,33 @@ import {
 } from "@/components/transactions/modals";
 
 import { TRANSACTION_STRINGS } from "@/constants/strings";
+import {
+  useAllTransactions,
+  useCategories,
+  useBudgets,
+  useAddTransaction,
+  useUpdateTransaction,
+  useDeleteTransaction,
+  useBulkImportTransactions,
+} from "@/hooks/apiQueries";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function TransactionsPage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
 
-  // ===== Data State =====
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [budgets, setBudgets] = useState<Budget[]>([]);
-  const [transactions, setTransactions] = useState<TransactionDTO[]>([]);
-  const [loading, setLoading] = useState(false);
+  // ===== Data Loading with React Query =====
+  const { data: transactions = [], isLoading: transactionsLoading } = useAllTransactions(90, 500);
+  const { data: categories = [], isLoading: categoriesLoading } = useCategories(true);
+  const { data: budgets = [], isLoading: budgetsLoading } = useBudgets(true);
+  const loading = transactionsLoading || categoriesLoading || budgetsLoading;
+
+  // ===== Mutations =====
+  const addTransactionMutation = useAddTransaction();
+  const updateTransactionMutation = useUpdateTransaction();
+  const deleteTransactionMutation = useDeleteTransaction();
+  const bulkImportMutation = useBulkImportTransactions();
+
   const [categorizingId, setCategorizingId] = useState<string | null>(null);
 
   // ===== Modals =====
@@ -92,38 +107,6 @@ export default function TransactionsPage() {
   const [customStart, setCustomStart] = useState("");
   const [customEnd, setCustomEnd] = useState("");
 
-  // ===== Load Data =====
-  const loadTransactions = async () => {
-    try {
-      setLoading(true);
-      const resp = await apiFetch<{ transactions: TransactionDTO[] }>(
-        "/transactions?days=90&limit=500",
-        {},
-        true
-      );
-      setTransactions(resp.transactions);
-    } catch (e) {
-      console.error("Failed to load transactions", e);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const cats = await categoryService.listCategories(true);
-        const bs = await budgetService.listBudgets(true);
-        setCategories(cats);
-        setBudgets(bs);
-        await loadTransactions();
-      } catch (e) {
-        console.error("Error loading data", e);
-      }
-    };
-    load();
-  }, []);
-
   // ===== Summary Calculations =====
   const now = new Date();
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -176,7 +159,7 @@ export default function TransactionsPage() {
       const hadCategorySelected = Boolean(selectedCategoryId);
       const hadNoteOrDescription = Boolean(note || description);
 
-      const result = await transactionsService.addTransaction({
+      const result = await addTransactionMutation.mutateAsync({
         categoryId: selectedCategoryId || undefined,
         amountCents: cents,
         note: note || description,
@@ -184,15 +167,6 @@ export default function TransactionsPage() {
       });
 
       const newTx = result.transaction;
-      setTransactions((prev) => {
-        const withoutCurrent = prev.filter((tx) => tx.id !== newTx.id);
-        const merged = [newTx, ...withoutCurrent];
-        return merged.sort(
-          (a, b) =>
-            new Date(b.occurredAt).getTime() - new Date(a.occurredAt).getTime()
-        );
-      });
-
       setShowAddModal(false);
       setDescription("");
       setAmount("");
@@ -210,17 +184,8 @@ export default function TransactionsPage() {
           .categorizeTransaction(txId)
           .then((response) => {
             if (response) {
-              setTransactions((prev) =>
-                prev.map((tx) =>
-                  tx.id === txId
-                    ? {
-                        ...tx,
-                        categoryId: response.categoryId,
-                        updatedAt: new Date().toISOString(),
-                      }
-                    : tx
-                )
-              );
+              // Invalidate queries to refetch with updated category
+              queryClient.invalidateQueries({ queryKey: ["transactions"] });
             }
           })
           .catch((err) => {
@@ -259,15 +224,15 @@ export default function TransactionsPage() {
 
     try {
       setEditSubmitting(true);
-      const updatedTx = await transactionsService.updateTransaction(editTx.id, {
-        amountCents: editTx.amountCents < 0 ? -cents : cents,
-        categoryId: editCategoryId || undefined,
-        note: editNote,
-        occurredAt: new Date(editDate),
+      await updateTransactionMutation.mutateAsync({
+        id: editTx.id,
+        updates: {
+          amountCents: editTx.amountCents < 0 ? -cents : cents,
+          categoryId: editCategoryId || undefined,
+          note: editNote,
+          occurredAt: new Date(editDate),
+        },
       });
-      setTransactions((prev) =>
-        prev.map((t) => (t.id === editTx.id ? updatedTx : t))
-      );
       setShowEditModal(false);
     } catch {
       setEditMessage(TRANSACTION_STRINGS.messages.failure);
@@ -280,8 +245,7 @@ export default function TransactionsPage() {
     if (!editTx) return;
     try {
       setDeleting(true);
-      await transactionsService.deleteTransaction(editTx.id);
-      setTransactions((prev) => prev.filter((t) => t.id !== editTx.id));
+      await deleteTransactionMutation.mutateAsync(editTx.id);
       setShowDeleteConfirm(false);
       setShowEditModal(false);
     } catch {
@@ -308,11 +272,8 @@ export default function TransactionsPage() {
     if (parsedTransactions.length === 0) return;
     try {
       setImporting(true);
-      const result = await transactionsService.bulkImportTransactions(
-        parsedTransactions
-      );
+      const result = await bulkImportMutation.mutateAsync(parsedTransactions);
       setImportResult(result);
-      if (result.imported > 0) await loadTransactions();
     } finally {
       setImporting(false);
     }

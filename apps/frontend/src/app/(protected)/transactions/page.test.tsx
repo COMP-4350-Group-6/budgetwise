@@ -1,9 +1,11 @@
-import { render, screen, waitFor, fireEvent } from "@testing-library/react";
+import { screen, waitFor, fireEvent } from "@testing-library/react";
 import TransactionsPage from "@/app/(protected)/transactions/page";
 import React from "react";
 import { vi, describe, it, expect, beforeEach } from "vitest";
 import type { Budget } from "@/services/budgetService";
 import type { TransactionDTO } from "@/services/transactionsService";
+import { renderWithQueryClient } from "../../../../tests/setup/testUtils";
+import * as apiQueries from "@/hooks/apiQueries";
 
 // mock CSS module
 vi.mock("@/app/(protected)/transactions/transactions.module.css", () => ({
@@ -31,28 +33,26 @@ vi.mock("@/components/transactions/financialSummary", () => ({
   ),
 }));
 
-// Mock services
-vi.mock("@/services/budgetService", () => ({
-  budgetService: {
-    listBudgets: vi.fn(),
-  },
-  categoryService: {
-    listCategories: vi.fn(),
-  },
+// Mock React Query hooks
+vi.mock("@/hooks/apiQueries", () => ({
+  useAllTransactions: vi.fn(),
+  useCategories: vi.fn(),
+  useBudgets: vi.fn(),
+  useAddTransaction: vi.fn(),
+  useUpdateTransaction: vi.fn(),
+  useDeleteTransaction: vi.fn(),
+  useBulkImportTransactions: vi.fn(),
 }));
 
 vi.mock("@/services/transactionsService", () => ({
   transactionsService: {
-    addTransaction: vi.fn(),
-    updateTransaction: vi.fn(),
-    deleteTransaction: vi.fn(),
     categorizeTransaction: vi.fn(),
     parseInvoice: vi.fn(),
   },
 }));
 
-vi.mock("@/lib/apiClient", () => ({
-  apiFetch: vi.fn(),
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
 }));
 
 describe("TransactionsPage", () => {
@@ -118,38 +118,93 @@ describe("TransactionsPage", () => {
 
   beforeEach(() => {
     vi.resetAllMocks();
+    
+    // Set up default mutation mocks - use the mocked functions from vi.mock
+    const mockMutationReturn = {
+      mutate: vi.fn(),
+      mutateAsync: vi.fn(),
+      isPending: false,
+      isError: false,
+      error: null,
+      reset: vi.fn(),
+    };
+    
+    vi.mocked(apiQueries.useAddTransaction).mockReturnValue({
+      ...mockMutationReturn,
+      mutateAsync: vi.fn().mockResolvedValue({ transaction: {} }),
+    } as any);
+    
+    vi.mocked(apiQueries.useUpdateTransaction).mockReturnValue({
+      ...mockMutationReturn,
+      mutateAsync: vi.fn().mockResolvedValue({}),
+    } as any);
+    
+    vi.mocked(apiQueries.useDeleteTransaction).mockReturnValue({
+      ...mockMutationReturn,
+      mutateAsync: vi.fn().mockResolvedValue(undefined),
+    } as any);
+    
+    vi.mocked(apiQueries.useBulkImportTransactions).mockReturnValue({
+      ...mockMutationReturn,
+      mutateAsync: vi.fn().mockResolvedValue({ imported: 0, failed: 0, total: 0, success: [], errors: [] }),
+    } as any);
   });
 
   it("renders loading state initially", async () => {
-    const { categoryService, budgetService } = await import("@/services/budgetService");
-    const { apiFetch } = await import("@/lib/apiClient");
+    vi.mocked(apiQueries.useCategories).mockReturnValue({
+      data: mockCategories,
+      isLoading: false,
+      isError: false,
+      error: null,
+      refetch: vi.fn(),
+    } as any);
 
-  vi.mocked(categoryService.listCategories).mockResolvedValue(mockCategories);
-  vi.mocked(budgetService.listBudgets).mockResolvedValue(mockBudgets);
-  vi.mocked(apiFetch).mockResolvedValue({ transactions: mockTransactions });
+    vi.mocked(apiQueries.useBudgets).mockReturnValue({
+      data: mockBudgets,
+      isLoading: false,
+      isError: false,
+      error: null,
+      refetch: vi.fn(),
+    } as any);
 
-    render(<TransactionsPage />);
+    vi.mocked(apiQueries.useAllTransactions).mockReturnValue({
+      data: undefined,
+      isLoading: true,
+      isError: false,
+      error: null,
+      refetch: vi.fn(),
+    } as any);
+
+    renderWithQueryClient(<TransactionsPage />);
     expect(screen.getByRole("heading", { name: /^transactions$/i })).toBeInTheDocument();
-
-
-    await waitFor(() =>
-      expect(apiFetch).toHaveBeenCalledWith(
-        "/transactions?days=90&limit=500",
-        {},
-        true
-      )
-    );
   });
 
   it("renders loaded transactions after fetch", async () => {
-    const { categoryService, budgetService } = await import("@/services/budgetService");
-    const { apiFetch } = await import("@/lib/apiClient");
+    vi.mocked(apiQueries.useCategories).mockReturnValue({
+      data: mockCategories,
+      isLoading: false,
+      isError: false,
+      error: null,
+      refetch: vi.fn(),
+    } as any);
 
-  vi.mocked(categoryService.listCategories).mockResolvedValue(mockCategories);
-  vi.mocked(budgetService.listBudgets).mockResolvedValue(mockBudgets);
-  vi.mocked(apiFetch).mockResolvedValue({ transactions: mockTransactions });
+    vi.mocked(apiQueries.useBudgets).mockReturnValue({
+      data: mockBudgets,
+      isLoading: false,
+      isError: false,
+      error: null,
+      refetch: vi.fn(),
+    } as any);
 
-    render(<TransactionsPage />);
+    vi.mocked(apiQueries.useAllTransactions).mockReturnValue({
+      data: mockTransactions,
+      isLoading: false,
+      isError: false,
+      error: null,
+      refetch: vi.fn(),
+    } as any);
+
+    renderWithQueryClient(<TransactionsPage />);
 
     await waitFor(() => screen.getByText(/Starbucks Coffee/i));
     expect(screen.getByTestId("month-summary")).toBeInTheDocument();
@@ -158,28 +213,62 @@ describe("TransactionsPage", () => {
   });
 
   it("shows empty state when no transactions", async () => {
-    const { categoryService, budgetService } = await import("@/services/budgetService");
-    const { apiFetch } = await import("@/lib/apiClient");
+    vi.mocked(apiQueries.useCategories).mockReturnValue({
+      data: mockCategories,
+      isLoading: false,
+      isError: false,
+      error: null,
+      refetch: vi.fn(),
+    } as any);
 
-  vi.mocked(categoryService.listCategories).mockResolvedValue(mockCategories);
-  vi.mocked(budgetService.listBudgets).mockResolvedValue(mockBudgets);
-  vi.mocked(apiFetch).mockResolvedValue({ transactions: [] });
+    vi.mocked(apiQueries.useBudgets).mockReturnValue({
+      data: mockBudgets,
+      isLoading: false,
+      isError: false,
+      error: null,
+      refetch: vi.fn(),
+    } as any);
 
-    render(<TransactionsPage />);
+    vi.mocked(apiQueries.useAllTransactions).mockReturnValue({
+      data: [],
+      isLoading: false,
+      isError: false,
+      error: null,
+      refetch: vi.fn(),
+    } as any);
+
+    renderWithQueryClient(<TransactionsPage />);
     await waitFor(() =>
       expect(screen.getByText(/no transactions logged/i)).toBeInTheDocument()
     );
   });
 
   it("opens and closes Add Transaction modal", async () => {
-    const { categoryService, budgetService } = await import("@/services/budgetService");
-    const { apiFetch } = await import("@/lib/apiClient");
+    vi.mocked(apiQueries.useCategories).mockReturnValue({
+      data: mockCategories,
+      isLoading: false,
+      isError: false,
+      error: null,
+      refetch: vi.fn(),
+    } as any);
 
-  vi.mocked(categoryService.listCategories).mockResolvedValue(mockCategories);
-  vi.mocked(budgetService.listBudgets).mockResolvedValue(mockBudgets);
-  vi.mocked(apiFetch).mockResolvedValue({ transactions: [] });
+    vi.mocked(apiQueries.useBudgets).mockReturnValue({
+      data: mockBudgets,
+      isLoading: false,
+      isError: false,
+      error: null,
+      refetch: vi.fn(),
+    } as any);
 
-    render(<TransactionsPage />);
+    vi.mocked(apiQueries.useAllTransactions).mockReturnValue({
+      data: [],
+      isLoading: false,
+      isError: false,
+      error: null,
+      refetch: vi.fn(),
+    } as any);
+
+    renderWithQueryClient(<TransactionsPage />);
     await waitFor(() =>
       expect(screen.queryByText(/no transactions logged/i)).toBeInTheDocument()
     );
@@ -197,16 +286,33 @@ describe("TransactionsPage", () => {
   });
 
   it("handles export with no transactions", async () => {
-    const { categoryService, budgetService } = await import("@/services/budgetService");
-    const { apiFetch } = await import("@/lib/apiClient");
+    vi.mocked(apiQueries.useCategories).mockReturnValue({
+      data: mockCategories,
+      isLoading: false,
+      isError: false,
+      error: null,
+      refetch: vi.fn(),
+    } as any);
 
-  vi.mocked(categoryService.listCategories).mockResolvedValue(mockCategories);
-  vi.mocked(budgetService.listBudgets).mockResolvedValue(mockBudgets);
-  vi.mocked(apiFetch).mockResolvedValue({ transactions: [] });
+    vi.mocked(apiQueries.useBudgets).mockReturnValue({
+      data: mockBudgets,
+      isLoading: false,
+      isError: false,
+      error: null,
+      refetch: vi.fn(),
+    } as any);
+
+    vi.mocked(apiQueries.useAllTransactions).mockReturnValue({
+      data: [],
+      isLoading: false,
+      isError: false,
+      error: null,
+      refetch: vi.fn(),
+    } as any);
 
     global.alert = vi.fn();
 
-    render(<TransactionsPage />);
+    renderWithQueryClient(<TransactionsPage />);
     await waitFor(() => screen.getByText(/no transactions logged/i));
 
     const exportBtn = screen.getByRole("button", { name: /export csv/i });
