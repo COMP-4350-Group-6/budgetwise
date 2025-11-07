@@ -12,6 +12,7 @@ interface TransactionListProps {
   loading: boolean;
   onEdit: (tx: TransactionDTO) => void;
   categories?: Category[];
+  categorizingId?: string | null;
 }
 
 /**
@@ -26,6 +27,7 @@ export default function TransactionList({
   loading,
   onEdit,
   categories = [],
+  categorizingId = null,
 }: TransactionListProps) {
   // Safely resolve a readable category label
   const getCategoryLabel = (categoryId?: string) => {
@@ -64,7 +66,9 @@ export default function TransactionList({
                   </div>
                   <div className={styles.transactionMeta}>
                     <span className={styles.categoryBadge}>
-                      {getCategoryLabel(tx.categoryId)}
+                      {categorizingId === tx.id
+                        ? (TRANSACTION_STRINGS.labels.categorizing || "Categorizing…")
+                        : getCategoryLabel(tx.categoryId)}
                     </span>
                     <span className={styles.transactionDate}>
                       {new Date(tx.occurredAt).toLocaleDateString()}

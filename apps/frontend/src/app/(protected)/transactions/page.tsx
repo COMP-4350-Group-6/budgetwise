@@ -37,6 +37,7 @@ export default function TransactionsPage() {
   const [budgets, setBudgets] = useState<Budget[]>([]);
   const [transactions, setTransactions] = useState<TransactionDTO[]>([]);
   const [loading, setLoading] = useState(false);
+  const [categorizingId, setCategorizingId] = useState<string | null>(null);
 
   // ===== Modals =====
   const [showAddModal, setShowAddModal] = useState(false);
@@ -172,6 +173,9 @@ export default function TransactionsPage() {
 
     try {
       setSubmitting(true);
+      const hadCategorySelected = Boolean(selectedCategoryId);
+      const hadNoteOrDescription = Boolean(note || description);
+
       const result = await transactionsService.addTransaction({
         categoryId: selectedCategoryId || undefined,
         amountCents: cents,
@@ -179,13 +183,53 @@ export default function TransactionsPage() {
         occurredAt: new Date(date),
       });
 
-      setTransactions((prev) => [result.transaction, ...prev]);
+      const newTx = result.transaction;
+      setTransactions((prev) => {
+        const withoutCurrent = prev.filter((tx) => tx.id !== newTx.id);
+        const merged = [newTx, ...withoutCurrent];
+        return merged.sort(
+          (a, b) =>
+            new Date(b.occurredAt).getTime() - new Date(a.occurredAt).getTime()
+        );
+      });
+
       setShowAddModal(false);
       setDescription("");
       setAmount("");
       setNote("");
       setSelectedCategoryId("");
       setMessage(TRANSACTION_STRINGS.messages.successAdd);
+
+      // If no category was selected, try to auto-categorize
+      if (!hadCategorySelected && newTx.id && hadNoteOrDescription) {
+        const txId = newTx.id;
+        setCategorizingId(txId);
+
+        // Call categorization endpoint asynchronously
+        transactionsService
+          .categorizeTransaction(txId)
+          .then((response) => {
+            if (response) {
+              setTransactions((prev) =>
+                prev.map((tx) =>
+                  tx.id === txId
+                    ? {
+                        ...tx,
+                        categoryId: response.categoryId,
+                        updatedAt: new Date().toISOString(),
+                      }
+                    : tx
+                )
+              );
+            }
+          })
+          .catch((err) => {
+            console.error("Auto-categorization failed:", err);
+          })
+          .finally(() => {
+            setCategorizingId(null);
+          });
+      }
     } catch {
       setMessage(TRANSACTION_STRINGS.messages.failure);
     } finally {
@@ -394,6 +438,7 @@ export default function TransactionsPage() {
               loading={loading}
               onEdit={openEditModal}
               categories={categories}
+              categorizingId={categorizingId}
             />
           </div>
         );
