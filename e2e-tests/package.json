@@ -1,0 +1,21 @@
+{
+  "name": "@budgetwise/e2e-tests",
+  "version": "1.0.0",
+  "private": true,
+  "description": "End-to-end and smoke tests for BudgetWise",
+  "scripts": {
+    "test:e2e": "playwright test tests/",
+    "test:smoke": "playwright test smoke-tests/",
+    "test:smoke:production": "PRODUCTION_URL=https://budgetwise.pages.dev API_URL=https://budgetwise-api.workers.dev playwright test smoke-tests/",
+    "test:smoke:preview": "playwright test smoke-tests/",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "test:debug": "playwright test --debug",
+    "report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.48.0",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.6.3"
+  }
+}

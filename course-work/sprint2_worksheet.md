@@ -278,8 +278,8 @@ I implemented end-to-end continuous deployment with Cloudflare and architected o
 #### What I Built
 
 **Cloudflare CI/CD Pipeline**
-- **Automatic deployments** - Push to `main` → instant production deploy (API on Workers, Frontend on Pages)
-- **PR preview deployments** - Each PR gets unique URL: `https://pr-{number}.budgetwise.pages.dev`
+- **Automatic deployments** - Push to `main` → instant production deploy (API and Frontend on workers runtime)
+- **PR preview deployments** - Each PR gets unique URL
 - **Zero-downtime** - Global edge network deployment, sub-100ms latency worldwide
 - **Full automation** - 525 tests run → build → deploy → live in minutes
 
@@ -307,7 +307,7 @@ I implemented end-to-end continuous deployment with Cloudflare and architected o
 - `.github/workflows/deploy.yml` - CI/CD pipeline
 - `DESIGN.md` - Architecture documentation
 - `wrangler.jsonc` - Cloudflare configuration
-- Production: `https://budgetwise.pages.dev`
+- Production: `https://budgetwise.ca`
 
 The architecture and deployment pipeline I built became the foundation enabling the team to move fast while maintaining quality - automated testing catches regressions, preview deployments catch integration issues, and Clean Architecture keeps business logic testable and maintainable.
 

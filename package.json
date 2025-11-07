@@ -11,6 +11,8 @@
     "test:unit": "turbo run test:unit",
     "test:int": "turbo run test:int",
     "test:e2e": "playwright test",
+    "test:smoke": "pnpm --filter @budgetwise/e2e-tests run test:smoke",
+    "test:smoke:production": "pnpm --filter @budgetwise/e2e-tests run test:smoke:production",
     "test:auth": "pnpm run test:auth:unit && pnpm run test:auth:integration",
     "test:auth:unit": "pnpm --filter api run test:auth",
     "test:auth:integration": "pnpm --filter @budget/adapters-auth-supabase run test:integration",
