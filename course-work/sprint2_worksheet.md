@@ -4,19 +4,33 @@ Format: Markdown file in your repository. Include links to relevant code, script
 
 
 ## 1. Regression Testing
+**Smoke Tests**  
+We use a fast, targeted smoke suite consisting only of tests tagged `@critical` across the core business flows (authentication, budget CRUD, categories, transaction integration, dashboard aggregation). These make up our critical regression suite, designed for CI/CD gates and rapid deploy validation.
 
-> [!IMPORTANT]
-> ### Worksheet Question
->
-> 1. [ ] Describe how you run regression testing:
->
->    - [ ] Which tests are executed?
->
->    - [ ] Which tool(s) are used?
->
-> 2. [ ] Link to the regression testing script.
->
-> 3. [ ] Include the latest snapshot of execution results.
+**Tests Executed**  
+Only those directly tagged as `@critical`, covering:
+- Auth middleware (`@critical allows request when token is valid`)
+- Budgets API (`@critical should create a budget with valid data`, `@critical should list all budgets for user`, `@critical should return dashboard data`, `@critical should update budget amount`)
+- Categories API (`@critical should create a category with minimal data`, `@critical should list all categories`)
+- Transaction Integration (`@critical should reflect added transaction in dashboard totals`)
+
+Test files used:
+- `apps/api/src/middleware/auth.test.ts`
+- `apps/api/src/routes/budgets.test.ts`
+- `apps/api/src/routes/categories.test.ts`
+- `apps/api/tests/integration/transactions.int.test.ts`
+
+All tests use **Vitest**, configured to run with in-memory repositories for speed and determinism, invoked through PNPM workspaces. 
+```bash
+pnpm test:critical
+```
+or per package:
+```bash
+pnpm test:critical --filter api
+```
+
+**Latest snapshot of execution results:**  
+See [`test-coverage/smoke-tests.md`](../test-coverage/smoke-tests.md) for an updated run summary and breakdown.
 
 
 ## 2. Testing Slowdown
