@@ -10,6 +10,7 @@
     "test": "turbo run test",
     "test:unit": "turbo run test:unit",
     "test:int": "turbo run test:int",
+    "test:critical": "pnpm --filter api run test:critical",
     "test:e2e": "playwright test",
     "test:auth": "pnpm run test:auth:unit && pnpm run test:auth:integration",
     "test:auth:unit": "pnpm --filter api run test:auth",
