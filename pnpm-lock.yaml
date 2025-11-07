@@ -77,7 +77,7 @@ importers:
         version: link:../../packages/composition/web-auth-client
       '@next/font':
         specifier: ^14.2.15
-        version: 14.2.15(next@15.5.5(@babel/core@7.28.4)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))
+        version: 14.2.15(next@15.5.5(@babel/core@7.28.4)(@playwright/test@1.56.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))
       '@opennextjs/cloudflare':
         specifier: ^1.11.0
         version: 1.11.0(wrangler@4.43.0(@cloudflare/workers-types@4.20251011.0))
@@ -89,7 +89,7 @@ importers:
         version: 2.11.5(@types/node@20.19.21)(typescript@5.9.3)
       next:
         specifier: 15.5.5
-        version: 15.5.5(@babel/core@7.28.4)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+        version: 15.5.5(@babel/core@7.28.4)(@playwright/test@1.56.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       react:
         specifier: 19.1.0
         version: 19.1.0
@@ -166,6 +166,18 @@ importers:
       wrangler:
         specifier: ^4.43.0
         version: 4.43.0(@cloudflare/workers-types@4.20251011.0)
+
+  e2e-tests:
+    devDependencies:
+      '@playwright/test':
+        specifier: ^1.48.0
+        version: 1.56.1
+      '@types/node':
+        specifier: ^20.0.0
+        version: 20.19.21
+      typescript:
+        specifier: ^5.6.3
+        version: 5.9.3
 
   packages/adapters/auth-supabase:
     dependencies:
@@ -1680,6 +1692,11 @@ packages:
   '@pkgjs/parseargs@0.11.0':
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
     engines: {node: '>=14'}
+
+  '@playwright/test@1.56.1':
+    resolution: {integrity: sha512-vSMYtL/zOcFpvJCW71Q/OEGQb7KYBPAdKh35WNSkaZA75JlAO8ED8UN6GUNTm3drWomcbcqRPFqQbLae8yBTdg==}
+    engines: {node: '>=18'}
+    hasBin: true
 
   '@poppinss/colors@4.1.5':
     resolution: {integrity: sha512-FvdDqtcRCtz6hThExcFOgW0cWX+xwSMWcRuQe5ZEb2m7cVQOAVZOIMt+/v9RxGiD9/OY16qJBXK4CVKWAPalBw==}
@@ -3457,6 +3474,11 @@ packages:
   fs.realpath@1.0.0:
     resolution: {integrity: sha512-OO0pH2lK6a0hZnAdau5ItzHPI6pUlvI7jMVnxUQRtw4owF2wk8lOSabtGDCTP4Ggrg2MbGnWO9X8K1t4+fGMDw==}
 
+  fsevents@2.3.2:
+    resolution: {integrity: sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==}
+    engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
+    os: [darwin]
+
   fsevents@2.3.3:
     resolution: {integrity: sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==}
     engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
@@ -4382,6 +4404,16 @@ packages:
   picomatch@4.0.3:
     resolution: {integrity: sha512-5gTmgEY/sqK6gFXLIsQNH19lWb4ebPDLA4SdLP7dsWkIXHWlG66oPuVvXSGFPppYZz8ZDZq0dYYrbHfBCVUb1Q==}
     engines: {node: '>=12'}
+
+  playwright-core@1.56.1:
+    resolution: {integrity: sha512-hutraynyn31F+Bifme+Ps9Vq59hKuUCz7H1kDOcBs+2oGguKkWTU50bBWrtz34OUWmIwpBTWDxaRPXrIXkgvmQ==}
+    engines: {node: '>=18'}
+    hasBin: true
+
+  playwright@1.56.1:
+    resolution: {integrity: sha512-aFi5B0WovBHTEvpM3DzXTUaeN6eN0qWnTkKx4NQaH4Wvcmc153PdaY2UBdSYKaGYw+UyWXSVyxDUg5DoPEttjw==}
+    engines: {node: '>=18'}
+    hasBin: true
 
   possible-typed-array-names@1.1.0:
     resolution: {integrity: sha512-/+5VFTchJDoVj3bhoqi6UeymcD00DAwb1nJwamzPvHEszJ4FpF6SNNbUbOS8yI56qHzdV8eK0qEfOSiodkTdxg==}
@@ -7059,9 +7091,9 @@ snapshots:
     dependencies:
       fast-glob: 3.3.1
 
-  '@next/font@14.2.15(next@15.5.5(@babel/core@7.28.4)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))':
+  '@next/font@14.2.15(next@15.5.5(@babel/core@7.28.4)(@playwright/test@1.56.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))':
     dependencies:
-      next: 15.5.5(@babel/core@7.28.4)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      next: 15.5.5(@babel/core@7.28.4)(@playwright/test@1.56.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
 
   '@next/swc-darwin-arm64@15.5.5':
     optional: true
@@ -7175,6 +7207,10 @@ snapshots:
 
   '@pkgjs/parseargs@0.11.0':
     optional: true
+
+  '@playwright/test@1.56.1':
+    dependencies:
+      playwright: 1.56.1
 
   '@poppinss/colors@4.1.5':
     dependencies:
@@ -8059,7 +8095,7 @@ snapshots:
 
   '@types/node-fetch@2.6.13':
     dependencies:
-      '@types/node': 24.7.2
+      '@types/node': 20.19.21
       form-data: 4.0.4
 
   '@types/node@18.19.130':
@@ -8078,7 +8114,7 @@ snapshots:
 
   '@types/rclone.js@0.6.3':
     dependencies:
-      '@types/node': 24.7.2
+      '@types/node': 20.19.21
 
   '@types/react-dom@19.2.1(@types/react@19.2.2)':
     dependencies:
@@ -8092,7 +8128,7 @@ snapshots:
 
   '@types/ws@8.18.1':
     dependencies:
-      '@types/node': 24.7.2
+      '@types/node': 20.19.21
 
   '@typescript-eslint/eslint-plugin@8.46.0(@typescript-eslint/parser@8.46.0(eslint@9.37.0(jiti@2.6.1))(typescript@5.9.3))(eslint@9.37.0(jiti@2.6.1))(typescript@5.9.3)':
     dependencies:
@@ -9395,6 +9431,9 @@ snapshots:
 
   fs.realpath@1.0.0: {}
 
+  fsevents@2.3.2:
+    optional: true
+
   fsevents@2.3.3:
     optional: true
 
@@ -10130,7 +10169,7 @@ snapshots:
 
   negotiator@1.0.0: {}
 
-  next@15.5.5(@babel/core@7.28.4)(react-dom@19.1.0(react@19.1.0))(react@19.1.0):
+  next@15.5.5(@babel/core@7.28.4)(@playwright/test@1.56.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0):
     dependencies:
       '@next/env': 15.5.5
       '@swc/helpers': 0.5.15
@@ -10148,6 +10187,7 @@ snapshots:
       '@next/swc-linux-x64-musl': 15.5.5
       '@next/swc-win32-arm64-msvc': 15.5.5
       '@next/swc-win32-x64-msvc': 15.5.5
+      '@playwright/test': 1.56.1
       sharp: 0.34.4
     transitivePeerDependencies:
       - '@babel/core'
@@ -10293,6 +10333,14 @@ snapshots:
   picomatch@2.3.1: {}
 
   picomatch@4.0.3: {}
+
+  playwright-core@1.56.1: {}
+
+  playwright@1.56.1:
+    dependencies:
+      playwright-core: 1.56.1
+    optionalDependencies:
+      fsevents: 2.3.2
 
   possible-typed-array-names@1.1.0: {}
 

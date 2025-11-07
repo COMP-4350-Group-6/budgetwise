@@ -3,6 +3,7 @@ packages:
   - frontend
   - packages/**
   - infra/**
+  - e2e-tests
 
 onlyBuiltDependencies:
   - esbuild
