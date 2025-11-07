@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FiArrowLeft, FiArrowRight } from "react-icons/fi";
 import { FaHome, FaChartLine, FaWallet } from "react-icons/fa";
+import { FaSignOutAlt } from "react-icons/fa";
 import { useSidebarState } from "@/app/(protected)/ProtectedLayoutClient";
 import styles from "./sidebar.module.css";
 
@@ -64,7 +65,8 @@ export default function Sidebar() {
 
       {/* Logout button at bottom */}
       <button onClick={handleLogout} className={styles.logout}>
-        Logout
+        <FaSignOutAlt className={styles.logoutIcon} />
+        {!collapsed && <span>Logout</span>}
       </button>
     </aside>
   );
