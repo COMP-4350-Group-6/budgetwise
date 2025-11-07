@@ -291,7 +291,7 @@ export class OpenRouterCategorization implements CategorizationPort {
       .map(cat => `ID: ${cat.id} | Name: ${cat.name}${cat.icon ? ` ${cat.icon}` : ''}`)
       .join('\n');
 
-    const systemPrompt = `You are a financial transaction categorization assistant. Your job is to analyze transaction descriptions and amounts, then assign them to the most appropriate category from the user's available categories.
+    const systemPrompt = `You are a financial transaction categorization assistant. Your job is to analyze transaction descriptions and match them to the semantically most appropriate category based on what the transaction actually represents.
 
 CRITICAL RULES - READ CAREFULLY:
 1. You MUST respond with ONLY a JSON object in this exact format:
@@ -302,17 +302,38 @@ CRITICAL RULES - READ CAREFULLY:
    - DO NOT use any variation of the name
    - You MUST use the full UUID string exactly as shown (format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)
    
-3. Example of CORRECT response:
-   {"categoryId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890", "reasoning": "Coffee purchase fits the Groceries category"}
-   
-4. Example of INCORRECT response (will be rejected):
-   {"categoryId": "Groceries", "reasoning": "..."}  ❌ WRONG - used name instead of UUID
+3. SEMANTIC MATCHING IS CRITICAL:
+   - Match transactions to categories based on WHAT the purchase actually is, not just keywords
+   - "Food" category = actual food items, groceries, restaurants, meals
+   - "Transportation" category = gas, public transit, rideshare, vehicle expenses
+   - "Shopping" category = clothing, electronics, household items, general retail
+   - "Bills" category = utilities, subscriptions, recurring services
+   - "Entertainment" category = movies, games, events, hobbies
+   - Think about the PURPOSE and NATURE of the purchase, not just surface-level words
 
-5. If none of the categories seem appropriate, use: {"categoryId": "NONE", "reasoning": "Explanation why"}
-6. Be confident - only use NONE if truly uncertain
-7. Consider both the description and amount when categorizing
-8. Keep reasoning brief (1-2 sentences)
-9. DO NOT include any text before or after the JSON object
+4. EXAMPLES OF CORRECT CATEGORIZATION:
+   - "socks" → Shopping (clothing item, not food)
+   - "coffee at Starbucks" → Food (beverage/food purchase)
+   - "gas station" → Transportation (fuel for vehicle)
+   - "Netflix subscription" → Bills (recurring service)
+   - "movie tickets" → Entertainment (leisure activity)
+   - "groceries" → Food (food items)
+   - "restaurant dinner" → Food (meal purchase)
+   - "Uber ride" → Transportation (transportation service)
+   - "Amazon purchase" → Shopping (general retail, unless it's food/entertainment)
+   - "electric bill" → Bills (utility payment)
+
+5. EXAMPLES OF INCORRECT CATEGORIZATION (DO NOT DO THIS):
+   - "socks" → Food ❌ WRONG (socks are clothing, not food)
+   - "gas station" → Food ❌ WRONG (fuel is transportation, not food)
+   - "Netflix" → Entertainment ❌ WRONG (subscription is a bill, not entertainment purchase)
+   - "restaurant" → Shopping ❌ WRONG (restaurant meal is food, not shopping)
+
+6. If none of the categories seem appropriate, use: {"categoryId": "NONE", "reasoning": "Explanation why"}
+7. Be confident - only use NONE if truly uncertain after careful semantic analysis
+8. Consider both the description and amount when categorizing (amount can provide context)
+9. Keep reasoning brief (1-2 sentences) explaining the semantic match
+10. DO NOT include any text before or after the JSON object
 
 Available categories (format: ID | Name):
 ${categoryList}`;
@@ -338,8 +359,8 @@ Respond with ONLY the JSON object as specified.`;
             { role: 'system', content: systemPrompt },
             { role: 'user', content: userPrompt }
           ] as OpenRouterMessage[],
-          temperature: 0.3, // Lower temperature for more consistent categorization
-          max_tokens: 200 // Enough for category ID and reasoning
+          temperature: 0.5, // Balanced temperature for better semantic reasoning while maintaining consistency
+          max_tokens: 250 // Enough for category ID and reasoning with more context
         })
       });
 
