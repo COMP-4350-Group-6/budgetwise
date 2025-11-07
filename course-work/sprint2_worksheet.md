@@ -271,115 +271,45 @@ This feature saves users time by allowing them to import many transactions at on
 
 ### Ramatjyot
 
-**CI/CD Pipeline & Clean Architecture Implementation**
+**CI/CD Pipeline & Clean Architecture**
 
-I implemented a complete continuous integration and deployment pipeline for BudgetWise with automatic deployments to Cloudflare, along with researching and proposing our Clean Architecture design.
+I implemented end-to-end continuous deployment with Cloudflare and architected our Clean Architecture design that enabled high test coverage.
 
 #### What I Built
 
-**1. Cloudflare CI/CD Pipeline**
-- **Automatic deployments** - Push to `main` triggers production deployment to Cloudflare Workers (API) and Cloudflare Pages (Frontend)
-- **Preview deployments** - Every pull request gets its own preview URL for testing before merge
-- **Multi-environment setup** - Separate staging and production environments with proper secrets management
-- **Zero-downtime deployments** - Cloudflare's edge network ensures instant rollouts globally
+**Cloudflare CI/CD Pipeline**
+- **Automatic deployments** - Push to `main` → instant production deploy (API on Workers, Frontend on Pages)
+- **PR preview deployments** - Each PR gets unique URL: `https://pr-{number}.budgetwise.pages.dev`
+- **Zero-downtime** - Global edge network deployment, sub-100ms latency worldwide
+- **Full automation** - 525 tests run → build → deploy → live in minutes
 
-**2. Codebase Refactoring (In Progress - `refactor/all` branch)**
-- **Monorepo optimization** - Restructuring packages for better separation of concerns
-- **Dependency management** - Cleaning up package dependencies and removing circular references
-- **Code organization** - Consolidating duplicate code and improving module boundaries
-- **Build optimization** - Streamlining build process for faster CI/CD cycles
+**Clean Architecture Design**
+- **Researched and proposed** layered architecture: Domain → Use Cases → Adapters → Infrastructure
+- **Port/Adapter pattern** - Designed interfaces enabling swappable implementations (Local/Supabase, OpenRouter AI)
+- **Dependency inversion** - Domain has zero external dependencies, enabling 100% coverage on core entities
+- **Enabled testability** - Architecture directly contributed to 55.3% repo coverage
 
-**3. Clean Architecture Design & Research**
-- **Researched and proposed** Clean Architecture pattern for the project
-- **Created architecture documentation** - Defined layers: Domain, Use Cases, Adapters, Infrastructure
-- **Port/Adapter pattern** - Designed interfaces for external dependencies (DB, AI services, Auth)
-- **Dependency inversion** - Ensured domain layer has no external dependencies
+**Codebase Refactoring** (In Progress - `refactor/all` branch)
+- Monorepo optimization and circular dependency removal
+- Build process streamlining for faster CI/CD
+- Consolidating duplicate code across packages
 
-#### Technical Implementation
+#### Impact
 
-**CI/CD Features:**
-```yaml
-# Automatic on push to main
-✓ Runs full test suite (525 tests)
-✓ Builds frontend and API
-✓ Deploys to Cloudflare Workers/Pages
-✓ Updates production URLs instantly
+**Deployment Velocity:** Hours → Minutes (automated)  
+**Developer Experience:** Preview URLs eliminate "works on my machine" - reviewers test PRs before merge  
+**Global Performance:** Cloudflare edge = 99.99% uptime, sub-100ms responses  
+**Cost Efficiency:** Serverless pay-per-use vs always-on servers  
+**Test Coverage:** Clean Architecture separation = 100% on domain entities, 73% on use cases
 
-# Preview on pull requests
-✓ Creates isolated preview environment
-✓ Generates unique PR URL
-✓ Enables testing before merge
-✓ Auto-cleanup on PR close
-```
+#### Key Deliverables
 
-**Architecture Benefits:**
-- **Testability** - 55.3% coverage achieved through proper layer separation
-- **Flexibility** - Can swap databases (local → Supabase) without changing domain
-- **Maintainability** - Clear boundaries between business logic and infrastructure
-- **Scalability** - Cloudflare edge deployment provides global low-latency access
-
-#### Why This Matters
-
-**Developer Experience:**
-- No manual deployments - just push and it's live
-- Preview URLs let reviewers test PRs before merging
-- Fast feedback loop - know within minutes if deployment works
-- Confidence in releases - automated testing catches issues early
-
-**Production Reliability:**
-- Cloudflare's edge network = 99.99% uptime
-- Instant rollbacks if issues detected
-- Environment parity - preview matches production
-- Secrets management through Cloudflare environment variables
-
-**Business Impact:**
-- **Deploy velocity** - From hours to minutes for releases
-- **Global performance** - Sub-100ms response times worldwide via Cloudflare edge
-- **Cost efficiency** - Serverless means pay only for usage, not idle servers
-- **Reduced risk** - Preview deployments catch issues before production
-
-#### Current Status
-
-**Completed:**
-- ✅ Cloudflare Workers deployment for API
-- ✅ Cloudflare Pages deployment for Frontend
-- ✅ GitHub Actions CI/CD pipeline
-- ✅ Preview deployments on pull requests
-- ✅ Clean Architecture design and documentation
-
-**In Progress (refactor/all branch):**
-- 🔄 Package restructuring for better modularity
-- 🔄 Removing technical debt from rapid prototyping phase
-- 🔄 Optimizing build configuration for faster deployments
-- 🔄 Consolidating duplicate logic across packages
-
-#### Key Files & Links
-
-**CI/CD Configuration:**
-- `.github/workflows/deploy.yml` - Main deployment pipeline
-- `.github/workflows/preview.yml` - PR preview deployments
-- `wrangler.jsonc` - Cloudflare Workers configuration
-
-**Architecture Documentation:**
-- `ARCHITECTURE.md` - Clean Architecture overview (deleted in optimization, see commit history)
-- `DESIGN.md` - System design and layer descriptions
-- Package structure follows Clean Architecture principles
-
-**Deployment URLs:**
+- `.github/workflows/deploy.yml` - CI/CD pipeline
+- `DESIGN.md` - Architecture documentation
+- `wrangler.jsonc` - Cloudflare configuration
 - Production: `https://budgetwise.pages.dev`
-- API: `https://budgetwise-api.workers.dev`
-- PR Previews: `https://pr-{number}.budgetwise.pages.dev`
 
-**Relevant Commits:**
-- CI/CD setup and Cloudflare integration
-- Clean Architecture package restructuring
-- Environment configuration and secrets management
-
-#### What I Learned
-
-Implementing this CI/CD pipeline taught me the importance of **infrastructure as code** and **automated deployments**. The Clean Architecture research showed me how proper separation of concerns enables **independent testability** - which is why we achieved 100% coverage on our domain entities and use cases. The refactoring work (still in progress) revealed how early architectural decisions compound over time, reinforcing the value of getting the structure right from the start.
-
-The most rewarding part is seeing the team benefit from instant preview deployments - no more "works on my machine" issues, and reviewers can actually click and test features before approving PRs.
+The architecture and deployment pipeline I built became the foundation enabling the team to move fast while maintaining quality - automated testing catches regressions, preview deployments catch integration issues, and Clean Architecture keeps business logic testable and maintainable.
 
 
 ### Robert
