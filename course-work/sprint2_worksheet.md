@@ -126,7 +126,28 @@ This feature saves users time by allowing them to import many transactions at on
 
 
 ### Sid
+**Optimistic Add + Async Auto-categorization**
 
+I added an optimistic UI update when creating a transaction and improved the auto-categorization flow so it updates the transaction in-place without reloading the whole list.
+
+Included
+- **Optimistic insert**
+  - New transaction is inserted into local state immediately after the add API returns and the list is sorted by occurredAt.
+  - Removes the previous full reload (no more `await loadTransactions()`) for faster UX.
+- **Better auto-categorization flow**
+  - Tracks whether a category was selected and whether note/description existed (`hadCategorySelected`, `hadNoteOrDescription`).
+  - If no category was chosen and there is note/description, calls `categorizeTransaction` asynchronously.
+  - When categorization returns, updates the matching transaction's `categoryId` and `updatedAt` in state (no full reload).
+  - `setCategorizingId` is still used to indicate ongoing categorization.
+- **Minor state and cleanup**
+  - Clears form fields as before; uses `newTx` from the create response to avoid re-fetching.
+
+**Key file**
+- apps/frontend/src/app/(protected)/transactions/page.tsx
+
+**Relevant Links**
+- [Issue](https://github.com/COMP-4350-Group-6/budgetwise/issues/102)
+- [Commit](https://github.com/COMP-4350-Group-6/budgetwise/commit/857087990d542cd17874dacd8a016b57514b1125)
 
 
 ### Stephanie
@@ -153,7 +174,7 @@ I refactored and modernized the entire pages (based on feedback given) mostly to
 - [`apps/frontend/src/app/constants/strings`](../../apps/frontend/src/app/constants/strings)  - Removal of string literals in code
 
 #### Commit
-**Commit**: (https://github.com/COMP-4350-Group-6/budgetwise/pull/118/commits/76fc006d38c4bf517819c97781d05c5ebf48fa23) [https://github.com/COMP-4350-Group-6/budgetwise/pull/137/commits/5ce025aa9a095ba7f770e7971f7477f315f7454d]
+**Commit**: [https://github.com/COMP-4350-Group-6/budgetwise/pull/118/commits/76fc006d38c4bf517819c97781d05c5ebf48fa23](https://github.com/COMP-4350-Group-6/budgetwise/pull/137/commits/5ce025aa9a095ba7f770e7971f7477f315f7454d)
 
 
 
