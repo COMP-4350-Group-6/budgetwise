@@ -90,6 +90,28 @@ Format: Markdown file in your repository. Include links to relevant code, script
 
 
 ### Bryce
+**CSV Upload Feature**
+
+I implemented a CSV upload feature that allows users to bulk import transactions
+
+Included
+- **Flexible CSV parsing**:
+  - Supports various column name formats (amount/price/total, date/occurredAt, description/note)
+- **Automatic AI categorization**
+  - Transactions are automatically categorized using AI based on their description
+- **Error handling**
+  - Shows preview before import, reports errors by row number, continues importing even if some rows fail
+- **User-friendly UI**
+  - Modal with file upload, preview table, and clear success/error feedback
+
+The implementation uses a CSV parser on the frontend and a bulk import endpoint on the backend. When transactions are imported without categories, the system automatically calls the AI categorization service to assign appropriate categories.
+
+**Key Files:**
+- apps/frontend/src/lib/csvParser.ts - CSV parsing logic
+- apps/frontend/src/app/(protected)/transactions/page.tsx - Upload UI
+- apps/api/src/routes/transactions.ts - Bulk import endpoint is POST /transactions/bulk-import
+
+This feature saves users time by allowing them to import many transactions at once rather than entering them manually one by one.
 
 
 
