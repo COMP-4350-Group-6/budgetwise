@@ -34,13 +34,16 @@ See [`test-coverage/smoke-tests.md`](../test-coverage/smoke-tests.md) for an upd
 
 
 ## 2. Testing Slowdown
+**Have you been able to keep all unit and integration tests from your test plan?**  
+Although there are gaps in our current testing coverage for the new features, we have maintained unit and integration tests as originally planned.
+- The README in TESTING.md explicitly splits out test types:
+  - **Unit Tests:** For functions, classes, and logic, with mocks/stubs. Locations: `src/**/*.{test,spec}.{ts,tsx}` (see [source](https://github.com/COMP-4350-Group-6/budgetwise/blob/main/TESTING.md#test-types)).
+  - **Integration Tests:** Higher-level flows, real adapters or test environments, located at `tests/integration/**/*.int.test.{ts,tsx}` or equivalent locations in each app ([link](https://github.com/COMP-4350-Group-6/budgetwise/blob/main/TESTING.md#test-types)).
+- Critical regression flows link all business tiers: "Category → Budget → Transaction → Dashboard aggregation" (see [test-coverage/smoke-tests.md](https://github.com/COMP-4350-Group-6/budgetwise/blob/main/test-coverage/smoke-tests.md#transaction-integration)).
 
-> [!IMPORTANT]
-> ### Worksheet Question
->
-> 1. [ ] Have you been able to keep all unit and integration tests from your test plan?
->
-> 2. [ ] Have you created different test plans for different release types? Explain.
+ **Have you created different test plans for different release types? Explain.**
+- We still need to expand on the variety of test plans as we have not implemented a release strategy yet, but have some regression testing in place.
+- **Critical Regression Tests:** There’s a fast, lightweight subset covering core functionality (auth, CRUD, categories, transaction flows) tagged with `@critical` which is designed for post-deployment smoke checks (see [TESTING.md](https://github.com/COMP-4350-Group-6/budgetwise/blob/main/TESTING.md#test-types) and [test-coverage/smoke-tests.md](https://github.com/COMP-4350-Group-6/budgetwise/blob/main/test-coverage/smoke-tests.md)).
 
 
 ## 3. Not Testing
