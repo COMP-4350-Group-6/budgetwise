@@ -93,10 +93,43 @@ This is normal performance for POST operations. No optimization needed.
 
 ## 5. Last Dash
 
-> [!IMPORTANT]
-> ### Worksheet Question
->
-> 1. [ ] What issues do you foresee in the final sprint?
+Complying with professor's remark from 2025-11-07 (Actual remark may differ slightly):
+> I should be able to come back in two or three days and see comments about "can't merge this because of X and Y" on the PR's
+
+
+Refactoring Challenges:
+- Code Comprehension Gaps
+- Dependency Chain Complexity
+- Testing Infrastructure Deficit
+
+Deployment Preparation Issues
+- Configuration Management
+- Build Pipeline Unknowns
+- Production Environment Differences
+
+Stress Testing Discoveries
+- Performance Bottlenecks
+    - Current code has not been optimized for concurrent users.
+- Stress testing will likely reveal:
+    - Synchronous operations that should be asynchronous 
+    - Missing database indexes causing slow queries
+    - Memory management issues from unclosed connections
+    - State management problems under concurrent load
+- Error Handling Gaps
+- Scalability Architecture Issues
+
+Process and Coordination Concerns
+- The time costs of Code Review
+- Knowledge Transfer Requirements
+- Integration Complexity
+
+Risk Mitigation Considerations
+- Timeline Pressure
+- Quality vs. Deadline Tradeoffs
+
+
+> [!NOTE]
+> All points in "5. Last Dash" are headings (except for the first one about the professor) of a much larger breakdown provided by a group member - larger breakdown was requested to be shortened by said member.
 
 
 ## 6. Show Off
@@ -342,26 +375,3 @@ The end result is that users get instant, accurate categorization that seems too
 
 _Acknowledgements:
 The above article was structured and refined with assistance from Claude Sonnet 4.5 (Anthropic). The Fermi estimates, cost calculations, mathematical formulations, and overall narrative structure were developed through iterative collaboration via the Anthropic web interface. It had been verified for factuality._
-
-
-## Sprint 2 Quick Checklist
-
-- [ ] Regression testing process described.
-
-- [ ] Link to regression script + last results.
-
-- [ ] Testing slowdown discussed.
-
-- [ ] Untested parts identified + updated system diagram.
-
-- [ ] Tier testing coverage levels stated.
-
-- [ ] Coverage reports included.
-
-- [ ] API profiler run + slowest endpoint identified.
-
-- [ ] Profiler output attached/linked.
-
-- [ ] Issues for final sprint listed.
-
-- [ ] Each member’s “best work” committed & described.
