@@ -119,7 +119,60 @@ This feature saves users time by allowing them to import many transactions at on
 
 ### Robert
 
+I focused on documentation of work & future maintainability
 
+Much of my work is not see through commits, however go through most of the repository Issues and it will become evident to the degree I utilized issues to manage & document engagements. 
+
+Some aspects I frequently utilized were, (+2 examples each)
+- Relationships (Sub issues, Issue blocking)
+    - https://github.com/COMP-4350-Group-6/budgetwise/issues/128
+    - https://github.com/COMP-4350-Group-6/budgetwise/issues/8
+- Specifying reason for closing (Complete, No planned, Duplicate, Stale)
+    - https://github.com/COMP-4350-Group-6/budgetwise/issues/38
+    - https://github.com/COMP-4350-Group-6/budgetwise/issues/54
+- Use of specialized labels (ex. s.UnderReview label for issues that appear off,)
+    - https://github.com/COMP-4350-Group-6/budgetwise/issues/108
+    - https://github.com/COMP-4350-Group-6/budgetwise/issues/127
+
+
+Other examples where I displayed a focus on documentation of work & future maintainability were,
+
+Security measures: https://github.com/COMP-4350-Group-6/budgetwise/issues/80
+
+Our GitLeaks linter (checks if code contains Keys) was encountering a false positive in one of our files. Instead of turning off the linter entirely, or disabling the triggered security rule; I instead made a scoped in exception (see extract bellow)
+
+File: `.github/linters/customgitleaks.toml`
+```toml
+# Template from: https://github.com/gitleaks/gitleaks#configuration
+
+# Title for the gitleaks configuration file.
+title = "Custom Gitleaks configuration"
+
+[extend]
+
+useDefault = true
+
+[[rules]]
+
+id = "generic-api-key"
+    [[rules.allowlists]]
+    # This is to suppress the false possitive occuring in TESTING-RATIONALE.md:generic-api-key:166
+    condition = "AND"
+    paths = ['''TESTING-RATIONALE\.md''']
+    regexTarget = "match"
+    regexes = ['''(?:budgetwise\/apps\/api\/src\/middleware\/auth\.ts:17)''']
+```
+
+I did a number of things here,
+1. Citation of the template used. Allowing for future editors to see how to format said file.
+2. `useDefault = true` makes it so this file extends the GitLeaks rules instead of writing every rule manually
+3. The scoped exception:
+    1. First I specified the id of the rule I wanted to extend
+    2. I created a "AND" condition so only if all following conditions are met, will there be a bypass of the rule.
+    3. I specified conditions for both the file path, and a regex for the contents of the false positive line.
+    4. I created both the file path and a regex conditions as a list, so if future exceptions of the same manner occurred, all you would need to do is add it to the list.
+
+Committing this change did stop the false positive, but to check that the scoped exception only occurred where I wanted it to I created a test branch `test/this-should-trigger-gitleasks` (https://github.com/COMP-4350-Group-6/budgetwise/pull/88). This test branch had a files that was line by line the same as the original file being flagged, except for being named differently. As expected the new copycat file was flagged, telling me that the exception was properly scoped, and that I could close issue 80.
 
 ### Sid
 **Optimistic Add + Async Auto-categorization**
