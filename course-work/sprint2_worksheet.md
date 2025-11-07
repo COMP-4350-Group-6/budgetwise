@@ -35,258 +35,174 @@ Format: Markdown file in your repository. Include links to relevant code, script
 > ### Worksheet Question
 >
 > 1. [x] What parts of the system are not tested?
->
 > 2. [x] Provide an updated system diagram.
->
 > 3. [x] For each tier, indicate which layers are:
 >    - [x] Fully tested (80%+)
->
 >    - [x] Mostly tested (20–80%)
->
 >    - [x] Somewhat tested (0–20%)
->
 >    - [x] Not tested
->
-> 5. [x] Include coverage reports for tested tiers.
+> 4. [x] Include coverage reports for tested tiers.
+
+### Overall Coverage Summary
+
+**Repository Coverage: 55.3% lines | 74.5% functions**  
+**Total Tests: 525 tests across 47 test files**
 
 ### What Parts Are Not Tested?
 
-The following system components currently have **no test coverage** (0%):
+#### 1. **Composition Layer (0%)** - DI Containers
+- `packages/composition/cloudflare-worker/` - Cloudflare Workers DI wiring
+- `packages/composition/web-auth-client/` - Frontend authentication DI wiring
 
-#### 1. **Composition Layer** (Dependency Injection Containers)
-- `packages/composition/cloudflare-worker/` - DI container for Cloudflare Workers deployment
-- `packages/composition/web-auth-client/` - DI container for frontend authentication
+**Rationale:** Simple composition roots that wire dependencies. Validated through integration tests.
 
-**Why not tested:** These are simple composition roots that wire up dependencies. Testing these would primarily verify correct dependency injection, which is better validated through integration tests of the composed systems.
+#### 2. **AI/LLM Use Cases (0%)** 
+- `usecases/transactions/categorize-transaction.ts`
+- `usecases/transactions/parse-invoice.ts`
 
-#### 2. **AI/LLM Features in Use Cases**
-- `src/usecases/transactions/categorize-transaction.ts` (0% coverage)
-- `src/usecases/transactions/parse-invoice.ts` (0% coverage)
+**Rationale:** Thin wrappers around AI adapters. The underlying OpenRouter adapter has 100% coverage.
 
-**Why not tested:** These use cases are wrappers around external AI service calls. Unit tests exist for the underlying AI adapters (OpenRouter), but the use case orchestration layer hasn't been tested yet.
+#### 3. **Observability Features (0%)**
+- `domain/llm-model.ts` - Cost calculation models
+- `domain/llm-call.ts` - LLM tracking entities
+- `domain/default-categories.ts` - Seed data
 
-#### 3. **Domain Models with Complex Logic**
-- `src/domain/money.ts` (50% coverage - only basic operations tested)
-- `src/domain/llm-model.ts` (0% coverage - cost calculation models)
-- `src/domain/llm-call.ts` (0% coverage - LLM tracking entities)
-- `src/domain/default-categories.ts` (0% coverage - seed data)
+**Rationale:** Newer observability features. Money value object has 50% coverage.
 
-**Why not tested:** Money value object has partial coverage. LLM tracking domain models were added for observability but aren't yet tested.
+#### 4. **Supabase CRUD Repos (~3%)**
+- Categories, Budgets, Users, LLM Calls repositories
 
-#### 4. **Supabase Repository Implementations**
-- Categories repository: ~3% coverage
-- Budgets repository: ~3% coverage  
-- Users repository: ~3% coverage
-- LLM Calls repository: ~6% coverage
+**Rationale:** Mappers (100%) and Transactions repo (100%) are fully tested. Others follow same pattern.
 
-**Why not tested:** Mappers and core transaction repository are 100% tested with mocks. The remaining repositories follow the same pattern but haven't been prioritized for testing yet. Integration tests with real Supabase require environment setup.
+#### 5. **UI Components (0-40%)**
+- Dashboard components (0%)
+- Advanced transaction modals (17-41%)
 
-#### 5. **Frontend React Components**
-- Dashboard components (DonutChart, TrendChart, SpendingOverview, QuickActions, StatCard): 0% coverage
-- Budget components (CategorySpending 0%, SavingsGoal 15%)
-- Transaction modals (Edit: 33%, Import CSV: 17%, Upload Invoice: 41%)
+**Rationale:** Focus on business logic over UI. Component testing requires complex React Testing Library setup.
 
-**Why not tested:** Focus has been on testing business logic (utilities, services) over UI components. Component testing requires more complex setup with React Testing Library and mocking UI interactions.
+#### 6. **API Routes (28-70%)**
+- `routes/transactions.ts` (28%) - Edge cases
+- `routes/auth.ts` (39%) - Some flows
 
-#### 6. **API Route Handlers**
-- `src/routes/transactions.ts` - Many edge cases untested (~28% coverage)
-- `src/routes/auth.ts` - Authentication flows partially tested (~39% coverage)
+**Rationale:** Core business logic in use cases is tested. Routes add HTTP handling/validation.
 
-**Why not tested:** Core business logic in use cases is tested. API routes add HTTP handling, validation, and error formatting which has lower priority than domain logic testing.
+#### 7. **External Services (Integration Only)**
+- Supabase PostgreSQL, OpenRouter API, Cloudflare Workers
 
-#### 7. **External Services**
-- Supabase database (PostgreSQL)
-- OpenRouter API (AI service)
-- Cloudflare Workers runtime
+**Rationale:** Mocked in unit tests. Some Supabase integration tests exist (env-gated).
 
-**Why not tested:** External services are integration points. We mock these in unit tests and have some integration tests that hit real Supabase (when env vars are set). Full end-to-end testing would require live service deployments.
+### System Diagram - Coverage by Tier
 
-### System Diagram
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    PRESENTATION TIER (53-59%)                   │
+│                        [Mostly Tested]                          │
+├─────────────────────────────────────────────────────────────────┤
+│  Frontend: 53.86%  │  API: 59.48%                              │
+│  ✓ Utils: 100%     │  ✓ Routes: ~70%                           │
+│  ✓ Services: 100%  │  ✓ Middleware: ~62%                       │
+│  ✓ Hooks: 100%     │  ✓ Container: 100%                        │
+│  ✗ UI Components   │                                            │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│                   APPLICATION TIER (73%)                        │
+│                        [Mostly Tested]                          │
+├─────────────────────────────────────────────────────────────────┤
+│  Use Cases: 73.33%                                              │
+│  ✓ Budget Management: 100%   │  ✓ Auth: 100%                   │
+│  ✓ Category Mgmt: 100%       │  ✓ Transactions: ~80%           │
+│  ✗ AI Features: 0%           │  ✗ DI Containers: 0%            │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│                     DOMAIN TIER (35%)                           │
+│                        [Mostly Tested]                          │
+├─────────────────────────────────────────────────────────────────┤
+│  Entities: 34.78%                                               │
+│  ✓ Budget: 100%        │  ✓ User: 100%                         │
+│  ✓ Category: 100%      │  ~ Money: 50%                         │
+│  ✓ Transaction: 100%   │  ✗ LLM Models: 0%                     │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│                  INFRASTRUCTURE TIER (70%)                      │
+│                        [Mostly Tested]                          │
+├─────────────────────────────────────────────────────────────────┤
+│  Adapters:                                                      │
+│  ✓ OpenRouter (AI): 100%        │  ✓ System: 70%               │
+│  ✓ Local Storage: 81.52%        │  ~ Auth: 62.85%              │
+│  ~ Supabase: 34.24%             │                               │
+│    • Mappers: 100%              │                               │
+│    • Transactions: 100%         │                               │
+│    • Others: ~3%                │                               │
+└─────────────────────────────────────────────────────────────────┘
 
-See [Testing Coverage Diagram](./testing-coverage-diagram.md) for detailed visual representation of test coverage across all tiers.
+Legend: ✓ Tested  ~ Partial  ✗ Not Tested
+```
 
 ### Coverage by Tier
 
-#### **Presentation Tier** - Mostly Tested (20-80%)
+| Tier | Coverage | Tests | Classification | Status |
+|------|----------|-------|----------------|--------|
+| **Presentation** | 53-59% | 228 tests | Mostly Tested | ✅ |
+| **Application** | 73% | 138 tests | Mostly Tested | ✅ |
+| **Domain** | 35% | 55 tests | Mostly Tested | ⚠️ |
+| **Infrastructure** | 70% | 104 tests | Mostly Tested | ✅ |
+| **Composition** | 0% | 0 tests | Not Tested | ❌ |
 
-| Component | Coverage | Classification |
-|-----------|----------|----------------|
-| **Frontend (Next.js)** | 53.86% | Mostly Tested |
-| - React Pages | ~60% | Mostly Tested |
-| - React Components | ~40% | Mostly Tested |
-| - Utilities (dateHelpers, csvParser) | 100% | ✅ Fully Tested |
-| - Services (API clients) | 100% | ✅ Fully Tested |
-| - Hooks (useAuth) | 100% | ✅ Fully Tested |
-| **API (Hono)** | 59.48% | Mostly Tested |
-| - Route handlers | ~70% | Mostly Tested |
-| - Middleware | ~62% | Mostly Tested |
-| - Container (DI) | 100% | ✅ Fully Tested |
+### Detailed Coverage Reports
 
-**Analysis:** Core utilities and services have full test coverage. Pages and components have moderate coverage focusing on critical user flows (auth, transactions, budgets). Dashboard and advanced UI components are lower priority for testing.
+#### Package-Level Summary
 
----
+| Package | Coverage | Tests | Highlights |
+|---------|----------|-------|------------|
+| **Frontend** | 53.86% | 131 | ✅ Utils/Services: 100%, ⚠️ Components: 0-40% |
+| **API** | 59.48% | 97 | ✅ Categories: 98%, ✅ Budgets: 85%, ⚠️ Transactions: 28% |
+| **Domain** | 34.78% | 55 | ✅ Core entities: 100%, ❌ LLM models: 0% |
+| **Use Cases** | 73.33% | 138 | ✅ CRUD: 100%, ❌ AI: 0%, Functions: 100% |
+| **OpenRouter** | 100% | 23 | ✅ Full coverage including mocks |
+| **Local Persist** | 81.52% | 18 | ✅ Transactions/Categories: 100% |
+| **Supabase Persist** | 34.24% | 28 | ✅ Mappers: 100%, ⚠️ Others: ~3% |
+| **System** | 70% | 13 | ✅ Clock: 100%, ~ ID Gen: 68% |
+| **Auth Supabase** | 62.85% | 22 | ✅ Signup/Login: 100% |
 
-#### **Application Tier** - Mostly Tested (20-80%)
+#### Fully Tested Components (80%+)
 
-| Component | Coverage | Classification |
-|-----------|----------|----------------|
-| **Use Cases** | 73.33% | Mostly Tested |
-| - Budget Management | 100% | ✅ Fully Tested |
-| - Category Management | 100% | ✅ Fully Tested |
-| - Transaction Management | ~80% | ✅ Fully Tested |
-| - Authentication | 100% | ✅ Fully Tested |
-| - AI Features (Categorization, Invoice) | 0% | ❌ Not Tested |
-| **Composition (DI Containers)** | 0% | ❌ Not Tested |
+- ✅ Frontend utilities (dateHelpers, csvParser): 96-100%
+- ✅ Frontend services (budgetService, transactionsService): 98-100%
+- ✅ Frontend hooks (useAuth): 100%
+- ✅ OpenRouter AI adapter (categorization, invoice parsing): 100%
+- ✅ Local persistence (transactions, categories): 100%
+- ✅ Supabase mappers (domain ↔ DB transformation): 100%
+- ✅ Supabase transactions repository: 100%
+- ✅ Use cases (budgets, categories, auth): 100%
+- ✅ Domain entities (Budget, Category, Transaction, User): 100%
+- ✅ System clock adapter: 100%
+- ✅ API container (DI): 100%
 
-**Analysis:** Core business use cases (CRUD operations) have excellent coverage with comprehensive unit and integration tests. AI-powered features are untested at the use case level but have adapter tests. DI containers are simple wiring code.
-
----
-
-#### **Domain Tier** - Mostly Tested (20-80%)
-
-| Component | Coverage | Classification |
-|-----------|----------|----------------|
-| **Domain Entities** | 34.78% | Mostly Tested |
-| - Budget | 100% | ✅ Fully Tested |
-| - Category | 100% | ✅ Fully Tested |
-| - Transaction | 100% | ✅ Fully Tested |
-| - User | 100% | ✅ Fully Tested |
-| - Money (Value Object) | 50% | Mostly Tested |
-| - LLM Models | 0% | ❌ Not Tested |
-| - Default Categories (Seed Data) | 0% | ❌ Not Tested |
-| **Ports (Interfaces)** | N/A | Interface Definitions |
-
-**Analysis:** Core domain entities have complete test coverage with thorough validation of business rules. Money value object has partial coverage. LLM tracking models are newer additions focused on observability and haven't been prioritized for testing.
-
----
-
-#### **Infrastructure Tier** - Mostly Tested (20-80%)
-
-| Component | Coverage | Classification |
-|-----------|----------|----------------|
-| **Persistence Adapters** | | |
-| - Local Storage | 81.52% | ✅ Fully Tested |
-|   - Budgets Repo | 56% | Mostly Tested |
-|   - Categories Repo | 100% | ✅ Fully Tested |
-|   - Transactions Repo | 100% | ✅ Fully Tested |
-| - Supabase | 34.24% | Mostly Tested |
-|   - Mappers | 100% | ✅ Fully Tested |
-|   - Transactions Repo | 100% | ✅ Fully Tested |
-|   - Categories Repo | ~3% | Somewhat Tested |
-|   - Budgets Repo | ~3% | Somewhat Tested |
-|   - Users Repo | ~3% | Somewhat Tested |
-|   - LLM Calls Repo | ~6% | Somewhat Tested |
-| **Service Adapters** | | |
-| - OpenRouter (AI) | 100% | ✅ Fully Tested |
-|   - Categorization | 100% | ✅ Fully Tested |
-|   - Invoice Parser | 100% | ✅ Fully Tested |
-| - Auth (Supabase) | 62.85% | Mostly Tested |
-|   - Signup | 100% | ✅ Fully Tested |
-|   - Login | 100% | ✅ Fully Tested |
-|   - Refresh Token | ~30% | Mostly Tested |
-|   - Logout | ~30% | Mostly Tested |
-| **System Adapters** | 70% | Mostly Tested |
-| - Clock | 100% | ✅ Fully Tested |
-| - ID Generator | 68% | Mostly Tested |
-
-**Analysis:** Infrastructure adapters have strong coverage, especially for critical paths (transactions, mappers, AI services). Local storage has higher coverage than Supabase repos because it's simpler to test. Supabase repos require more complex mocking or real database connections.
-
----
-
-### Coverage Reports
-
-#### Merged Repository Coverage
-
-**Overall: 55.3% lines, 74.5% functions**
-
-Generated HTML report available at: `coverage/html/index.html`
-
-To view:
-```bash
-# Generate merged coverage
-pnpm run test:coverage
-
-# View HTML report
-xdg-open coverage/html/index.html  # Linux
-open coverage/html/index.html      # macOS
-```
-
-#### Per-Package Coverage Reports
-
-**Frontend:**
-```
-Coverage: 53.86% statements | 76.03% branches | 50.95% functions
-Report: apps/frontend/coverage/index.html
-```
-
-**API:**
-```
-Coverage: 59.48% statements | 76.38% branches | 80% functions
-Report: apps/api/coverage/lcov-report/index.html
-```
-
-**Domain:**
-```
-Coverage: 34.78% statements | 95.71% branches | 70% functions
-Report: packages/domain/coverage/index.html
-```
-
-**Use Cases:**
-```
-Coverage: 73.33% statements | 86.44% branches | 100% functions
-Report: packages/usecases/coverage/index.html
-```
-
-**Adapters - OpenRouter (AI Services):**
-```
-Coverage: 100% statements | 96.77% branches | 100% functions
-Report: packages/adapters/services/openrouter/coverage/index.html
-```
-
-**Adapters - Local Persistence:**
-```
-Coverage: 81.52% statements | 100% branches | 84% functions
-Report: packages/adapters/persistence/local/coverage/index.html
-```
-
-**Adapters - Supabase Persistence:**
-```
-Coverage: 34.24% statements | 83.33% branches | 57.69% functions
-Report: packages/adapters/persistence/supabase/coverage/index.html
-```
-
-**Adapters - System:**
-```
-Coverage: 70% statements | 87.5% branches | 100% functions
-Report: packages/adapters/system/coverage/index.html
-```
-
-**Adapters - Auth (Supabase):**
-```
-Coverage: 62.85% statements | 66.66% branches | 50% functions
-Report: packages/adapters/auth-supabase/coverage/index.html
-```
-
-#### Viewing Coverage
+#### Viewing Coverage Reports
 
 ```bash
-# Run all tests with coverage and merge reports
-pnpm run test:coverage
-
-# Generate HTML report (requires: sudo apt-get install lcov)
-pnpm run coverage:html
-
-# Open in browser
-pnpm run coverage:view
-
-# Or all-in-one
+# Generate all coverage reports and open in browser
 pnpm run coverage:report
+
+# Or step by step:
+pnpm run test:coverage    # Run tests + merge
+pnpm run coverage:html    # Generate HTML (requires: apt-get install lcov)
+pnpm run coverage:view    # Open in browser
 ```
 
-**Coverage Documentation:**
-- [Coverage Guide](../COVERAGE_GUIDE.md) - Comprehensive coverage documentation
-- [Coverage Cheatsheet](../COVERAGE_CHEATSHEET.md) - Quick reference for coverage commands
-- [Testing Coverage Diagram](./testing-coverage-diagram.md) - Visual system diagram with coverage annotations
+**HTML Reports:**
+- Merged: `coverage/html/index.html`
+- Frontend: `apps/frontend/coverage/index.html`
+- API: `apps/api/coverage/lcov-report/index.html`
+- Per-package: `packages/{name}/coverage/index.html`
+
+**Documentation:**
+- [Coverage Guide](../COVERAGE_GUIDE.md) - Commands and workflows
+- [Coverage Cheatsheet](../COVERAGE_CHEATSHEET.md) - Quick reference
+
 
 
 

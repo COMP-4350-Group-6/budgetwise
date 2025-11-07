@@ -152,6 +152,20 @@ See [TESTING.md](TESTING.md) for full details, rationale, and troubleshooting.
 pnpm test
 ```
 
+### Run Tests with Coverage
+
+```sh
+# Run tests with coverage across all packages and merge results
+pnpm run test:coverage
+
+# View merged HTML report
+open coverage/html/index.html
+```
+
+**Coverage Guides:**
+- [COVERAGE_CHEATSHEET.md](COVERAGE_CHEATSHEET.md) - Quick reference for coverage commands
+- [COVERAGE_GUIDE.md](COVERAGE_GUIDE.md) - Comprehensive coverage documentation
+
 ### Frontend Tests (Vitest)
 
 ```sh
