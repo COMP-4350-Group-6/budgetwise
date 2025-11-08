@@ -144,54 +144,44 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## Testing
 
-See [TESTING.md](TESTING.md) for full details, rationale, and troubleshooting.
+> **📚 See [TESTING_GUIDE.md](TESTING_GUIDE.md) for the complete testing guide**
 
-### Run All Tests (Monorepo)
+### Quick Start
 
 ```sh
+# Run all tests
 pnpm test
+
+# Run with coverage
+pnpm test:coverage
+
+# View coverage report
+pnpm coverage:report
+
+# Run smoke tests (production)
+pnpm test:smoke:production
 ```
 
-### Run Tests with Coverage
+### What We Test
 
-```sh
-# Run tests with coverage across all packages and merge results
-pnpm run test:coverage
+- **525 unit & integration tests** across 47 files
+- **17 smoke tests** validating production deployment
+- **55.3% lines coverage** | **74.5% functions coverage**
 
-# View merged HTML report
-open coverage/html/index.html
-```
+### Test Types
 
-**Coverage Guides:**
-- [COVERAGE_CHEATSHEET.md](COVERAGE_CHEATSHEET.md) - Quick reference for coverage commands
-- [COVERAGE_GUIDE.md](COVERAGE_GUIDE.md) - Comprehensive coverage documentation
+| Type | Location | Command | Purpose |
+|------|----------|---------|---------|
+| **Unit** | `packages/*/src/*.test.ts` | `pnpm test:unit` | Test individual components |
+| **Integration** | `packages/*/tests/integration/` | `pnpm test:int` | Test component interactions |
+| **Smoke/E2E** | `e2e-tests/smoke-tests/` | `pnpm test:smoke:production` | Validate production |
 
-### Frontend Tests (Vitest)
+### Documentation
 
-```sh
-cd apps/frontend
-pnpm vitest
-# or with coverage:
-pnpm vitest run --coverage
-```
-- Vitest loads `.env.local` for frontend tests via `vitest.setup.ts`.
-
-### Backend/API Tests
-
-```sh
-cd apps/api
-pnpm test
-```
-
-### Domain/Usecases Tests with Coverage
-
-```sh
-pnpm test --filter @budget/domain -- --coverage
-pnpm test --filter @budget/usecases -- --coverage
-```
-
-- Coverage is per-package. Barrel files (pure re-exports) may show 0% coverage—see [TESTING.md](TESTING.md) for details.
-- For a summary of recent test results and coverage, see [`test-coverage/test-summary.md`](test-coverage/test-summary.md).
+- **[TESTING_GUIDE.md](TESTING_GUIDE.md)** - Complete testing guide (commands, best practices, troubleshooting)
+- **[e2e-tests/README.md](e2e-tests/README.md)** - Smoke test documentation
+- **[TESTING-RATIONALE.md](TESTING-RATIONALE.md)** - Domain-specific testing rationale
+- **[course-work/TESTING_PLAN.md](course-work/TESTING_PLAN.md)** - Original test plan
 
 ---
 
@@ -240,8 +230,10 @@ See [`ACKNOWLEDGMENTS.md`](ACKNOWLEDGMENTS.md) for more details and attributions
 
 ## Further Reading
 
-- [DESIGN.md](DESIGN.md) — Architecture and rationale
-- [TESTING.md](TESTING.md) — Testing strategy, scenarios, and troubleshooting
-- [TESTING-RATIONALE.md](TESTING-RATIONALE.md) — Why and how we test specific behaviors
-- [TEST_SUMMARY.md](./test-coverage/test-summary.md) - Test Coverage and results
+- **[DESIGN.md](DESIGN.md)** — Comprehensive architecture, design patterns, and technical decisions
+- **[TESTING_GUIDE.md](TESTING_GUIDE.md)** — Complete testing strategy, commands, and troubleshooting
+- **[TESTING-RATIONALE.md](TESTING-RATIONALE.md)** — Domain-specific testing reasoning
+- **[ACKNOWLEDGMENTS.md](ACKNOWLEDGMENTS.md)** — AI usage and tool acknowledgments
+- **[test-coverage/test-summary.md](./test-coverage/test-summary.md)** — Test coverage reports
+
 *For API documentation and sprint planning, see the [API Doc](https://docs.google.com/document/d/1tYB-VAGl5qK_Bi0bbtqdJ5mbaJzvSiDYkD_54Wbm0mI/edit?usp=sharing) and [`course-work/`](course-work/) folder.*

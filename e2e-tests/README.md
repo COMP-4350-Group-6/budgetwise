@@ -1,209 +1,279 @@
-# Smoke Tests
+# E2E & Smoke Tests
 
-Production smoke tests for BudgetWise that run after deployment to verify critical functionality.
+> **📚 Part of [TESTING_GUIDE.md](../TESTING_GUIDE.md) - See complete testing documentation**
 
-## What Are Smoke Tests?
+End-to-end and smoke tests for BudgetWise using Playwright.
 
-Smoke tests are a subset of tests that verify the most critical functionality of an application after deployment. They're designed to:
+## Quick Start
 
-- **Run quickly** (< 5 minutes) to provide fast feedback
-- **Test critical paths** that would cause major user impact if broken
-- **Validate deployment** to ensure the app is accessible and functional
-- **Catch deployment issues** like broken assets, API errors, or routing problems
-
-## Test Coverage
-
-Our smoke tests cover:
-
-### Frontend Health
-- ✅ Homepage loads successfully
-- ✅ Login/Signup pages are accessible
-- ✅ Static assets (CSS/JS) load correctly
-- ✅ Pages are interactive and render properly
-
-### API Health
-- ✅ Health check endpoint responds
-- ✅ CORS configuration works
-- ✅ Invalid routes return 404
-- ✅ Protected routes require authentication
-
-### Critical User Flows
-- ✅ Unauthenticated users redirect to login
-- ✅ Invalid credentials show error messages
-- ✅ Navigation works correctly
-
-### Performance
-- ✅ Homepage loads in < 5 seconds
-- ✅ API responds in < 1 second
-- ✅ Cloudflare edge performance
-
-### Error Handling
-- ✅ Network failures handled gracefully
-- ✅ API returns proper error formats
-- ✅ No crashes or white screens
-
-### Security
-- ✅ HTTPS enforced
-- ✅ Security headers present
-- ✅ No sensitive information exposed
-
-## Running Smoke Tests
-
-### Prerequisites
+### 1. Install Browsers (One-Time Setup)
 
 ```bash
-# Install dependencies
-pnpm install
+# From root directory
+pnpm --filter @budgetwise/e2e-tests run install:browsers
 
-# Install Playwright browsers
-npx playwright install chromium
+# Or from e2e-tests directory
+pnpm install:browsers
 ```
 
-### Local Testing
+This downloads Chromium, Firefox, WebKit, and mobile browsers (~500MB).
+
+### 2. Run Tests
+
+#### Smoke Tests (Recommended - Fast & Reliable)
 
 ```bash
-# Test against localhost (default)
-cd e2e-tests
-pnpm test:smoke
-
-# Test against specific URLs
-PRODUCTION_URL=https://budgetwise.pages.dev API_URL=https://budgetwise-api.workers.dev pnpm test:smoke
-
-# Run in headed mode (see browser)
-pnpm test:headed smoke-tests/
-
-# Run with UI mode (interactive)
-pnpm test:ui
-```
-
-### Production Testing
-
-```bash
-# Test production deployment
+# From root - runs on Chromium only (17 tests, ~30s)
 pnpm test:smoke:production
 
-# Test PR preview deployment
-PRODUCTION_URL=https://pr-123-budgetwise.pages.dev API_URL=https://pr-123-api.workers.dev pnpm test:smoke:preview
+# Local testing (localhost:3000)
+pnpm test:smoke
 ```
 
-### CI/CD Integration
-
-Smoke tests run automatically after successful deployment via GitHub Actions:
-
-```yaml
-# .github/workflows/smoke-tests.yml
-on:
-  workflow_run:
-    workflows: ["Deploy to Production"]
-    types: [completed]
-```
-
-You can also trigger manually:
-1. Go to Actions tab
-2. Select "Smoke Tests" workflow
-3. Click "Run workflow"
-4. Optionally specify custom URLs
-
-## Test Reports
-
-After running tests, view the HTML report:
+#### All Browsers (Comprehensive)
 
 ```bash
-pnpm report
+# From root - runs on all 5 browsers (85 tests, ~2-3min)
+pnpm test:smoke:production:all
+
+# Local testing on all browsers
+pnpm test:smoke:all
 ```
 
-Reports include:
-- ✅ Pass/fail status for each test
-- 📸 Screenshots on failure
-- 🎥 Videos of failed tests
-- ⏱️ Performance metrics
-- 🔍 Detailed error messages
+## Available Commands
 
-## Adding New Smoke Tests
+### From Root Directory
 
-Smoke tests should be **fast** and **reliable**. Follow these guidelines:
+| Command | Description | Browsers | Tests | Time |
+|---------|-------------|----------|-------|------|
+| `pnpm test:smoke:production` | Production smoke tests | Chromium only | 17 | ~30s |
+| `pnpm test:smoke:production:all` | Production all browsers | All 5 browsers | 85 | ~2-3min |
+| `pnpm test:smoke` | Local smoke tests | Chromium only | 17 | ~30s |
+| `pnpm test:smoke:all` | Local all browsers | All 5 browsers | 85 | ~2-3min |
+| `pnpm test:e2e` | E2E tests | All configured | Varies | Varies |
 
-### ✅ Good Smoke Tests
+### From e2e-tests Directory
 
-```typescript
-test('should load homepage', async ({ page }) => {
-  const response = await page.goto(PRODUCTION_URL);
-  expect(response?.status()).toBe(200);
-});
+```bash
+cd e2e-tests
 
-test('should respond to health check', async ({ request }) => {
-  const response = await request.get(`${API_URL}/health`);
-  expect(response.status()).toBe(200);
-});
+# Quick smoke tests (Chromium only)
+pnpm test:smoke
+pnpm test:smoke:production
+
+# All browsers
+pnpm test:smoke:all
+pnpm test:smoke:production:all
+
+# Debugging
+pnpm test:headed              # Watch tests run
+pnpm test:ui                  # Interactive UI mode
+pnpm test:debug               # Step-by-step debugger
+
+# View results
+pnpm report                   # Open HTML report
 ```
-
-### ❌ Bad Smoke Tests
-
-```typescript
-// Too slow - requires full user flow
-test('should complete full budget creation flow', async ({ page }) => {
-  // This belongs in E2E tests, not smoke tests
-});
-
-// Too flaky - depends on specific data
-test('should show exactly 5 budgets', async ({ page }) => {
-  // Production data changes, use E2E tests instead
-});
-
-// Too detailed - testing implementation
-test('should call getBudgets API with correct parameters', async ({ page }) => {
-  // This is a unit test, not a smoke test
-});
-```
-
-### Guidelines
-
-1. **Keep tests independent** - Each test should run in isolation
-2. **Avoid authentication** - Test public endpoints and redirects
-3. **Test responses, not content** - Check status codes, not specific text
-4. **Make it fast** - Aim for < 30 seconds per test
-5. **Focus on critical paths** - Test what would break the app
 
 ## Environment Variables
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `PRODUCTION_URL` | Frontend URL to test | `http://localhost:3000` |
-| `API_URL` | API URL to test | `http://localhost:8787` |
-| `CI` | CI environment flag | `false` |
+### Production URLs
+
+```bash
+# Automatically set by test:smoke:production commands
+PRODUCTION_URL=https://budgetwise.ca
+API_URL=https://api.budgetwise.ca
+```
+
+### Local/Preview URLs
+
+```bash
+# Default (used by test:smoke)
+PRODUCTION_URL=http://localhost:3000
+API_URL=http://localhost:8787
+
+# Custom preview
+PRODUCTION_URL=https://preview-abc123.pages.dev pnpm test:smoke
+```
+
+## Browser Configuration
+
+Tests run on these browsers (configurable in `playwright.config.ts`):
+
+1. **Chromium** (Desktop Chrome) - Default for quick tests
+2. **Firefox** (Desktop Firefox)
+3. **WebKit** (Desktop Safari)
+4. **Mobile Chrome** (Pixel 5)
+5. **Mobile Safari** (iPhone 12)
+
+### Why Chromium-Only by Default?
+
+- ✅ **Fast**: 17 tests in ~30 seconds
+- ✅ **Reliable**: Most common browser, best Playwright support
+- ✅ **CI-Friendly**: Doesn't require all browsers installed
+- ✅ **Covers 65%**: Chromium covers most real-world usage
+
+Use `*:all` commands for comprehensive cross-browser testing before major releases.
+
+## Test Structure
+
+```
+e2e-tests/
+├── smoke-tests/
+│   └── production-health.test.ts    # 17 production validation tests
+├── tests/
+│   └── (future e2e tests)
+├── playwright.config.ts              # Playwright configuration
+└── README.md                         # This file
+```
+
+## Smoke Tests Coverage
+
+17 tests across 6 categories:
+
+1. **Frontend Health** (4 tests)
+   - Homepage loads
+   - Login page accessible
+   - Signup page accessible
+   - Static assets served
+
+2. **API Health** (4 tests)
+   - Health endpoint responds
+   - CORS configured
+   - 404 for invalid routes
+   - Auth required for protected routes
+
+3. **Critical User Flows** (2 tests)
+   - Unauthenticated redirect to login
+   - Invalid login shows error
+
+4. **Performance** (2 tests)
+   - Homepage loads quickly
+   - API responds quickly
+
+5. **Error Handling** (2 tests)
+   - Network errors handled gracefully
+   - Proper error format from API
+
+6. **Security** (3 tests)
+   - HTTPS enforced
+   - Security headers present
+   - No sensitive info in errors
 
 ## Troubleshooting
 
-### Tests fail locally but pass in CI
+### "Executable doesn't exist" Error
 
-- **Cause**: Different environment or URLs
-- **Fix**: Set `PRODUCTION_URL` and `API_URL` correctly
+**Problem**: Firefox/WebKit/Mobile Safari browsers not installed
 
-### Tests timeout
+**Solution**:
+```bash
+pnpm --filter @budgetwise/e2e-tests run install:browsers
+```
 
-- **Cause**: Network latency or slow server
-- **Fix**: Increase timeout in `playwright.config.ts`
+Or use Chromium-only commands:
+```bash
+pnpm test:smoke:production  # Instead of test:smoke:production:all
+```
 
-### Browser not installed
+### Tests Timing Out
 
-- **Cause**: Missing Playwright browsers
-- **Fix**: Run `npx playwright install chromium`
+**Problem**: Production site slow or unreachable
 
-### CORS errors
+**Solutions**:
+1. Check if site is up: `curl -I https://budgetwise.ca`
+2. Increase timeout in `playwright.config.ts`
+3. Run with retries: `playwright test --retries=2`
 
-- **Cause**: API not configured for test origin
-- **Fix**: Check API CORS configuration
+### Can't Connect to localhost
+
+**Problem**: Local dev server not running
+
+**Solution**:
+```bash
+# Terminal 1: Start frontend
+cd apps/frontend && pnpm dev
+
+# Terminal 2: Start API
+cd apps/api && pnpm dev
+
+# Terminal 3: Run tests
+pnpm test:smoke
+```
+
+### Flaky Tests
+
+**Problem**: Tests pass/fail randomly
+
+**Solutions**:
+1. Run with UI mode: `pnpm --filter @budgetwise/e2e-tests run test:ui`
+2. Check screenshots: `playwright-report/` after failure
+3. Add explicit waits in test code
+4. Use `--headed` to watch: `pnpm --filter @budgetwise/e2e-tests run test:headed`
+
+## CI/CD Integration
+
+### GitHub Actions
+
+Smoke tests run automatically:
+
+```yaml
+# .github/workflows/smoke-tests.yml
+- name: Install browsers
+  run: pnpm --filter @budgetwise/e2e-tests exec playwright install --with-deps chromium
+
+- name: Run smoke tests
+  run: pnpm test:smoke:production
+```
+
+Uses Chromium-only for speed and reliability.
+
+### Manual Trigger
+
+```bash
+# From GitHub Actions UI
+Workflow: Smoke Tests → Run workflow → main
+```
+
+### Scheduled
+
+Runs daily at 9 AM UTC to catch production issues.
 
 ## Best Practices
 
-1. **Run after every deployment** - Catch issues immediately
-2. **Monitor trends** - Track test duration over time
-3. **Keep tests green** - Fix failures quickly
-4. **Review artifacts** - Check videos/screenshots on failure
-5. **Update regularly** - Add tests for new critical features
+### Local Development
 
-## Resources
+1. **Use Chromium-only** for quick feedback
+   ```bash
+   pnpm test:smoke
+   ```
 
-- [Playwright Documentation](https://playwright.dev)
-- [Smoke Testing Guide](https://www.browserstack.com/guide/smoke-testing)
-- [BudgetWise Testing Guide](../TESTING.md)
+2. **Run all browsers** before pushing major changes
+   ```bash
+   pnpm test:smoke:all
+   ```
+
+3. **Use UI mode** for debugging
+   ```bash
+   cd e2e-tests && pnpm test:ui
+   ```
+
+### CI/CD
+
+1. **PRs**: Chromium-only (fast feedback)
+2. **Main branch**: Chromium-only (reliable)
+3. **Pre-release**: All browsers (comprehensive)
+4. **Post-deploy**: Chromium-only production smoke tests
+
+### Writing Tests
+
+1. **Be specific**: Use data-testid attributes
+2. **Wait explicitly**: Use `waitForLoadState()`, `waitForSelector()`
+3. **Test real scenarios**: Don't just check HTTP status codes
+4. **Keep it fast**: Smoke tests should run in < 1 minute per browser
+5. **Make it reliable**: Avoid timing-dependent assertions
+
+## Related Documentation
+
+- [CI/CD Testing Strategy](../.github/CI_CD_TESTING_STRATEGY.md)
+- [Smoke Tests Workflow](../.github/workflows/smoke-tests.yml)
+- [Playwright Docs](https://playwright.dev)

@@ -1,13 +1,8 @@
 name: Smoke Tests
 
 on:
-  # Run after successful deployment to production
-  workflow_run:
-    workflows: ["Deploy to Production"]
-    types:
-      - completed
-  
-  # Allow manual trigger
+  # Trigger manually or on schedule to test production
+  # Cloudflare handles deployment automatically
   workflow_dispatch:
     inputs:
       production_url:
@@ -18,15 +13,15 @@ on:
         description: 'API URL to test'
         required: false
         default: 'https://api.budgetwise.ca'
+  
+  # Optional: Run smoke tests daily to catch issues early
+  schedule:
+    - cron: '0 9 * * *'  # Run at 9 AM UTC daily
 
 jobs:
   smoke-tests:
     name: Run Production Smoke Tests
     runs-on: ubuntu-latest
-    
-    # Only run if deployment was successful
-    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
-    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -45,16 +40,15 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       
-      - name: Install Playwright browsers
-        run: npx playwright install chromium --with-deps
+      - name: Install Playwright Chromium browser
+        run: pnpm --filter @budgetwise/e2e-tests exec playwright install chromium --with-deps
       
-      - name: Run smoke tests
+      - name: Run smoke tests (Chromium only)
         env:
           PRODUCTION_URL: ${{ github.event.inputs.production_url || 'https://budgetwise.ca' }}
           API_URL: ${{ github.event.inputs.api_url || 'https://api.budgetwise.ca' }}
-        run: |
-          cd e2e-tests
-          pnpm test:smoke
+          CI: true
+        run: pnpm test:smoke:production
       
       - name: Upload test results
         if: always()
