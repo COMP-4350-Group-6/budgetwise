@@ -689,11 +689,43 @@ This is normal performance for POST operations. No optimization needed.
 
 ## 5. Last Dash
 
-> [!IMPORTANT]
->
-> ### Worksheet Question
->
-> 1. [x] What issues do you foresee in the final sprint?
+Complying with professor's remark from 2025-11-07 (Actual remark may differ slightly):
+> I should be able to come back in two or three days and see comments about "can't merge this because of X and Y" on the PR's
+
+
+Refactoring Challenges:
+- Code Comprehension Gaps
+- Dependency Chain Complexity
+- Testing Infrastructure Deficit
+
+Deployment Preparation Issues
+- Configuration Management
+- Build Pipeline Unknowns
+- Production Environment Differences
+
+Stress Testing Discoveries
+- Performance Bottlenecks
+    - Current code has not been optimized for concurrent users.
+- Stress testing will likely reveal:
+    - Synchronous operations that should be asynchronous 
+    - Missing database indexes causing slow queries
+    - Memory management issues from unclosed connections
+    - State management problems under concurrent load
+- Error Handling Gaps
+- Scalability Architecture Issues
+
+Process and Coordination Concerns
+- The time costs of Code Review
+- Knowledge Transfer Requirements
+- Integration Complexity
+
+Risk Mitigation Considerations
+- Timeline Pressure
+- Quality vs. Deadline Tradeoffs
+
+
+> [!NOTE]
+> All points in "5. Last Dash" are headings (except for the first one about the professor) of a much larger breakdown provided by a group member - larger breakdown was requested to be shortened by said member.
 
 ### Anticipated Challenges for Sprint 3
 
@@ -890,6 +922,61 @@ The architecture and deployment pipeline I built became the foundation enabling 
 
 ### Robert
 
+I focused on documentation of work & future maintainability
+
+Much of my work is not see through commits, however go through most of the repository Issues and it will become evident to the degree I utilized issues to manage & document engagements. 
+
+Some aspects I frequently utilized were, (+2 examples each)
+- Relationships (Sub issues, Issue blocking)
+    - https://github.com/COMP-4350-Group-6/budgetwise/issues/128
+    - https://github.com/COMP-4350-Group-6/budgetwise/issues/8
+- Specifying reason for closing (Complete, No planned, Duplicate, Stale)
+    - https://github.com/COMP-4350-Group-6/budgetwise/issues/38
+    - https://github.com/COMP-4350-Group-6/budgetwise/issues/54
+- Use of specialized labels (ex. s.UnderReview label for issues that appear off,)
+    - https://github.com/COMP-4350-Group-6/budgetwise/issues/108
+    - https://github.com/COMP-4350-Group-6/budgetwise/issues/127
+
+
+Other examples where I displayed a focus on documentation of work & future maintainability were,
+
+Security measures: https://github.com/COMP-4350-Group-6/budgetwise/issues/80
+
+Our GitLeaks linter (checks if code contains Keys) was encountering a false positive in one of our files. Instead of turning off the linter entirely, or disabling the triggered security rule; I instead made a scoped in exception (see extract bellow)
+
+File: `.github/linters/customgitleaks.toml`
+```toml
+# Template from: https://github.com/gitleaks/gitleaks#configuration
+
+# Title for the gitleaks configuration file.
+title = "Custom Gitleaks configuration"
+
+[extend]
+
+useDefault = true
+
+[[rules]]
+
+id = "generic-api-key"
+    [[rules.allowlists]]
+    # This is to suppress the false possitive occuring in TESTING-RATIONALE.md:generic-api-key:166
+    condition = "AND"
+    paths = ['''TESTING-RATIONALE\.md''']
+    regexTarget = "match"
+    regexes = ['''(?:budgetwise\/apps\/api\/src\/middleware\/auth\.ts:17)''']
+```
+
+I did a number of things here,
+1. Citation of the template used. Allowing for future editors to see how to format said file.
+2. `useDefault = true` makes it so this file extends the GitLeaks rules instead of writing every rule manually
+3. The scoped exception:
+    1. First I specified the id of the rule I wanted to extend
+    2. I created a "AND" condition so only if all following conditions are met, will there be a bypass of the rule.
+    3. I specified conditions for both the file path, and a regex for the contents of the false positive line.
+    4. I created both the file path and a regex conditions as a list, so if future exceptions of the same manner occurred, all you would need to do is add it to the list.
+
+Committing this change did stop the false positive, but to check that the scoped exception only occurred where I wanted it to I created a test branch `test/this-should-trigger-gitleasks` (https://github.com/COMP-4350-Group-6/budgetwise/pull/88). This test branch had a files that was line by line the same as the original file being flagged, except for being named differently. As expected the new copycat file was flagged, telling me that the exception was properly scoped, and that I could close issue 80.
+
 ### Sid
 
 **Optimistic Add + Async Auto-categorization**
@@ -1052,27 +1139,6 @@ Some math I did to demonstrate this features practical value.
 
 The end result is that users get instant, accurate categorization that seems too good to be true, while it costs us pennies per thousand transactions.
 
-*Acknowledgements:
-The above article was structured and refined with assistance from Claude Sonnet 4.5 (Anthropic). The Fermi estimates, cost calculations, mathematical formulations, and overall narrative structure were developed through iterative collaboration via the Anthropic web interface. It had been verified for factuality.*
 
-## Sprint 2 Quick Checklist
-
-- [ ] Regression testing process described.
-
-- [ ] Link to regression script + last results.
-
-- [ ] Testing slowdown discussed.
-
-- [ ] Untested parts identified + updated system diagram.
-
-- [ ] Tier testing coverage levels stated.
-
-- [ ] Coverage reports included.
-
-- [ ] API profiler run + slowest endpoint identified.
-
-- [ ] Profiler output attached/linked.
-
-- [ ] Issues for final sprint listed.
-
-- [ ] Each member’s “best work” committed & described.
+_Acknowledgements:
+The above article was structured and refined with assistance from Claude Sonnet 4.5 (Anthropic). The Fermi estimates, cost calculations, mathematical formulations, and overall narrative structure were developed through iterative collaboration via the Anthropic web interface. It had been verified for factuality._

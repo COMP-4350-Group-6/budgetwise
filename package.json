@@ -10,6 +10,7 @@
     "test": "turbo run test",
     "test:unit": "turbo run test:unit",
     "test:int": "turbo run test:int",
+    "test:critical": "pnpm --filter api run test:critical",
     "test:e2e": "pnpm --filter @budgetwise/e2e-tests run test:e2e",
     "test:smoke": "pnpm --filter @budgetwise/e2e-tests run test:smoke",
     "test:smoke:all": "pnpm --filter @budgetwise/e2e-tests run test:smoke:all",
