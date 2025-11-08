@@ -5,10 +5,19 @@
   "exports": {
     ".": "./src/index.ts"
   },
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:integration": "vitest run tests/integration"
+  },
   "dependencies": {
     "@budget/domain": "workspace:*",
     "@budget/ports": "workspace:*",
     "@supabase/supabase-js": "^2.45.4"
+  },
+  "devDependencies": {
+    "vitest": "^3.2.4",
+    "@vitest/coverage-v8": "^3.2.4",
+    "dotenv": "^16.0.0"
   }
 }
-
