@@ -1,0 +1,41 @@
+.actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
+  gap: 1rem;
+}
+
+.card {
+  composes: card from "../../app/(protected)/home/home.module.css";
+  border-left: 4px solid var(--accent-green);
+}
+
+.top h3 {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.top p {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  margin-bottom: 0.5rem;
+}
+
+.primary {
+  background-color: var(--accent-green);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.secondary {
+  background-color: rgba(78, 124, 102, 0.08);
+  color: var(--accent-green);
+  border: none;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
