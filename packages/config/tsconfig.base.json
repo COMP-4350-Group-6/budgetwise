@@ -26,6 +26,8 @@
       "@budget/adapters-persistence-local/*": ["../adapters/persistence/local/src/*"],
       "@budget/adapters-persistence-firebase": ["../adapters/persistence/firebase/src/index.ts"],
       "@budget/adapters-persistence-firebase/*": ["../adapters/persistence/firebase/src/*"],
+      "@budget/adapters-persistence-supabase": ["../adapters/persistence/supabase/src/index.ts"],
+      "@budget/adapters-persistence-supabase/*": ["../adapters/persistence/supabase/src/*"],
       "@budget/composition-cloudflare-worker": ["../composition/cloudflare-worker/src/index.ts"],
       "@budget/composition-cloudflare-worker/*": ["../composition/cloudflare-worker/src/*"],
       "@budget/adapters-auth-supabase": ["../adapters/auth-supabase/src/index.ts"],

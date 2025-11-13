@@ -24,7 +24,7 @@ export function makeCreateBudget(deps: {
     const now = deps.clock.now();
     
     const budget = new Budget({
-      id: deps.id.ulid(),
+      id: deps.id.uuid(),
       userId: input.userId,
       categoryId: input.categoryId,
       name: input.name,

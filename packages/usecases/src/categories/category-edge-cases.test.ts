@@ -5,7 +5,7 @@ import { makeListCategories } from './list-categories';
 import { makeDeleteCategory } from './delete-category';
 import { makeSeedDefaultCategories } from './seed-default-categories';
 import { makeInMemCategoriesRepo, makeInMemBudgetsRepo } from '@budget/adapters-persistence-local';
-import { makeSystemClock, makeUlid } from '@budget/adapters-system';
+import { makeSystemClock, makeUuid } from '@budget/adapters-system';
 
 describe('Category Edge Cases & Boundary Tests', () => {
   let categoriesRepo: ReturnType<typeof makeInMemCategoriesRepo>;
@@ -16,13 +16,13 @@ describe('Category Edge Cases & Boundary Tests', () => {
   let deleteCategory: ReturnType<typeof makeDeleteCategory>;
   let seedDefaultCategories: ReturnType<typeof makeSeedDefaultCategories>;
   let clock: ReturnType<typeof makeSystemClock>;
-  let id: ReturnType<typeof makeUlid>;
+  let id: ReturnType<typeof makeUuid>;
 
   beforeEach(() => {
     categoriesRepo = makeInMemCategoriesRepo();
     budgetsRepo = makeInMemBudgetsRepo();
     clock = makeSystemClock();
-    id = makeUlid();
+    id = makeUuid();
     
     createCategory = makeCreateCategory({ categoriesRepo, clock, id });
     updateCategory = makeUpdateCategory({ categoriesRepo, clock });

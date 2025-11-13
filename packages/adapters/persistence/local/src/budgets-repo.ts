@@ -33,7 +33,13 @@ export function makeInMemBudgetsRepo(): BudgetsRepo {
       budgets.set(budget.id, budget);
     },
 
-    async delete(id: string): Promise<void> {
+    async delete(id: string, userId?: string): Promise<void> {
+      if (userId) {
+        const budget = budgets.get(id);
+        if (!budget || budget.props.userId !== userId) {
+          return;
+        }
+      }
       budgets.delete(id);
     },
   };

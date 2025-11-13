@@ -1,1 +1,1 @@
-export interface IdPort { ulid(): string }
+export interface IdPort { uuid(): string }

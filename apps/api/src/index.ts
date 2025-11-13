@@ -3,6 +3,8 @@ import { app } from "./app";
 // Cloudflare Workers export with environment support
 interface Env {
   SUPABASE_JWT_SECRET: string;
+  SUPABASE_URL: string;
+  SUPABASE_SERVICE_ROLE_KEY: string;
   OPENROUTER_API_KEY?: string;
 }
 

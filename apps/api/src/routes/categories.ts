@@ -38,6 +38,7 @@ categories.post("/categories/seed", async (c) => {
   
   return c.json({
     categories: seeded.map(cat => ({
+      // map domain Category -> plain props for response
       ...cat.props,
       createdAt: cat.props.createdAt.toISOString(),
       updatedAt: cat.props.updatedAt.toISOString(),

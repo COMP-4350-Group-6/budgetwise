@@ -1,19 +1,19 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { makeCreateCategory } from './create-category';
 import { makeInMemCategoriesRepo } from '@budget/adapters-persistence-local';
-import { makeSystemClock, makeUlid } from '@budget/adapters-system';
+import { makeSystemClock, makeUuid } from '@budget/adapters-system';
 import { Category } from '@budget/domain';
 
 describe('createCategory', () => {
   let categoriesRepo: ReturnType<typeof makeInMemCategoriesRepo>;
   let createCategory: ReturnType<typeof makeCreateCategory>;
   let clock: ReturnType<typeof makeSystemClock>;
-  let id: ReturnType<typeof makeUlid>;
+  let id: ReturnType<typeof makeUuid>;
 
   beforeEach(() => {
     categoriesRepo = makeInMemCategoriesRepo();
     clock = makeSystemClock();
-    id = makeUlid();
+    id = makeUuid();
     createCategory = makeCreateCategory({ categoriesRepo, clock, id });
   });
 

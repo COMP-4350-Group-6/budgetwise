@@ -2,19 +2,19 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { makeCreateBudget } from './create-budget';
 import { makeDeleteBudget } from './delete-budget';
 import { makeInMemBudgetsRepo } from '@budget/adapters-persistence-local';
-import { makeSystemClock, makeUlid } from '@budget/adapters-system';
+import { makeSystemClock, makeUuid } from '@budget/adapters-system';
 
 describe('deleteBudget (focused usecase tests)', () => {
   let budgetsRepo: ReturnType<typeof makeInMemBudgetsRepo>;
   let createBudget: ReturnType<typeof makeCreateBudget>;
   let deleteBudget: ReturnType<typeof makeDeleteBudget>;
   let clock: ReturnType<typeof makeSystemClock>;
-  let id: ReturnType<typeof makeUlid>;
+  let id: ReturnType<typeof makeUuid>;
 
   beforeEach(() => {
     budgetsRepo = makeInMemBudgetsRepo();
     clock = makeSystemClock();
-    id = makeUlid();
+    id = makeUuid();
     createBudget = makeCreateBudget({ budgetsRepo, clock, id });
     deleteBudget = makeDeleteBudget({ budgetsRepo });
   });

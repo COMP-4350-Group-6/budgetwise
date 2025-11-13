@@ -3,7 +3,7 @@ import { makeListBudgets } from './list-budgets';
 import { makeCreateBudget } from './create-budget';
 import { makeUpdateBudget } from './update-budget';
 import { makeInMemBudgetsRepo } from '@budget/adapters-persistence-local';
-import { makeSystemClock, makeUlid } from '@budget/adapters-system';
+import { makeSystemClock, makeUuid } from '@budget/adapters-system';
 
 describe('listBudgets (focused usecase tests)', () => {
   let budgetsRepo: ReturnType<typeof makeInMemBudgetsRepo>;
@@ -11,12 +11,12 @@ describe('listBudgets (focused usecase tests)', () => {
   let createBudget: ReturnType<typeof makeCreateBudget>;
   let updateBudget: ReturnType<typeof makeUpdateBudget>;
   let clock: ReturnType<typeof makeSystemClock>;
-  let id: ReturnType<typeof makeUlid>;
+  let id: ReturnType<typeof makeUuid>;
 
   beforeEach(() => {
     budgetsRepo = makeInMemBudgetsRepo();
     clock = makeSystemClock();
-    id = makeUlid();
+    id = makeUuid();
     listBudgets = makeListBudgets({ budgetsRepo });
     createBudget = makeCreateBudget({ budgetsRepo, clock, id });
     updateBudget = makeUpdateBudget({ budgetsRepo, clock });
