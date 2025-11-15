@@ -54,6 +54,13 @@ export default function TransactionsPage() {
   const [customStart, setCustomStart] = useState("");
   const [customEnd, setCustomEnd] = useState("");
 
+  const parseDateInput = (value: string) => {
+    const [year, month, day] = value.split("-").map(Number);
+    const date = new Date(year, month - 1, day);
+    date.setHours(12, 0, 0, 0);
+    return date;
+  };
+
   // ===== Pagination =====
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -109,7 +116,7 @@ export default function TransactionsPage() {
         categoryId: selectedCategoryId || undefined,
         amountCents: cents,
         note: note || description || undefined,
-        occurredAt: new Date(date),
+        occurredAt: parseDateInput(date),
       });
 
       const newTx = result.transaction;
@@ -192,7 +199,7 @@ export default function TransactionsPage() {
         amountCents: cents,
         categoryId: editCategoryId,
         note: editNote,
-        occurredAt: new Date(editDate),
+        occurredAt: parseDateInput(editDate),
       });
       await loadTransactions();
       setShowEditModal(false);
@@ -313,8 +320,8 @@ export default function TransactionsPage() {
     else if (dateRange === "90") withinRange = txDate >= now - 90 * 24 * 60 * 60 * 1000;
     else if (dateRange === "custom" && customStart && customEnd) {
       withinRange =
-        txDate >= new Date(customStart).getTime() &&
-        txDate <= new Date(customEnd).getTime();
+        txDate >= parseDateInput(customStart).getTime() &&
+        txDate <= parseDateInput(customEnd).getTime();
     }
 
     return matchesCategory && matchesSearch && withinRange;
