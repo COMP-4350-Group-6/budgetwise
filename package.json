@@ -3,7 +3,7 @@
   "private": true,
   "packageManager": "pnpm@10.18.3",
   "scripts": {
-    "dev": "turbo run dev",
+    "dev": "turbo run dev --filter=api --filter=frontend --filter=frontend-vue",
     "build": "turbo run build",
     "typecheck": "turbo run typecheck",
     "lint": "turbo run lint",

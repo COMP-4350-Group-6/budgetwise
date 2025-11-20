@@ -13,7 +13,7 @@ export const app = new Hono();
 app.use(
   "*",
   cors({
-    origin: ["http://localhost:3000", "http://10.0.0.7:3000", "https://budgetwise.ca", "https://www.budgetwise.ca"],
+    origin: ["http://localhost:3000", "http://localhost:3001", "http://10.0.0.7:3000", "https://budgetwise.ca", "https://www.budgetwise.ca"],
     allowHeaders: ["Content-Type", "Authorization"],
     allowMethods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     credentials: true,
