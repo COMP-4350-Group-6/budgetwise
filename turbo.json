@@ -12,6 +12,7 @@
       "persistent": true
     },
     "build": {
+      "dependsOn": ["^build"],
       "outputs": [
         "dist/**",
         ".next/**",
@@ -27,19 +28,24 @@
       "outputs": []
     },
     "test": {
+      "dependsOn": ["^build"],
       "outputs": [
         "coverage/**"
-      ]
+      ],
+      "cache": false
     },
     "test:unit": {
       "outputs": [
         "coverage/**"
-      ]
+      ],
+      "cache": false
     },
     "test:int": {
       "outputs": [
         "coverage/**"
-      ]
+      ],
+      "cache": false,
+      "env": ["NODE_ENV", "SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY"]
     },
     "clean": {
       "outputs": []
