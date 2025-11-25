@@ -53,9 +53,6 @@
         <button @click="handleLogout" class="logout-button">
           Logout
         </button>
-        <button @click="goToLogin" class="back-button">
-          Back to Login
-        </button>
       </div>
     </div>
   </div>
@@ -134,10 +131,6 @@ const handleLogout = async () => {
     localStorage.removeItem('user');
     router.push('/login');
   }
-};
-
-const goToLogin = () => {
-  router.push('/login');
 };
 </script>
 
