@@ -13,6 +13,7 @@
 
     "baseUrl": ".",
     "paths": {
+      "@budget/domain": ["../domain/src/index.ts"],
       "@budget/domain/*": ["../domain/src/*"],
       "@budget/usecases/*": ["../usecases/src/*"],
       "@budget/usecases": ["../usecases/src/index.ts"],

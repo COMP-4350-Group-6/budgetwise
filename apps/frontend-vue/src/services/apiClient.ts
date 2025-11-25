@@ -1,6 +1,19 @@
+/// <reference types="vite/client" />
 import { supabase } from '@/lib/supabase';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8787';
+// Type-safe environment variable access
+type Env = {
+  VITE_API_URL?: string;
+  VITE_SUPABASE_URL?: string;
+  VITE_SUPABASE_ANON_KEY?: string;
+};
+
+const getEnv = (): Env => {
+  // Type assertion to access import.meta.env
+  return (import.meta as unknown as { env: Env }).env;
+};
+
+const API_BASE_URL = getEnv().VITE_API_URL || 'http://localhost:8787';
 
 export interface LoginRequest {
   email: string;
