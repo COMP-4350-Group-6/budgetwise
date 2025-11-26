@@ -1,5 +1,7 @@
 packages:
   - apps/**
+  - "!apps/**/.open-next/**"
+  - "!apps/**/.next/**"
   - frontend
   - packages/**
   - infra/**
