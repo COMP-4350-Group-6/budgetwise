@@ -6,7 +6,7 @@ import { TRANSACTION_STRINGS } from "@/constants/strings";
 
 interface CategoryBreakdownProps {
   categories: { name: string; total: number }[];
-  onCategorizeNow: () => void;
+  onCategorizeNow?: () => void;
 }
 
 /**
@@ -18,7 +18,6 @@ interface CategoryBreakdownProps {
  */
 export default function CategoryBreakdown({
   categories,
-  onCategorizeNow,
 }: CategoryBreakdownProps) {
   const hasData = categories && categories.length > 0;
 

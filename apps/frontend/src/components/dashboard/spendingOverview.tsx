@@ -35,25 +35,33 @@ export default function SpendingOverview({
   const router = useRouter();
 
   // ---------- DATE CALCULATIONS ----------
-  const now = new Date();
-  const ref = new Date(now);
-  ref.setDate(now.getDate() + weekOffset * 7);
+  const dayNames = useMemo(
+    () =>
+      Array.from({ length: 7 }, (_, i) =>
+        formatDayShort(new Date(2025, 0, i + 4)) // Sunday start reference
+      ),
+    []
+  );
 
-  const startOfWeek = new Date(ref);
-  startOfWeek.setDate(ref.getDate() - ((ref.getDay() + 6) % 7));
-  startOfWeek.setHours(0, 0, 0, 0);
+  const { startOfWeek, endOfWeek } = useMemo(() => {
+    const now = new Date();
+    const ref = new Date(now);
+    ref.setDate(now.getDate() + weekOffset * 7);
 
-  const endOfWeek = new Date(startOfWeek);
-  endOfWeek.setDate(startOfWeek.getDate() + 6);
-  endOfWeek.setHours(23, 59, 59, 999);
+    const start = new Date(ref);
+    start.setDate(ref.getDate() - ((ref.getDay() + 6) % 7));
+    start.setHours(0, 0, 0, 0);
+
+    const end = new Date(start);
+    end.setDate(start.getDate() + 6);
+    end.setHours(23, 59, 59, 999);
+
+    return { startOfWeek: start, endOfWeek: end };
+  }, [weekOffset]);
 
   const weekRangeLabel = useMemo(
     () => getWeekRangeLabel(startOfWeek, endOfWeek),
     [startOfWeek, endOfWeek]
-  );
-
-  const dayNames = Array.from({ length: 7 }, (_, i) =>
-    formatDayShort(new Date(2025, 0, i + 4)) //  Sunday start reference
   );
 
   // ---------- WEEKLY BAR CHART DATA ----------
@@ -72,7 +80,7 @@ export default function SpendingOverview({
       day,
       amount: totals.get(day) ?? 0,
     }));
-  }, [transactions, weekOffset]);
+  }, [transactions, startOfWeek, endOfWeek, dayNames]);
 
   // ---------- SELECTED DAY TRANSACTIONS ----------
   const selectedTx = useMemo(() => {
@@ -86,7 +94,7 @@ export default function SpendingOverview({
         date <= endOfWeek
       );
     });
-  }, [selectedDay, transactions, startOfWeek, endOfWeek]);
+  }, [selectedDay, transactions, startOfWeek, endOfWeek, dayNames]);
 
   // ---------- CALENDAR HEATMAP ----------
   const getHeatClass = (val: number) => {

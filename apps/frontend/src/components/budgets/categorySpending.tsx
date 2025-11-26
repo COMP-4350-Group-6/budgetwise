@@ -4,7 +4,6 @@ import React, { useState, JSX } from "react";
 import styles from "./categorySpending.module.css";
 import type { Category, BudgetDashboard } from "@/services/budgetService";
 import type { BudgetPeriod } from "@budget/schemas";
-import { budgetService } from "@/services/budgetService";
 import {
   Home,
   Car,
@@ -134,10 +133,8 @@ export default function CategorySpendingSection({
 
     const totalSpentCents = categorySummary?.totalSpentCents || 0;
     const totalBudgetCents = categorySummary?.totalBudgetCents || 0;
-    const progress =
-      totalBudgetCents > 0
-        ? Math.min((totalSpentCents / totalBudgetCents) * 100, 100)
-        : 0;
+    // Progress calculation available if needed for future UI enhancements
+    void totalBudgetCents;
 
     return (
       <div

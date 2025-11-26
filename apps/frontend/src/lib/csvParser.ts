@@ -54,11 +54,7 @@ export function parseCSV(csvText: string): CSVParseResult {
   const additionalNotesIdx = headers.findIndex(h => 
     ['notes', 'additionalnotes', 'extra'].includes(h)
   );
-  // Optional columns - app will auto-categorize, so these aren't needed
-  const categoryIdx = headers.findIndex(h => 
-    ['category', 'categoryname', 'cat'].includes(h)
-  );
-  const categoryIdIdx = headers.findIndex(h => h === 'categoryid');
+  // Optional column for budgetId (category columns ignored - app auto-categorizes)
   const budgetIdIdx = headers.findIndex(h => h === 'budgetid');
 
   if (amountIdx === -1) {
@@ -137,7 +133,7 @@ export function parseCSV(csvText: string): CSVParseResult {
         if (isNaN(occurredAt.getTime())) {
           throw new Error("Invalid date");
         }
-      } catch (e) {
+      } catch {
         errors.push({ row: i + 1, error: `Invalid date format: ${dateStr}` });
         continue;
       }

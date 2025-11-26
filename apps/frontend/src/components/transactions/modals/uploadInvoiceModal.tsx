@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 import styles from "./modals.module.css";
 import { TRANSACTION_STRINGS, GENERAL_STRINGS } from "@/constants/strings";
 
@@ -73,10 +74,13 @@ export default function UploadInvoiceModal({
             </div>
           ) : (
             <div className={styles.imagePreview}>
-              <img
+              <Image
                 src={uploadedImage}
                 alt="Invoice preview"
                 className={styles.previewImage}
+                width={300}
+                height={400}
+                style={{ objectFit: "contain" }}
               />
               <button
                 className={`${styles.btn} ${styles.btnSecondary}`}

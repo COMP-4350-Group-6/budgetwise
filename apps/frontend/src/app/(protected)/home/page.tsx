@@ -6,7 +6,6 @@ import styles from "./home.module.css";
 
 // Hooks
 import { useDashboard, useRecentTransactions } from "@/hooks/apiQueries";
-import type { TransactionDTO } from "@/services/transactionsService";
 
 // Components
 import StatCard from "@/components/dashboard/statCard";
@@ -80,16 +79,6 @@ export default function HomePage() {
       },
     };
   }, [dashboard]);
-
-  /**
-   * Determines insight messages based on current budget usage.
-   */
-  const insight =
-    stats.usage < 0.5
-      ? DASHBOARD_STRINGS.insights.good
-      : stats.usage < 0.9
-      ? DASHBOARD_STRINGS.insights.warning
-      : DASHBOARD_STRINGS.insights.bad;
 
   // Loading state
   if (loading)

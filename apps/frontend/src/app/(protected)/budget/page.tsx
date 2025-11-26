@@ -9,8 +9,7 @@ const parseDateInput = (value: string) => {
   date.setHours(12, 0, 0, 0);
   return date;
 };
-import { useRouter } from "next/navigation";
-import type { BudgetDashboard, Category } from "@/services/budgetService";
+import type { BudgetDashboard } from "@/services/budgetService";
 import CategorySpendingSection from "@/components/budgets/categorySpending";
 import SavingsGoal from "@/components/budgets/savingsGoal";
 import { CreateBudgetInput, Currency } from "@budget/schemas";
@@ -61,8 +60,6 @@ import {
 } from "lucide-react";
 
 export default function BudgetPage() {
-  const router = useRouter();
-  
   // ===== Data Loading with React Query =====
   const { data: dashboardData, isLoading: dashboardLoading } = useDashboard();
   const { data: categoriesData = [], isLoading: categoriesLoading } = useCategories(true);

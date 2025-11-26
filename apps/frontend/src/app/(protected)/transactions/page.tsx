@@ -50,7 +50,7 @@ export default function TransactionsPage() {
   // ===== Data Loading with React Query =====
   const { data: transactions = [], isLoading: transactionsLoading } = useAllTransactions(90, 500);
   const { data: categories = [], isLoading: categoriesLoading } = useCategories(true);
-  const { data: budgets = [], isLoading: budgetsLoading } = useBudgets(true);
+  const { isLoading: budgetsLoading } = useBudgets(true);
   const loading = transactionsLoading || categoriesLoading || budgetsLoading;
 
   // ===== Mutations =====
@@ -115,18 +115,16 @@ export default function TransactionsPage() {
   const [customEnd, setCustomEnd] = useState("");
 
   // ===== Summary Calculations =====
-  const now = new Date();
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-  const monthTx = useMemo(
-    () =>
-      transactions.filter(
-        (tx) =>
-          new Date(tx.occurredAt) >= startOfMonth &&
-          new Date(tx.occurredAt) <= endOfMonth
-      ),
-    [transactions]
-  );
+  const monthTx = useMemo(() => {
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    return transactions.filter(
+      (tx) =>
+        new Date(tx.occurredAt) >= startOfMonth &&
+        new Date(tx.occurredAt) <= endOfMonth
+    );
+  }, [transactions]);
 
   const totalTransactions = monthTx.length;
   const totalSpent = monthTx.reduce(

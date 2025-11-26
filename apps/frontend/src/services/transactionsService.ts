@@ -1,5 +1,4 @@
 import { apiFetch } from "../lib/apiClient";
-import { authClient } from "../lib/authContainer";
 
 export interface AddTransactionInput {
   budgetId?: string;
@@ -38,12 +37,6 @@ export interface ParsedInvoiceData {
   suggestedCategory?: string;
   description?: string; // Human-readable description for the transaction note
   confidence: number;
-}
-
-function ulid(): string {
-  // Simple ULID-ish ID generator (not fully spec-compliant, but unique enough for client gen)
-  // If you prefer, swap this to a proper ULID generator.
-  return ("01" + Date.now().toString(36) + Math.random().toString(36).slice(2, 18)).slice(0, 26).toUpperCase();
 }
 
 export const transactionsService = {
