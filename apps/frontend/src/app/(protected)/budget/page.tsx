@@ -80,7 +80,7 @@ export default function BudgetPage() {
     }
   }, [categoriesData.length, categoriesLoading, seedCategoriesMutation]);
 
-  // Process dashboard data with monthly transactions
+  // Process dashboard data with monthly transactions for category-level spending
   const dashboard = useMemo(() => {
     if (!dashboardData) return null;
 
@@ -88,22 +88,19 @@ export default function BudgetPage() {
     const month = now.getMonth();
     const year = now.getFullYear();
 
+    // Filter to current month's transactions for category breakdown
     const monthlyTx = transactions.filter((t) => {
       const d = new Date(t.occurredAt);
       return d.getMonth() === month && d.getFullYear() === year;
     });
 
-    const totalSpentCents = monthlyTx.reduce(
-      (sum, t) => sum + t.amountCents,
-      0
-    );
-
+    // Build category spending map for UI updates
     const categorySpentMap: Record<string, number> = {};
     for (const t of monthlyTx) {
       const catId = t.categoryId;
       if (!catId) continue;
       categorySpentMap[catId] =
-        (categorySpentMap[catId] || 0) + t.amountCents;
+        (categorySpentMap[catId] || 0) + Math.abs(t.amountCents);
     }
 
     const updatedCats = dashboardData.categories.map((c) => {
@@ -123,10 +120,10 @@ export default function BudgetPage() {
       };
     });
 
+    // Use the API's totalSpentCents for consistency with the home dashboard
     return {
       ...dashboardData,
       categories: updatedCats,
-      totalSpentCents,
     };
   }, [dashboardData, transactions]);
 
