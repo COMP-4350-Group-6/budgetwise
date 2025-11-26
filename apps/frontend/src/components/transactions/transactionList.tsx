@@ -6,6 +6,7 @@ import { Pencil } from "lucide-react";
 import type { TransactionDTO } from "@/services/transactionsService";
 import type { Category } from "@/services/budgetService";
 import { TRANSACTION_STRINGS, GENERAL_STRINGS } from "@/constants/strings";
+import { parseLocalDate } from "@/utils/dateHelpers";
 
 interface TransactionListProps {
   transactions: TransactionDTO[];
@@ -71,7 +72,7 @@ export default function TransactionList({
                         : getCategoryLabel(tx.categoryId)}
                     </span>
                     <span className={styles.transactionDate}>
-                      {new Date(tx.occurredAt).toLocaleDateString()}
+                      {parseLocalDate(tx.occurredAt).toLocaleDateString()}
                     </span>
                   </div>
                 </div>

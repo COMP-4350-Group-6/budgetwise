@@ -38,3 +38,20 @@ export const formatLocalYMD = (date: Date): string => {
   const d = String(date.getDate()).padStart(2, "0");
   return `${y}-${m}-${d}`;
 };
+
+/**
+ * Parses an ISO date string (e.g., "2025-01-15T00:00:00.000Z") into a local Date.
+ * Extracts just the date portion and creates a local date at noon to avoid
+ * timezone-related day shifts that occur when the time is midnight UTC.
+ * 
+ * This is essential for displaying transaction dates correctly in the user's
+ * local timezone, preventing dates from appearing as the previous day.
+ */
+export const parseLocalDate = (isoString: string): Date => {
+  // Extract just the date portion (YYYY-MM-DD) from the ISO string
+  const datePart = isoString.split("T")[0];
+  const [year, month, day] = datePart.split("-").map(Number);
+  // Create a local date at noon to avoid any timezone edge cases
+  const date = new Date(year, month - 1, day, 12, 0, 0, 0);
+  return date;
+};

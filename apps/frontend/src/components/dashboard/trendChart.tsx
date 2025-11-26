@@ -13,7 +13,7 @@ import {
 import type { TransactionDTO } from "@/services/transactionsService";
 
 // Utilities
-import { formatLocalYMD } from "@/utils/dateHelpers";
+import { formatLocalYMD, parseLocalDate } from "@/utils/dateHelpers";
 import { TRANSACTION_STRINGS } from "@/constants/strings/transactionStrings";
 
 /**
@@ -42,8 +42,9 @@ export default function TrendChart({
     const totalsByDay = new Map<string, number>();
 
     // Aggregate transactions by local date
+    // Use parseLocalDate to avoid timezone-related day shifts
     for (const tx of transactions) {
-      const dayKey = formatLocalYMD(new Date(tx.occurredAt));
+      const dayKey = formatLocalYMD(parseLocalDate(tx.occurredAt));
       const previous = totalsByDay.get(dayKey) ?? 0;
       totalsByDay.set(dayKey, previous + Math.abs(tx.amountCents) / 100);
     }

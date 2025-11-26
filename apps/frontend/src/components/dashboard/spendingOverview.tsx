@@ -16,7 +16,7 @@ import { useRouter } from "next/navigation";
 
 // Constants & Utils
 import { TRANSACTION_STRINGS } from "@/constants/strings/transactionStrings";
-import { formatDayShort, getWeekRangeLabel, formatMonthLong } from "@/utils/dateHelpers";
+import { formatDayShort, getWeekRangeLabel, formatMonthLong, parseLocalDate } from "@/utils/dateHelpers";
 
 /**
  * Displays spending data in two modes:
@@ -60,7 +60,8 @@ export default function SpendingOverview({
   const weeklyData = useMemo(() => {
     const totals = new Map<string, number>();
     for (const tx of transactions) {
-      const date = new Date(tx.occurredAt);
+      // Use parseLocalDate to avoid timezone-related day shifts
+      const date = parseLocalDate(tx.occurredAt);
       if (date >= startOfWeek && date <= endOfWeek) {
         const day = dayNames[date.getDay()];
         const prev = totals.get(day) ?? 0;
@@ -76,12 +77,15 @@ export default function SpendingOverview({
   // ---------- SELECTED DAY TRANSACTIONS ----------
   const selectedTx = useMemo(() => {
     if (!selectedDay) return [];
-    return transactions.filter(
-      (tx) =>
-        dayNames[new Date(tx.occurredAt).getDay()] === selectedDay &&
-        new Date(tx.occurredAt) >= startOfWeek &&
-        new Date(tx.occurredAt) <= endOfWeek
-    );
+    return transactions.filter((tx) => {
+      // Use parseLocalDate to avoid timezone-related day shifts
+      const date = parseLocalDate(tx.occurredAt);
+      return (
+        dayNames[date.getDay()] === selectedDay &&
+        date >= startOfWeek &&
+        date <= endOfWeek
+      );
+    });
   }, [selectedDay, transactions, startOfWeek, endOfWeek]);
 
   // ---------- CALENDAR HEATMAP ----------
@@ -108,7 +112,8 @@ export default function SpendingOverview({
 
     const totalsByDay = new Map<number, number>();
     for (const tx of transactions) {
-      const d = new Date(tx.occurredAt);
+      // Use parseLocalDate to avoid timezone-related day shifts
+      const d = parseLocalDate(tx.occurredAt);
       if (d.getMonth() === month && d.getFullYear() === year) {
         const key = d.getDate();
         const prev = totalsByDay.get(key) ?? 0;
