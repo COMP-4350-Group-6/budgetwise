@@ -2,6 +2,13 @@
 
 import React, { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+
+const parseDateInput = (value: string) => {
+  const [year, month, day] = value.split("-").map(Number);
+  const date = new Date(year, month - 1, day);
+  date.setHours(12, 0, 0, 0);
+  return date;
+};
 import { Camera, Download, Plus, Upload } from "lucide-react";
 import styles from "./transactions.module.css";
 
@@ -163,7 +170,7 @@ export default function TransactionsPage() {
         categoryId: selectedCategoryId || undefined,
         amountCents: cents,
         note: note || description,
-        occurredAt: new Date(date),
+        occurredAt: parseDateInput(date),
       });
 
       const newTx = result.transaction;
@@ -230,7 +237,7 @@ export default function TransactionsPage() {
           amountCents: editTx.amountCents < 0 ? -cents : cents,
           categoryId: editCategoryId || undefined,
           note: editNote,
-          occurredAt: new Date(editDate),
+          occurredAt: parseDateInput(editDate),
         },
       });
       setShowEditModal(false);
@@ -382,8 +389,8 @@ export default function TransactionsPage() {
             withinRange = txDate >= nowMs - 90 * 86400000;
           else if (dateRange === "custom" && customStart && customEnd) {
             withinRange =
-              txDate >= new Date(customStart).getTime() &&
-              txDate <= new Date(customEnd).getTime();
+              txDate >= parseDateInput(customStart).getTime() &&
+              txDate <= parseDateInput(customEnd).getTime();
           }
 
           return matchesCategory && matchesSearch && withinRange;

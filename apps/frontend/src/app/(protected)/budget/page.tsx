@@ -2,6 +2,13 @@
 
 import React, { useState, useMemo, useEffect } from "react";
 import styles from "./budget.module.css";
+
+const parseDateInput = (value: string) => {
+  const [year, month, day] = value.split("-").map(Number);
+  const date = new Date(year, month - 1, day);
+  date.setHours(12, 0, 0, 0);
+  return date;
+};
 import { useRouter } from "next/navigation";
 import type { BudgetDashboard, Category } from "@/services/budgetService";
 import CategorySpendingSection from "@/components/budgets/categorySpending";
@@ -293,7 +300,7 @@ export default function BudgetPage() {
           amountCents: Math.round(parseFloat(formData.amount) * 100),
           currency: formData.currency as Currency,
           period: formData.period,
-          startDate: new Date(formData.startDate),
+          startDate: parseDateInput(formData.startDate),
           alertThreshold: parseInt(formData.alertThreshold),
         };
         await updateBudgetMutation.mutateAsync({ id: editingBudgetId, updates: updateData });
@@ -305,7 +312,7 @@ export default function BudgetPage() {
           amountCents: Math.round(parseFloat(formData.amount) * 100),
           currency: formData.currency as Currency,
           period: formData.period,
-          startDate: new Date(formData.startDate),
+          startDate: parseDateInput(formData.startDate),
           alertThreshold: parseInt(formData.alertThreshold),
         };
         await createBudgetMutation.mutateAsync(budgetData);
