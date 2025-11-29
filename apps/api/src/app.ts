@@ -13,7 +13,28 @@ export const app = new Hono();
 app.use(
   "*",
   cors({
-    origin: ["http://localhost:3000", "http://10.0.0.7:3000", "https://budgetwise.ca", "https://www.budgetwise.ca"],
+    origin: (origin) => {
+      // Allow known origins
+      const allowedOrigins = [
+        "http://localhost:3000",
+        "http://10.0.0.7:3000",
+        "https://budgetwise.ca",
+        "https://www.budgetwise.ca"
+      ];
+      
+      // If origin is in allowed list, return it
+      if (origin && allowedOrigins.includes(origin)) {
+        return origin;
+      }
+      
+      // Allow requests without Origin header (e.g., Postman, CI tests)
+      if (!origin) {
+        return "*";
+      }
+      
+      // Reject other origins
+      return "";
+    },
     allowHeaders: ["Content-Type", "Authorization"],
     allowMethods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     credentials: true,
