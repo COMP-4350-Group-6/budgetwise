@@ -1,24 +1,9 @@
 import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import { LoginInput, SignupInput, RefreshTokenInput, ForgotPasswordInput, ResetPasswordInput } from "@budget/schemas";
-import { container } from "../container";
-import { User } from "@budget/domain/user";
-import { JWTPayload } from "jose";
-import { authMiddleware } from "../middleware/auth";
-import type { Context } from "hono";
 
-type Variables = {
-  userId: string;
-  jwtPayload: JWTPayload;
-};
 
-type Env = {
-  SUPABASE_URL?: string;
-  SUPABASE_JWKS_URL?: string;
-  SUPABASE_LOCAL_JWT_SECRET?: string;
-};
-
-export const auth = new Hono<{ Variables: Variables; Bindings: Env }>();
+export const auth = new Hono();
 
 // POST /auth/signup
 auth.get("/auth", (c) => c.json({ message: "Auth API is running" }));
@@ -98,63 +83,23 @@ auth.post(
 );
 
 // GET /auth/me (requires authentication)
-auth.get("/auth/me", authMiddleware, async (c: Context<{ Variables: Variables; Bindings: Env }>) => {
-  const userId = c.get("userId");
-  const jwtPayload = c.get("jwtPayload");
-  
-  if (!userId) {
+auth.get("/auth/me", async (c) => {
+  // TODO: Get user from auth middleware
+  // const userId = c.get("userId");
+  // const getUserUseCase = container.getGetUserUseCase();
+  // const user = await getUserUseCase.execute(userId);
+  const header = c.req.header("Authorization");
+  if (!header || !header.startsWith("Bearer ")) {
     return c.json({ error: "Unauthorized" }, 401);
   }
-
-  const usersRepo = container.repos.usersRepo;
-  if (!usersRepo) {
-    return c.json({ error: "User repository not available" }, 500);
-  }
-
-  try {
-    // Check if user exists in database
-    let user = await usersRepo.getById(userId);
-    
-    // If user doesn't exist, create them from JWT payload
-    if (!user) {
-      // Extract user metadata from JWT token
-      const email = (jwtPayload.email as string) || "";
-      const userMetadata = (jwtPayload.user_metadata as Record<string, any>) || {};
-      const name = userMetadata.name || email.split("@")[0] || "User";
-      const defaultCurrency = userMetadata.defaultCurrency || "USD";
-      
-      if (!email) {
-        return c.json({ error: "Email not found in token" }, 400);
-      }
-
-      // Create user in database
-      const now = new Date();
-      const newUser = new User({
-        id: userId,
-        email,
-        name,
-        defaultCurrency,
-        createdAt: now,
-        updatedAt: now,
-      });
-
-      await usersRepo.create(newUser);
-      user = newUser;
-    }
-
-    return c.json({
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      defaultCurrency: user.defaultCurrency,
-      createdAt: user.props.createdAt.toISOString(),
-    });
-  } catch (error) {
-    console.error("Error in /auth/me:", error);
-    return c.json({ 
-      error: error instanceof Error ? error.message : "Failed to get user" 
-    }, 500);
-  }
+  
+  return c.json({
+    id: "user-123",
+    email: "user@example.com",
+    name: "John Doe",
+    defaultCurrency: "USD",
+    createdAt: new Date().toISOString(),
+  });
 });
 
 // POST /auth/forgot-password

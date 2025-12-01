@@ -9,16 +9,7 @@ import { budgets } from "./routes/budgets";
 import { authMiddleware } from "./middleware/auth";
 /// <reference types="@cloudflare/workers-types" />
 
-type Env = {
-  SUPABASE_URL?: string;
-  SUPABASE_JWKS_URL?: string;
-  SUPABASE_JWT_SECRET?: string;
-  SUPABASE_LOCAL_JWT_SECRET?: string;
-  SUPABASE_SERVICE_ROLE_KEY?: string;
-  OPENROUTER_API_KEY?: string;
-};
-
-export const app = new Hono<{ Bindings: Env }>();
+export const app = new Hono();
 app.use(
   "*",
   cors({
@@ -26,7 +17,6 @@ app.use(
       // Allow known origins
       const allowedOrigins = [
         "http://localhost:3000",
-        "http://localhost:3001",
         "http://10.0.0.7:3000",
         "https://budgetwise.ca",
         "https://www.budgetwise.ca"
@@ -53,6 +43,7 @@ app.use(
 app.use("*", errors);
 app.route("/", health);
 app.route("/", auth);
+app.use("/auth/me", authMiddleware);
 app.route("/", transactions);
 app.route("/", categories);
 app.route("/", budgets);
