@@ -88,11 +88,7 @@ export function createBudgetRoutes(deps: BudgetDeps) {
         const budget = await deps.updateBudget(
           id,
           userId,
-          {
-            ...updates,
-            endDate: updates.endDate ?? undefined,
-            alertThreshold: updates.alertThreshold ?? undefined,
-          }
+          updates
         );
         return c.json({ budget });
       } catch (err) {

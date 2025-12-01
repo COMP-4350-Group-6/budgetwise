@@ -61,7 +61,7 @@ export function makeBulkImportTransactions(deps: {
             const result = await autoCategorize(tx.props.id, userId);
             if (result) {
               // Fetch updated transaction after categorization
-              const updated = await deps.txRepo.findById(tx.props.id);
+              const updated = await deps.txRepo.getById(tx.props.id);
               if (updated) {
                 finalTx = updated;
               }

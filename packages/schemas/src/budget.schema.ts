@@ -19,8 +19,8 @@ export const CreateBudgetInputSchema = z.object({
   currency: CurrencySchema,
   period: BudgetPeriodSchema,
   startDate: z.coerce.date(),
-  endDate: z.coerce.date().nullable().optional(),
-  alertThreshold: z.number().int().min(0).max(100).nullable().optional(),
+  endDate: z.coerce.date().optional(),
+  alertThreshold: z.number().int().min(0).max(100).optional(),
   isActive: z.boolean().default(true).optional(),
 });
 
