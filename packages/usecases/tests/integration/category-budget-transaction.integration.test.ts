@@ -52,7 +52,7 @@ describe('Usecases Integration: Category + Budget + Transaction -> Dashboard', (
     // 2) Budget under that category
     const budget = await createBudget({
       userId,
-      categoryId: category.props.id,
+      categoryId: category.id,
       name: 'Groceries',
       amountCents: 50_000,
       currency: 'USD',
@@ -64,8 +64,8 @@ describe('Usecases Integration: Category + Budget + Transaction -> Dashboard', (
     // 3) Add transaction to the budget (spend 42,500)
     await addTransaction({
       userId,
-      budgetId: budget.props.id,
-      categoryId: category.props.id,
+      budgetId: budget.id,
+      categoryId: category.id,
       amountCents: 42_500,
       occurredAt: new Date('2025-01-15'),
     });
@@ -74,14 +74,14 @@ describe('Usecases Integration: Category + Budget + Transaction -> Dashboard', (
     const dashboard = await getBudgetDashboard(userId);
 
     // Find our category summary
-    const cat = dashboard.categories.find(c => c.categoryId === category.props.id);
+    const cat = dashboard.categories.find(c => c.categoryId === category.id);
     expect(cat).toBeDefined();
     expect(cat!.totalBudgetCents).toBe(50_000);
     expect(cat!.totalSpentCents).toBe(42_500);
     expect(cat!.totalRemainingCents).toBe(7_500);
 
     // Budget-level details also reflect spend
-    const status = cat!.budgets.find(b => b.budget.id === budget.props.id);
+    const status = cat!.budgets.find(b => b.budget.id === budget.id);
     expect(status).toBeDefined();
     expect(status!.spentCents).toBe(42_500);
     expect(status!.remainingCents).toBe(7_500);
@@ -103,7 +103,7 @@ describe('Usecases Integration: Category + Budget + Transaction -> Dashboard', (
 
     const budget = await createBudget({
       userId,
-      categoryId: category.props.id,
+      categoryId: category.id,
       name: 'Flights',
       amountCents: 100_000,
       currency: 'USD',
@@ -114,15 +114,15 @@ describe('Usecases Integration: Category + Budget + Transaction -> Dashboard', (
 
     const tx = await addTransaction({
       userId,
-      budgetId: budget.props.id,
-      categoryId: category.props.id,
+      budgetId: budget.id,
+      categoryId: category.id,
       amountCents: 50_000,
       note: 'Initial fare',
       occurredAt: new Date('2025-01-10'),
     });
 
     const updated = await updateTransaction({
-      transactionId: tx.props.id,
+      transactionId: tx.id,
       userId,
       amountCents: 60_000,
       note: 'Fare with baggage',
@@ -130,16 +130,16 @@ describe('Usecases Integration: Category + Budget + Transaction -> Dashboard', (
     });
 
     expect(updated).not.toBeNull();
-    expect(updated!.props.amountCents).toBe(60_000);
-    expect(updated!.props.note).toBe('Fare with baggage');
-    expect(updated!.props.occurredAt.toISOString()).toBe('2025-01-12T00:00:00.000Z');
+    expect(updated!.amountCents).toBe(60_000);
+    expect(updated!.note).toBe('Fare with baggage');
+    expect(updated!.occurredAt.toISOString()).toBe('2025-01-12T00:00:00.000Z');
 
     const dashboard = await getBudgetDashboard(userId);
-    const cat = dashboard.categories.find(c => c.categoryId === category.props.id);
+    const cat = dashboard.categories.find(c => c.categoryId === category.id);
     expect(cat).toBeDefined();
     expect(cat!.totalSpentCents).toBe(60_000);
 
-    const status = cat!.budgets.find(b => b.budget.id === budget.props.id);
+    const status = cat!.budgets.find(b => b.budget.id === budget.id);
     expect(status).toBeDefined();
     expect(status!.spentCents).toBe(60_000);
   });
@@ -153,7 +153,7 @@ describe('Usecases Integration: Category + Budget + Transaction -> Dashboard', (
 
     const budget = await createBudget({
       userId,
-      categoryId: category.props.id,
+      categoryId: category.id,
       name: 'Restaurants',
       amountCents: 80_000,
       currency: 'USD',
@@ -164,31 +164,31 @@ describe('Usecases Integration: Category + Budget + Transaction -> Dashboard', (
 
     const tx = await addTransaction({
       userId,
-      budgetId: budget.props.id,
-      categoryId: category.props.id,
+      budgetId: budget.id,
+      categoryId: category.id,
       amountCents: 30_000,
       note: 'Dinner out',
       occurredAt: new Date('2025-01-05'),
     });
 
     const initialDashboard = await getBudgetDashboard(userId);
-    const initialCat = initialDashboard.categories.find(c => c.categoryId === category.props.id);
+    const initialCat = initialDashboard.categories.find(c => c.categoryId === category.id);
     expect(initialCat).toBeDefined();
     expect(initialCat!.totalSpentCents).toBe(30_000);
 
     const deleted = await deleteTransaction({
-      transactionId: tx.props.id,
+      transactionId: tx.id,
       userId,
     });
 
     expect(deleted).toBe(true);
 
     const dashboard = await getBudgetDashboard(userId);
-    const cat = dashboard.categories.find(c => c.categoryId === category.props.id);
+    const cat = dashboard.categories.find(c => c.categoryId === category.id);
     expect(cat).toBeDefined();
     expect(cat!.totalSpentCents).toBe(0);
 
-    const status = cat!.budgets.find(b => b.budget.id === budget.props.id);
+    const status = cat!.budgets.find(b => b.budget.id === budget.id);
     expect(status).toBeDefined();
     expect(status!.spentCents).toBe(0);
   });

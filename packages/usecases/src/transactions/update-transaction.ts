@@ -1,6 +1,8 @@
 import { Transaction } from "@budget/domain/transaction";
 import type { TransactionsRepo } from "@budget/ports";
 import type { ClockPort } from "@budget/ports";
+import type { TransactionDTO } from "@budget/schemas";
+import { toTransactionDTO } from "../presenters";
 
 export function makeUpdateTransaction(deps: {
   clock: ClockPort;
@@ -14,7 +16,7 @@ export function makeUpdateTransaction(deps: {
     amountCents?: number;
     note?: string;
     occurredAt?: Date;
-  }) => {
+  }): Promise<TransactionDTO | null> => {
     const existing = await deps.txRepo.getById(input.transactionId);
     if (!existing || existing.props.userId !== input.userId) {
       return null;
@@ -33,7 +35,7 @@ export function makeUpdateTransaction(deps: {
     });
 
     await deps.txRepo.update(updated);
-    return updated;
+    return toTransactionDTO(updated);
   };
 }
 

@@ -2,7 +2,6 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { makeCreateBudget } from './create-budget';
 import { makeInMemBudgetsRepo } from '@budget/adapters-persistence-local';
 import { makeSystemClock, makeUlid } from '@budget/adapters-system';
-import { Budget } from '@budget/domain';
 
 describe('createBudget', () => {
   let budgetsRepo: ReturnType<typeof makeInMemBudgetsRepo>;
@@ -30,17 +29,17 @@ describe('createBudget', () => {
 
     const budget = await createBudget(input);
 
-    expect(budget).toBeInstanceOf(Budget);
-    expect(budget.props.userId).toBe(input.userId);
-    expect(budget.props.categoryId).toBe(input.categoryId);
-    expect(budget.props.name).toBe(input.name);
-    expect(budget.props.amountCents).toBe(input.amountCents);
-    expect(budget.props.currency).toBe(input.currency);
-    expect(budget.props.period).toBe(input.period);
-    expect(budget.props.isActive).toBe(true);
-    expect(budget.props.id).toBeDefined();
-    expect(budget.props.createdAt).toBeInstanceOf(Date);
-    expect(budget.props.updatedAt).toBeInstanceOf(Date);
+    expect(budget).toHaveProperty('id');
+    expect(budget.userId).toBe(input.userId);
+    expect(budget.categoryId).toBe(input.categoryId);
+    expect(budget.name).toBe(input.name);
+    expect(budget.amountCents).toBe(input.amountCents);
+    expect(budget.currency).toBe(input.currency);
+    expect(budget.period).toBe(input.period);
+    expect(budget.isActive).toBe(true);
+    expect(budget.id).toBeDefined();
+    expect(budget.createdAt).toBeInstanceOf(Date);
+    expect(budget.updatedAt).toBeInstanceOf(Date);
   });
 
   it('should create a budget with optional alert threshold', async () => {
@@ -57,7 +56,7 @@ describe('createBudget', () => {
 
     const budget = await createBudget(input);
 
-    expect(budget.props.alertThreshold).toBe(80);
+    expect(budget.alertThreshold).toBe(80);
   });
 
   it('should create a budget with end date', async () => {
@@ -77,7 +76,7 @@ describe('createBudget', () => {
 
     const budget = await createBudget(input);
 
-    expect(budget.props.endDate).toEqual(endDate);
+    expect(budget.endDate).toEqual(endDate);
   });
 
   it('should persist the budget to the repository', async () => {
@@ -92,10 +91,10 @@ describe('createBudget', () => {
     };
 
     const budget = await createBudget(input);
-    const retrieved = await budgetsRepo.getById(budget.props.id);
+    const retrieved = await budgetsRepo.getById(budget.id);
 
     expect(retrieved).toBeDefined();
-    expect(retrieved?.props.id).toBe(budget.props.id);
+    expect(retrieved?.props.id).toBe(budget.id);
     expect(retrieved?.props.name).toBe(input.name);
   });
 
@@ -120,7 +119,7 @@ describe('createBudget', () => {
       startDate: new Date('2025-01-01'),
     });
 
-    expect(budget1.props.id).not.toBe(budget2.props.id);
-    expect(budget1.props.categoryId).not.toBe(budget2.props.categoryId);
+    expect(budget1.id).not.toBe(budget2.id);
+    expect(budget1.categoryId).not.toBe(budget2.categoryId);
   });
 });

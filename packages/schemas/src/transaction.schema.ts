@@ -1,20 +1,12 @@
 import { z } from "zod";
 
-export const TransactionRowSchema = z.object({
-  id: z.uuid(),
-  user_id: z.uuid(),
-  budget_id: z.uuid().nullable(),
-  category_id: z.uuid().nullable(),
-  amount_cents: z.number().int(),
-  note: z.string().max(280).nullable(),
-  occurred_at: z.coerce.date(),
-  created_at: z.coerce.date(),
-  updated_at: z.coerce.date(),
-});
+// ============================================================================
+// API DTO Schema (camelCase, for JSON responses)
+// ============================================================================
 
-export const TransactionDTO = z.object({
-  id: z.uuid(),
-  userId: z.uuid(),
+export const TransactionDTOSchema = z.object({
+  id: z.string(),
+  userId: z.string(),
   budgetId: z.string().nullable(),
   categoryId: z.string().nullable(),
   amountCents: z.number().int(),
@@ -24,5 +16,47 @@ export const TransactionDTO = z.object({
   updatedAt: z.coerce.date(),
 });
 
-export type TransactionRow = z.infer<typeof TransactionRowSchema>;
-export type TransactionDTO = z.infer<typeof TransactionDTO>;
+// ============================================================================
+// Input Schemas (for API validation)
+// ============================================================================
+
+export const CreateTransactionInputSchema = z.object({
+  budgetId: z.string().optional(),
+  categoryId: z.string().optional(),
+  amountCents: z.number().int(),
+  note: z.string().max(280).optional(),
+  occurredAt: z.coerce.date(),
+});
+
+export const UpdateTransactionInputSchema = z.object({
+  budgetId: z.string().optional(),
+  categoryId: z.string().optional(),
+  amountCents: z.number().int().optional(),
+  note: z.string().max(280).optional(),
+  occurredAt: z.coerce.date().optional(),
+});
+
+// ============================================================================
+// AI Service Result Schemas
+// ============================================================================
+
+export const CategorizationResultSchema = z.object({
+  categoryId: z.string(),
+  reasoning: z.string(),
+});
+
+export const ParsedInvoiceSchema = z.object({
+  merchant: z.string(),
+  total: z.number(),
+  confidence: z.number().min(0).max(1),
+});
+
+// ============================================================================
+// Exported Types
+// ============================================================================
+
+export type TransactionDTO = z.infer<typeof TransactionDTOSchema>;
+export type CreateTransactionInput = z.infer<typeof CreateTransactionInputSchema>;
+export type UpdateTransactionInput = z.infer<typeof UpdateTransactionInputSchema>;
+export type CategorizationResult = z.infer<typeof CategorizationResultSchema>;
+export type ParsedInvoice = z.infer<typeof ParsedInvoiceSchema>;

@@ -49,7 +49,7 @@ describe('listBudgets (focused usecase tests)', () => {
       startDate: new Date('2025-01-01'),
     });
     // Make b2 inactive
-    await updateBudget(b2.props.id, 'user-1', { isActive: false });
+    await updateBudget(b2.id, 'user-1', { isActive: false });
 
     // Another user's budget should not appear
     await createBudget({
@@ -64,9 +64,9 @@ describe('listBudgets (focused usecase tests)', () => {
 
     const result = await listBudgets('user-1', false);
     expect(result).toHaveLength(2);
-    const ids = result.map(b => b.props.id);
-    expect(ids).toContain(b1.props.id);
-    expect(ids).toContain(b2.props.id);
+    const ids = result.map(b => b.id);
+    expect(ids).toContain(b1.id);
+    expect(ids).toContain(b2.id);
   });
 
   it('lists only active budgets when activeOnly=true', async () => {
@@ -88,12 +88,12 @@ describe('listBudgets (focused usecase tests)', () => {
       period: 'MONTHLY',
       startDate: new Date('2025-01-01'),
     });
-    await updateBudget(b2.props.id, 'user-1', { isActive: false });
+    await updateBudget(b2.id, 'user-1', { isActive: false });
 
     const result = await listBudgets('user-1', true);
     expect(result).toHaveLength(1);
-    expect(result[0].props.id).toBe(b1.props.id);
-    expect(result[0].props.isActive).toBe(true);
+    expect(result[0].id).toBe(b1.id);
+    expect(result[0].isActive).toBe(true);
   });
 
   it('does not include budgets from other users', async () => {
@@ -118,7 +118,7 @@ describe('listBudgets (focused usecase tests)', () => {
 
     const result = await listBudgets('user-2', false);
     expect(result).toHaveLength(1);
-    expect(result[0].props.userId).toBe('user-2');
-    expect(result[0].props.id).toBe(u2.props.id);
+    expect(result[0].userId).toBe('user-2');
+    expect(result[0].id).toBe(u2.id);
   });
 });

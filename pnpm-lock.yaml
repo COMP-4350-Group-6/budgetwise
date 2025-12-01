@@ -38,6 +38,9 @@ importers:
       '@budget/composition-cloudflare-worker':
         specifier: workspace:*
         version: link:../../packages/composition/cloudflare-worker
+      '@budget/domain':
+        specifier: workspace:*
+        version: link:../../packages/domain
       '@budget/schemas':
         specifier: workspace:*
         version: link:../../packages/schemas

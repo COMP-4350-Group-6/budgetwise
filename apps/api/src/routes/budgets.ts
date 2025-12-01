@@ -1,191 +1,118 @@
 import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import { CreateBudgetInputSchema, UpdateBudgetInputSchema } from "@budget/schemas";
-import { container } from "../container";
-import { authMiddleware } from "../middleware/auth";
+import type { BudgetDeps } from "../types";
 
-type Variables = {
-  userId: string;
-};
+/**
+ * Creates budget routes with explicit dependencies.
+ * Routes only know about the specific functions they need, not the entire container.
+ * Usecases return DTOs directly, so routes just pass them through.
+ * 
+ * Note: Auth middleware is applied in app.ts (composition root), not here.
+ */
+export function createBudgetRoutes(deps: BudgetDeps) {
+  const router = new Hono<{ Variables: { userId: string } }>();
 
-export const budgets = new Hono<{ Variables: Variables }>();
-budgets.use("*", authMiddleware);
+  // GET /budgets/dashboard
+  router.get("/budgets/dashboard", async (c) => {
+    const userId = c.get("userId");
 
-// GET /budgets/dashboard
-budgets.get("/budgets/dashboard", async (c) => {
-  const userId = c.get("userId") as string;
-  const { usecases } = container;
-  
-  const dashboard = await usecases.getBudgetDashboard(userId);
-  
-  // Serialize domain objects into plain JSON expected by clients/tests
-  const serializable = {
-    categories: dashboard.categories.map((cat) => ({
-      categoryId: cat.categoryId,
-      categoryName: cat.categoryName,
-      categoryIcon: cat.categoryIcon,
-      categoryColor: cat.categoryColor,
-      budgets: cat.budgets.map((b) => ({
-        budget: {
-          id: b.budget.id,
-          amountCents: b.budget.props.amountCents,
-        },
-        spentCents: b.spentCents,
-      })),
-      totalBudgetCents: cat.totalBudgetCents,
-      totalSpentCents: cat.totalSpentCents,
-      totalRemainingCents: cat.totalRemainingCents,
-      overallPercentageUsed: cat.overallPercentageUsed,
-      hasOverBudget: cat.hasOverBudget,
-    })),
-    totalBudgetCents: dashboard.totalBudgetCents,
-    totalSpentCents: dashboard.totalSpentCents,
-    overBudgetCount: dashboard.overBudgetCount,
-    alertCount: dashboard.alertCount,
-  };
+    const dashboard = await deps.getBudgetDashboard(userId);
 
-  return c.json({ dashboard: serializable });
-});
-
-// GET /budgets/:id/status
-budgets.get("/budgets/:id/status", async (c) => {
-  const userId = c.get("userId") as string;
-  const id = c.req.param("id");
-  const { usecases } = container;
-  
-  const status = await usecases.getBudgetStatus(id, userId);
-  
-  if (!status) {
-    return c.json({ error: "Budget not found" }, 404);
-  }
-  
-  // Serialize Budget object
-  const serializedStatus = {
-    ...status,
-    budget: {
-      ...status.budget.props,
-      startDate: status.budget.props.startDate.toISOString(),
-      endDate: status.budget.props.endDate?.toISOString(),
-      createdAt: status.budget.props.createdAt.toISOString(),
-      updatedAt: status.budget.props.updatedAt.toISOString(),
-    }
-  };
-  
-  return c.json({ status: serializedStatus });
-});
-
-// GET /budgets
-budgets.get("/budgets", async (c) => {
-  const userId = c.get("userId") as string;
-  const activeOnly = c.req.query("active") === "true";
-  const { usecases } = container;
-  
-  const budgetList = await usecases.listBudgets(userId, activeOnly);
-  
-  return c.json({
-    budgets: budgetList.map(b => ({
-      ...b.props,
-      startDate: b.props.startDate.toISOString(),
-      endDate: b.props.endDate?.toISOString(),
-      createdAt: b.props.createdAt.toISOString(),
-      updatedAt: b.props.updatedAt.toISOString(),
-    }))
+    return c.json({ dashboard });
   });
-});
 
-// POST /budgets
-budgets.post(
-  "/budgets",
-  async (c) => {
-    const userId = c.get("userId") as string;
-    // Perform validation here so we can inspect validation errors clearly in tests/logs
-    const raw = await c.req.json().catch(() => ({}));
-    const parsed = CreateBudgetInputSchema.safeParse(raw as any);
-    if (!parsed.success) {
-      console.error('CreateBudget validation failed:', parsed.error.format());
-      return c.json({ error: 'Invalid request', details: parsed.error.flatten() }, 400);
-    }
-    const input = parsed.data;
-    const { usecases, repos } = container;
-    
-    try {
-      // Validate category
-      const category = await repos.categoriesRepo.getById(input.categoryId);
-      if (!category || category.props.userId !== userId) {
-        return c.json({ error: "Invalid category" }, 400);
-      }
-      
-      const budget = await usecases.createBudget({
-        ...input,
-        userId,
-        // normalize nullable fields (requests may send `null`) to `undefined` which the domain expects
-        endDate: (input as any).endDate ?? undefined,
-        alertThreshold: (input as any).alertThreshold ?? undefined,
-      });
-      
-      return c.json({
-        budget: {
-          ...budget.props,
-          startDate: budget.props.startDate.toISOString(),
-          endDate: budget.props.endDate?.toISOString(),
-          createdAt: budget.props.createdAt.toISOString(),
-          updatedAt: budget.props.updatedAt.toISOString(),
-        }
-      }, 201);
-    } catch (err) {
-      console.error("Error creating budget:", err);
-      return c.json({ 
-        error: err instanceof Error ? err.message : "Failed to create budget" 
-      }, 400);
-    }
-  }
-);
-
-// PUT /budgets/:id
-budgets.put(
-  "/budgets/:id",
-  zValidator("json", UpdateBudgetInputSchema),
-  async (c) => {
-    const userId = c.get("userId") as string;
+  // GET /budgets/:id/status
+  router.get("/budgets/:id/status", async (c) => {
+    const userId = c.get("userId");
     const id = c.req.param("id");
-    const updates = c.req.valid("json");
-    const { usecases } = container;
-    
+
+    const status = await deps.getBudgetStatus(id, userId);
+
+    if (!status) {
+      return c.json({ error: "Budget not found" }, 404);
+    }
+
+    return c.json({ status });
+  });
+
+  // GET /budgets
+  router.get("/budgets", async (c) => {
+    const userId = c.get("userId");
+    const activeOnly = c.req.query("active") === "true";
+
+    const budgets = await deps.listBudgets(userId, activeOnly);
+
+    return c.json({ budgets });
+  });
+
+  // POST /budgets
+  router.post(
+    "/budgets",
+    zValidator("json", CreateBudgetInputSchema),
+    async (c) => {
+      const userId = c.get("userId");
+      const input = c.req.valid("json");
+
+      try {
+        // Validate category belongs to user
+        const category = await deps.getCategory(input.categoryId);
+        if (!category || category.userId !== userId) {
+          return c.json({ error: "Invalid category" }, 400);
+        }
+
+        const budget = await deps.createBudget({
+          ...input,
+          userId,
+        });
+
+        return c.json({ budget }, 201);
+      } catch (err) {
+        return c.json({
+          error: err instanceof Error ? err.message : "Failed to create budget"
+        }, 400);
+      }
+    }
+  );
+
+  // PUT /budgets/:id
+  router.put(
+    "/budgets/:id",
+    zValidator("json", UpdateBudgetInputSchema),
+    async (c) => {
+      const userId = c.get("userId");
+      const id = c.req.param("id");
+      const updates = c.req.valid("json");
+
+      try {
+        const budget = await deps.updateBudget(
+          id,
+          userId,
+          {
+            ...updates,
+            endDate: updates.endDate ?? undefined,
+            alertThreshold: updates.alertThreshold ?? undefined,
+          }
+        );
+        return c.json({ budget });
+      } catch (err) {
+        return c.json({ error: (err as Error).message }, 404);
+      }
+    }
+  );
+
+  // DELETE /budgets/:id
+  router.delete("/budgets/:id", async (c) => {
+    const userId = c.get("userId");
+    const id = c.req.param("id");
+
     try {
-      const budget = await usecases.updateBudget(
-        id,
-        userId,
-        {
-          ...updates,
-          endDate: updates.endDate ?? undefined,
-          alertThreshold: updates.alertThreshold ?? undefined,
-        }
-      );
-      return c.json({
-        budget: {
-          ...budget.props,
-          startDate: budget.props.startDate.toISOString(),
-          endDate: budget.props.endDate?.toISOString(),
-          createdAt: budget.props.createdAt.toISOString(),
-          updatedAt: budget.props.updatedAt.toISOString(),
-        }
-      });
+      await deps.deleteBudget(id, userId);
+      return c.json({ message: "Budget deleted" });
     } catch (err) {
       return c.json({ error: (err as Error).message }, 404);
     }
-  }
-);
+  });
 
-// DELETE /budgets/:id
-budgets.delete("/budgets/:id", async (c) => {
-  const userId = c.get("userId") as string;
-  const id = c.req.param("id");
-  const { usecases } = container;
-  
-  try {
-    await usecases.deleteBudget(id, userId);
-    return c.json({ message: "Budget deleted" });
-  } catch (err) {
-    return c.json({ error: (err as Error).message }, 404);
-  }
-});
+  return router;
+}

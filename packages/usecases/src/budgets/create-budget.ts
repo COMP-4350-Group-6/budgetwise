@@ -2,6 +2,8 @@ import { Budget } from "@budget/domain";
 import type { BudgetsRepo } from "@budget/ports";
 import type { ClockPort, IdPort } from "@budget/ports";
 import type { Currency, BudgetPeriod } from "@budget/domain";
+import type { BudgetDTO } from "@budget/schemas";
+import { toBudgetDTO } from "../presenters";
 
 export interface CreateBudgetInput {
   userId: string;
@@ -20,7 +22,7 @@ export function makeCreateBudget(deps: {
   clock: ClockPort;
   id: IdPort;
 }) {
-  return async (input: CreateBudgetInput): Promise<Budget> => {
+  return async (input: CreateBudgetInput): Promise<BudgetDTO> => {
     const now = deps.clock.now();
     
     const budget = new Budget({
@@ -40,6 +42,6 @@ export function makeCreateBudget(deps: {
     });
     
     await deps.budgetsRepo.create(budget);
-    return budget;
+    return toBudgetDTO(budget);
   };
 }

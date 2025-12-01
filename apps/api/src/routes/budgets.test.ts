@@ -15,8 +15,7 @@ vi.mock('jose', () => {
   };
 });
 
-import { app } from '../app';
-import { container } from '../container';
+import { app, container } from '../test-app';
 
 interface BudgetDTO {
   id: string;
@@ -84,7 +83,7 @@ describe('Budgets API Integration Tests', () => {
     userId = `user-${testCounter}`;
     
     // Create a category for budget tests
-    const categoryRes = await app.request('/categories', {
+    const categoryRes = await app.request('/v1/categories', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${authToken}`,
@@ -102,7 +101,7 @@ describe('Budgets API Integration Tests', () => {
 
   describe('POST /budgets - Create Budget', () => {
     it('@critical should create a budget with valid data', async () => {
-      const res = await app.request('/budgets', {
+      const res = await app.request('/v1/budgets', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${authToken}`,
@@ -126,7 +125,7 @@ describe('Budgets API Integration Tests', () => {
     });
 
     it('should reject budget without authorization', async () => {
-      const res = await app.request('/budgets', {
+      const res = await app.request('/v1/budgets', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -145,7 +144,7 @@ describe('Budgets API Integration Tests', () => {
     });
 
     it('should reject budget with invalid category', async () => {
-      const res = await app.request('/budgets', {
+      const res = await app.request('/v1/budgets', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${authToken}`,
@@ -167,7 +166,7 @@ describe('Budgets API Integration Tests', () => {
     });
 
     it('should reject budget with negative amount', async () => {
-      const res = await app.request('/budgets', {
+      const res = await app.request('/v1/budgets', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${authToken}`,
@@ -187,7 +186,7 @@ describe('Budgets API Integration Tests', () => {
     });
 
     it('should reject budget with invalid period', async () => {
-      const res = await app.request('/budgets', {
+      const res = await app.request('/v1/budgets', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${authToken}`,
@@ -207,7 +206,7 @@ describe('Budgets API Integration Tests', () => {
     });
 
     it('should create budget with alert threshold', async () => {
-      const res = await app.request('/budgets', {
+      const res = await app.request('/v1/budgets', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${authToken}`,
@@ -230,7 +229,7 @@ describe('Budgets API Integration Tests', () => {
     });
 
     it('should create budget with end date', async () => {
-      const res = await app.request('/budgets', {
+      const res = await app.request('/v1/budgets', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${authToken}`,
@@ -256,7 +255,7 @@ describe('Budgets API Integration Tests', () => {
   describe('GET /budgets - List Budgets', () => {
     it('@critical should list all budgets for user', async () => {
       // Create a few budgets
-      await app.request('/budgets', {
+      await app.request('/v1/budgets', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${authToken}`,
@@ -272,7 +271,7 @@ describe('Budgets API Integration Tests', () => {
         }),
       });
 
-      await app.request('/budgets', {
+      await app.request('/v1/budgets', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${authToken}`,
@@ -288,7 +287,7 @@ describe('Budgets API Integration Tests', () => {
         }),
       });
 
-      const res = await app.request('/budgets', {
+      const res = await app.request('/v1/budgets', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${authToken}`,
@@ -302,7 +301,7 @@ describe('Budgets API Integration Tests', () => {
 
     it('should filter active budgets only', async () => {
       // Create active budget
-      await app.request('/budgets', {
+      await app.request('/v1/budgets', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${authToken}`,
@@ -318,7 +317,7 @@ describe('Budgets API Integration Tests', () => {
         }),
       });
 
-      const res = await app.request('/budgets?active=true', {
+      const res = await app.request('/v1/budgets?active=true', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${authToken}`,
@@ -334,7 +333,7 @@ describe('Budgets API Integration Tests', () => {
 
   describe('GET /budgets/dashboard - Dashboard', () => {
     it('@critical should return dashboard data', async () => {
-      const res = await app.request('/budgets/dashboard', {
+      const res = await app.request('/v1/budgets/dashboard', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${authToken}`,
@@ -350,7 +349,7 @@ describe('Budgets API Integration Tests', () => {
     });
 
     it('should require authentication', async () => {
-      const res = await app.request('/budgets/dashboard', {
+      const res = await app.request('/v1/budgets/dashboard', {
         method: 'GET',
       });
 
@@ -361,7 +360,7 @@ describe('Budgets API Integration Tests', () => {
   describe('PUT /budgets/:id - Update Budget', () => {
     it('@critical should update budget amount', async () => {
       // Create budget first
-      const createRes = await app.request('/budgets', {
+      const createRes = await app.request('/v1/budgets', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${authToken}`,
@@ -381,7 +380,7 @@ describe('Budgets API Integration Tests', () => {
       const budgetId = createData.budget.id;
 
       // Update it
-      const updateRes = await app.request(`/budgets/${budgetId}`, {
+      const updateRes = await app.request(`/v1/budgets/${budgetId}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${authToken}`,
@@ -399,7 +398,7 @@ describe('Budgets API Integration Tests', () => {
 
     it('should reject update from different user', async () => {
       // Create budget
-      const createRes = await app.request('/budgets', {
+      const createRes = await app.request('/v1/budgets', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${authToken}`,
@@ -419,7 +418,7 @@ describe('Budgets API Integration Tests', () => {
       const budgetId = createData.budget.id;
 
       // Try to update as different user
-      const updateRes = await app.request(`/budgets/${budgetId}`, {
+      const updateRes = await app.request(`/v1/budgets/${budgetId}`, {
         method: 'PUT',
         headers: {
           'Authorization': 'Bearer different-user-token',
@@ -437,7 +436,7 @@ describe('Budgets API Integration Tests', () => {
   describe('DELETE /budgets/:id - Delete Budget', () => {
     it('should delete budget', async () => {
       // Create budget
-      const createRes = await app.request('/budgets', {
+      const createRes = await app.request('/v1/budgets', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${authToken}`,
@@ -457,7 +456,7 @@ describe('Budgets API Integration Tests', () => {
       const budgetId = createData.budget.id;
 
       // Delete it
-      const deleteRes = await app.request(`/budgets/${budgetId}`, {
+      const deleteRes = await app.request(`/v1/budgets/${budgetId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${authToken}`,
@@ -470,7 +469,7 @@ describe('Budgets API Integration Tests', () => {
     });
 
     it('should reject deleting non-existent budget', async () => {
-      const res = await app.request('/budgets/non-existent-id', {
+      const res = await app.request('/v1/budgets/non-existent-id', {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${authToken}`,
@@ -483,7 +482,7 @@ describe('Budgets API Integration Tests', () => {
 
   describe('Boundary Tests - Budget Creation', () => {
     it('should handle zero amount budget', async () => {
-      const res = await app.request('/budgets', {
+      const res = await app.request('/v1/budgets', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${authToken}`,
@@ -505,7 +504,7 @@ describe('Budgets API Integration Tests', () => {
     });
 
     it('should handle maximum safe integer amount', async () => {
-      const res = await app.request('/budgets', {
+      const res = await app.request('/v1/budgets', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${authToken}`,
@@ -528,7 +527,7 @@ describe('Budgets API Integration Tests', () => {
       const periods = ['DAILY', 'WEEKLY', 'MONTHLY', 'YEARLY'];
       
       for (const period of periods) {
-        const res = await app.request('/budgets', {
+        const res = await app.request('/v1/budgets', {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${authToken}`,
