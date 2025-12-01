@@ -8,6 +8,7 @@ import {
   makeSupabaseBudgetsRepo,
   makeSupabaseCategoriesRepo,
   makeSupabaseTransactionsRepo,
+  makeSupabaseUsersRepo,
   makeSupabaseServiceClient,
   SupabaseLLMCallsRepository,
 } from "@budget/adapters-persistence-supabase";
@@ -45,6 +46,7 @@ export function makeContainer(env?: Env) {
   let categoriesRepo = makeInMemCategoriesRepo();
   let budgetsRepo = makeInMemBudgetsRepo();
   let txRepo = makeInMemTransactionsRepo();
+  let usersRepo: ReturnType<typeof makeSupabaseUsersRepo> | null = null;
   let llmCallsRepo: SupabaseLLMCallsRepository | undefined;
   let llmTracker: LLMTracker | undefined;
 
@@ -62,6 +64,7 @@ export function makeContainer(env?: Env) {
     categoriesRepo = makeSupabaseCategoriesRepo({ client: supabaseClient });
     budgetsRepo = makeSupabaseBudgetsRepo({ client: supabaseClient });
     txRepo = makeSupabaseTransactionsRepo({ client: supabaseClient });
+    usersRepo = makeSupabaseUsersRepo({ client: supabaseClient });
     id = makeUuid();
     llmCallsRepo = new SupabaseLLMCallsRepository(supabaseClient);
     llmTracker = new LLMTracker(llmCallsRepo, id);
@@ -84,6 +87,7 @@ export function makeContainer(env?: Env) {
       categoriesRepo,
       budgetsRepo,
       txRepo,
+      usersRepo,
       llmCallsRepo,
     },
     services: {
