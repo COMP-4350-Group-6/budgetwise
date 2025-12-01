@@ -80,6 +80,7 @@ export async function authMiddleware(c: Context<{ Variables: Variables; Bindings
       SUPABASE_LOCAL_JWT_SECRET: c.env?.SUPABASE_LOCAL_JWT_SECRET as string | undefined,
     });
 
+
     const userId = (payload.sub as string) || "";
     if (!userId) throw new Error("Missing sub claim");
 
@@ -88,7 +89,8 @@ export async function authMiddleware(c: Context<{ Variables: Variables; Bindings
     c.set("jwtPayload", payload);
     await next();
   } catch (err) {
+    
     console.error("Token verification failed:", err);
-    throw new HTTPException(401, { message: "Invalid token" });
+    throw new HTTPException(401, { message: "Invalid token" ,cause: err});
   }
 }
