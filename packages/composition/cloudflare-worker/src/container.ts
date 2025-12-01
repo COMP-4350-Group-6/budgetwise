@@ -19,6 +19,7 @@ import {
   makeUpdateCategory,
   makeDeleteCategory,
   makeSeedDefaultCategories,
+  makeGetCategory,
   makeCreateBudget,
   makeListBudgets,
   makeUpdateBudget,
@@ -30,6 +31,9 @@ import {
   makeDeleteTransaction,
   makeCategorizeTransaction,
   makeParseInvoice,
+  makeListTransactions,
+  makeGetTransaction,
+  makeBulkImportTransactions,
 } from "@budget/usecases";
 
 interface Env {
@@ -80,15 +84,6 @@ export function makeContainer(env?: Env) {
     : undefined;
   
   return {
-    repos: {
-      categoriesRepo,
-      budgetsRepo,
-      txRepo,
-      llmCallsRepo,
-    },
-    services: {
-      llmTracker,
-    },
     usecases: {
       // Category use cases
       createCategory: makeCreateCategory({ categoriesRepo, clock, id }),
@@ -96,6 +91,7 @@ export function makeContainer(env?: Env) {
       updateCategory: makeUpdateCategory({ categoriesRepo, clock }),
       deleteCategory: makeDeleteCategory({ categoriesRepo, budgetsRepo }),
       seedDefaultCategories: makeSeedDefaultCategories({ categoriesRepo, clock, id }),
+      getCategory: makeGetCategory({ categoriesRepo }),
       
       // Budget use cases
       createBudget: makeCreateBudget({ budgetsRepo, clock, id }),
@@ -114,6 +110,9 @@ export function makeContainer(env?: Env) {
       addTransaction: makeAddTransaction({ clock, id, txRepo }),
       updateTransaction: makeUpdateTransaction({ clock, txRepo }),
       deleteTransaction: makeDeleteTransaction({ txRepo }),
+      listTransactions: makeListTransactions({ txRepo }),
+      getTransaction: makeGetTransaction({ txRepo }),
+      bulkImportTransactions: makeBulkImportTransactions({ txRepo, clock, id }),
       categorizeTransaction: categorization
         ? makeCategorizeTransaction({
             clock,

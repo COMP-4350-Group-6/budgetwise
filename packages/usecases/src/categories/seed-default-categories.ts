@@ -1,17 +1,29 @@
 import { Category, DEFAULT_CATEGORIES } from "@budget/domain";
 import type { CategoriesRepo } from "@budget/ports";
 import type { ClockPort, IdPort } from "@budget/ports";
+import type { CategoryDTO } from "@budget/schemas";
+import { toCategoryDTOList } from "../presenters";
+
+export interface SeedCategoriesResult {
+  categories: CategoryDTO[];
+  created: number;
+  message: string;
+}
 
 export function makeSeedDefaultCategories(deps: {
   categoriesRepo: CategoriesRepo;
   clock: ClockPort;
   id: IdPort;
 }) {
-  return async (userId: string): Promise<Category[]> => {
+  return async (userId: string): Promise<SeedCategoriesResult> => {
     // Check if user already has categories
     const existing = await deps.categoriesRepo.listByUser(userId);
     if (existing.length > 0) {
-      return existing; // Already seeded
+      return {
+        categories: [],
+        created: 0,
+        message: "Categories already seeded",
+      };
     }
 
     const now = deps.clock.now();
@@ -37,6 +49,11 @@ export function makeSeedDefaultCategories(deps: {
       categories.push(category);
     }
 
-    return categories;
+    const dtos = toCategoryDTOList(categories);
+    return {
+      categories: dtos,
+      created: dtos.length,
+      message: `Seeded ${dtos.length} default categories`,
+    };
   };
 }

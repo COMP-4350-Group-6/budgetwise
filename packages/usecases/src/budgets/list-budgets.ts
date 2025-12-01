@@ -1,13 +1,16 @@
-import type { Budget } from "@budget/domain";
 import type { BudgetsRepo } from "@budget/ports";
+import type { BudgetDTO } from "@budget/schemas";
+import { toBudgetDTOList } from "../presenters";
 
 export function makeListBudgets(deps: {
   budgetsRepo: BudgetsRepo;
 }) {
-  return async (userId: string, activeOnly: boolean = false): Promise<Budget[]> => {
+  return async (userId: string, activeOnly: boolean = false): Promise<BudgetDTO[]> => {
     if (activeOnly) {
-      return deps.budgetsRepo.listActiveByUser(userId);
+      const budgets = await deps.budgetsRepo.listActiveByUser(userId);
+      return toBudgetDTOList(budgets);
     }
-    return deps.budgetsRepo.listByUser(userId);
+    const budgets = await deps.budgetsRepo.listByUser(userId);
+    return toBudgetDTOList(budgets);
   };
 }

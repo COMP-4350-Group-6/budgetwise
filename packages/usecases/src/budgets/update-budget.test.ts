@@ -35,7 +35,7 @@ describe('updateBudget (focused usecase tests)', () => {
       alertThreshold: 80,
     });
 
-    const updated = await updateBudget(base.props.id, 'user-1', {
+    const updated = await updateBudget(base.id, 'user-1', {
       name: '  New Name  ',               // should be trimmed
       amountCents: 20000,
       currency: 'CAD' as const,
@@ -47,19 +47,19 @@ describe('updateBudget (focused usecase tests)', () => {
       alertThreshold: 0,                  // explicit 0 should be kept
     });
 
-    expect(updated.props.name).toBe('New Name');
-    expect(updated.props.amountCents).toBe(20000);
-    expect(updated.props.currency).toBe('CAD');
-    expect(updated.props.period).toBe('YEARLY');
-    expect(updated.props.categoryId).toBe('cat-2');
-    expect(updated.props.startDate.toISOString()).toBe('2025-02-01T00:00:00.000Z');
-    expect(updated.props.endDate?.toISOString()).toBe('2025-03-01T00:00:00.000Z');
-    expect(updated.props.isActive).toBe(false);
-    expect(updated.props.alertThreshold).toBe(0);
+    expect(updated.name).toBe('New Name');
+    expect(updated.amountCents).toBe(20000);
+    expect(updated.currency).toBe('CAD');
+    expect(updated.period).toBe('YEARLY');
+    expect(updated.categoryId).toBe('cat-2');
+    expect(updated.startDate.toISOString()).toBe('2025-02-01T00:00:00.000Z');
+    expect(updated.endDate?.toISOString()).toBe('2025-03-01T00:00:00.000Z');
+    expect(updated.isActive).toBe(false);
+    expect(updated.alertThreshold).toBe(0);
 
     // createdAt stays from createClock; updatedAt moves to updateClock
-    expect(updated.props.createdAt.toISOString()).toBe('2025-01-01T00:00:00.000Z');
-    expect(updated.props.updatedAt.toISOString()).toBe('2025-02-01T00:00:00.000Z');
+    expect(updated.createdAt.toISOString()).toBe('2025-01-01T00:00:00.000Z');
+    expect(updated.updatedAt.toISOString()).toBe('2025-02-01T00:00:00.000Z');
   });
 
   it('preserves fields when not provided (including endDate) and keeps alertThreshold when undefined', async () => {
@@ -76,20 +76,20 @@ describe('updateBudget (focused usecase tests)', () => {
     });
 
     // Omit most fields, provide only one change and undefined alertThreshold
-    const updated = await updateBudget(base.props.id, 'user-1', {
+    const updated = await updateBudget(base.id, 'user-1', {
       name: 'Changed',
       alertThreshold: undefined, // should preserve previous 75
       // no endDate provided -> should remain as base's endDate
     });
 
-    expect(updated.props.name).toBe('Changed');
-    expect(updated.props.amountCents).toBe(12345);
-    expect(updated.props.currency).toBe('USD');
-    expect(updated.props.period).toBe('MONTHLY');
-    expect(updated.props.categoryId).toBe('cat-1');
-    expect(updated.props.startDate.toISOString()).toBe('2025-01-01T00:00:00.000Z');
-    expect(updated.props.endDate?.toISOString()).toBe('2025-12-31T00:00:00.000Z');
-    expect(updated.props.alertThreshold).toBe(75);
+    expect(updated.name).toBe('Changed');
+    expect(updated.amountCents).toBe(12345);
+    expect(updated.currency).toBe('USD');
+    expect(updated.period).toBe('MONTHLY');
+    expect(updated.categoryId).toBe('cat-1');
+    expect(updated.startDate.toISOString()).toBe('2025-01-01T00:00:00.000Z');
+    expect(updated.endDate?.toISOString()).toBe('2025-12-31T00:00:00.000Z');
+    expect(updated.alertThreshold).toBe(75);
   });
 
   it('preserves endDate when explicitly set to undefined', async () => {
@@ -105,11 +105,11 @@ describe('updateBudget (focused usecase tests)', () => {
     });
 
     // Explicit endDate: undefined -> code path keeps existing endDate
-    const updated = await updateBudget(base.props.id, 'user-1', {
+    const updated = await updateBudget(base.id, 'user-1', {
       endDate: undefined,
     });
 
-    expect(updated.props.endDate?.toISOString()).toBe('2025-06-01T00:00:00.000Z');
+    expect(updated.endDate?.toISOString()).toBe('2025-06-01T00:00:00.000Z');
   });
 
   it('throws "Budget not found" for missing id', async () => {
@@ -130,11 +130,11 @@ describe('updateBudget (focused usecase tests)', () => {
     });
 
     await expect(
-      updateBudget(base.props.id, 'intruder', { name: 'Hack' })
+      updateBudget(base.id, 'intruder', { name: 'Hack' })
     ).rejects.toThrow('Unauthorized');
 
     // Ensure it remains unchanged
-    const still = await budgetsRepo.getById(base.props.id);
+    const still = await budgetsRepo.getById(base.id);
     expect(still?.props.name).toBe('Private');
     expect(still?.props.userId).toBe('owner');
   });
@@ -151,16 +151,16 @@ describe('updateBudget (focused usecase tests)', () => {
     });
 
     // No name provided -> original remains
-    const unchanged = await updateBudget(base.props.id, 'user-1', {
+    const unchanged = await updateBudget(base.id, 'user-1', {
       amountCents: 2000,
     });
-    expect(unchanged.props.name).toBe('Original Name');
+    expect(unchanged.name).toBe('Original Name');
 
     // Name with surrounding spaces -> trimmed
-    const trimmed = await updateBudget(base.props.id, 'user-1', {
+    const trimmed = await updateBudget(base.id, 'user-1', {
       name: '  Trim Me  ',
     });
-    expect(trimmed.props.name).toBe('Trim Me');
+    expect(trimmed.name).toBe('Trim Me');
   });
 
   it('updates only alertThreshold to a non-zero value and preserves others', async () => {
@@ -175,13 +175,13 @@ describe('updateBudget (focused usecase tests)', () => {
       alertThreshold: 50,
     });
 
-    const updated = await updateBudget(base.props.id, 'user-1', {
+    const updated = await updateBudget(base.id, 'user-1', {
       alertThreshold: 90,
     });
 
-    expect(updated.props.alertThreshold).toBe(90);
-    expect(updated.props.name).toBe('Threshold');
-    expect(updated.props.amountCents).toBe(10000);
+    expect(updated.alertThreshold).toBe(90);
+    expect(updated.name).toBe('Threshold');
+    expect(updated.amountCents).toBe(10000);
   });
 
   it('can clear endDate by explicitly setting it (regression guard around field preservation)', async () => {
@@ -198,10 +198,10 @@ describe('updateBudget (focused usecase tests)', () => {
       endDate: new Date('2025-03-01'),
     });
 
-    const updated = await updateBudget(base.props.id, 'user-1', {
+    const updated = await updateBudget(base.id, 'user-1', {
       endDate: new Date('2025-04-01'),
     });
 
-    expect(updated.props.endDate?.toISOString()).toBe('2025-04-01T00:00:00.000Z');
+    expect(updated.endDate?.toISOString()).toBe('2025-04-01T00:00:00.000Z');
   });
 });

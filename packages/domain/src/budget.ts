@@ -88,4 +88,47 @@ export class Budget {
     const percentage = (spentCents / this.props.amountCents) * 100;
     return percentage >= threshold;
   }
+
+  /**
+   * Calculate the current period's start and end dates for this budget.
+   * Used for determining which transactions count toward this budget period.
+   */
+  getPeriodDates(now: Date): { startDate: Date; endDate: Date } {
+    const start = new Date(now);
+    const end = new Date(now);
+
+    switch (this.props.period) {
+      case 'DAILY':
+        start.setHours(0, 0, 0, 0);
+        end.setHours(23, 59, 59, 999);
+        break;
+      case 'WEEKLY':
+        const day = start.getDay();
+        start.setDate(start.getDate() - day);
+        start.setHours(0, 0, 0, 0);
+        end.setDate(start.getDate() + 6);
+        end.setHours(23, 59, 59, 999);
+        break;
+      case 'MONTHLY':
+        start.setDate(1);
+        start.setHours(0, 0, 0, 0);
+        end.setMonth(end.getMonth() + 1);
+        end.setDate(0);
+        end.setHours(23, 59, 59, 999);
+        break;
+      case 'YEARLY':
+        start.setMonth(0, 1);
+        start.setHours(0, 0, 0, 0);
+        end.setMonth(11, 31);
+        end.setHours(23, 59, 59, 999);
+        break;
+    }
+
+    // Don't start before the budget's start date
+    if (start < this.props.startDate) {
+      start.setTime(this.props.startDate.getTime());
+    }
+
+    return { startDate: start, endDate: end };
+  }
 }

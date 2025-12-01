@@ -1,119 +1,88 @@
 import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import { CreateCategoryInputSchema, UpdateCategoryInputSchema } from "@budget/schemas";
-import { container } from "../container";
-import { authMiddleware } from "../middleware/auth";
+import type { CategoryDeps } from "../types";
 
-type Variables = {
-  userId: string;
-};
+/**
+ * Creates category routes with explicit dependencies.
+ * Routes only know about the specific functions they need, not the entire container.
+ * Usecases return DTOs directly, so routes just pass them through.
+ * 
+ * Note: Auth middleware is applied in app.ts (composition root), not here.
+ */
+export function createCategoryRoutes(deps: CategoryDeps) {
+  const router = new Hono<{ Variables: { userId: string } }>();
 
-export const categories = new Hono<{ Variables: Variables }>();
+  // GET /categories
+  router.get("/categories", async (c) => {
+    const userId = c.get("userId");
+    const activeOnly = c.req.query("active") === "true";
 
-categories.use("*", authMiddleware);
+    const categories = await deps.listCategories(userId, activeOnly);
 
-// GET /categories
-categories.get("/categories", async (c) => {
-  const userId = c.get("userId") as string;
-  const activeOnly = c.req.query("active") === "true";
-  const { usecases } = container;
-  
-  const cats = await usecases.listCategories(userId, activeOnly);
-  
-  return c.json({
-    categories: cats.map(cat => ({
-      ...cat.props,
-      createdAt: cat.props.createdAt.toISOString(),
-      updatedAt: cat.props.updatedAt.toISOString(),
-    }))
+    return c.json({ categories });
   });
-});
 
-// POST /categories/seed
-categories.post("/categories/seed", async (c) => {
-  const userId = c.get("userId") as string;
-  const { usecases } = container;
-  // Get existing categories first so we can return only newly created ones
-  const before = await usecases.listCategories(userId, false);
+  // POST /categories/seed
+  router.post("/categories/seed", async (c) => {
+    const userId = c.get("userId");
 
-  const seeded = await usecases.seedDefaultCategories(userId);
+    const result = await deps.seedDefaultCategories(userId);
 
-  // seeded may return existing categories when no new ones were added
-  const newly = seeded.filter((s) => !before.find((b) => b.id === s.id));
+    return c.json(result, 201);
+  });
 
-  return c.json({
-    categories: newly.map((cat) => ({
-      ...cat.props,
-      createdAt: cat.props.createdAt.toISOString(),
-      updatedAt: cat.props.updatedAt.toISOString(),
-    })),
-    message: `Seeded ${newly.length} default categories`,
-  }, 201);
-});
+  // POST /categories
+  router.post(
+    "/categories",
+    zValidator("json", CreateCategoryInputSchema),
+    async (c) => {
+      const userId = c.get("userId");
+      const input = c.req.valid("json");
 
-// POST /categories
-categories.post(
-  "/categories",
-  zValidator("json", CreateCategoryInputSchema),
-  async (c) => {
-    const userId = c.get("userId") as string;
-    const input = c.req.valid("json");
-    const { usecases } = container;
-    
+      try {
+        const category = await deps.createCategory({
+          ...input,
+          userId,
+        });
+
+        return c.json({ category }, 201);
+      } catch (err) {
+        return c.json({ error: (err as Error).message }, 400);
+      }
+    }
+  );
+
+  // PUT /categories/:id
+  router.put(
+    "/categories/:id",
+    zValidator("json", UpdateCategoryInputSchema),
+    async (c) => {
+      const userId = c.get("userId");
+      const id = c.req.param("id");
+      const updates = c.req.valid("json");
+
+      try {
+        const category = await deps.updateCategory(id, userId, updates);
+        return c.json({ category });
+      } catch (err) {
+        return c.json({ error: (err as Error).message }, 404);
+      }
+    }
+  );
+
+  // DELETE /categories/:id
+  router.delete("/categories/:id", async (c) => {
+    const userId = c.get("userId");
+    const id = c.req.param("id");
+
     try {
-      const category = await usecases.createCategory({
-        ...input,
-        userId,
-      });
-      
-      return c.json({
-        category: {
-          ...category.props,
-          createdAt: category.props.createdAt.toISOString(),
-          updatedAt: category.props.updatedAt.toISOString(),
-        }
-      }, 201);
+      await deps.deleteCategory(id, userId);
+      return c.json({ message: "Category deleted" });
     } catch (err) {
       return c.json({ error: (err as Error).message }, 400);
     }
-  }
-);
+  });
 
-// PUT /categories/:id
-categories.put(
-  "/categories/:id",
-  zValidator("json", UpdateCategoryInputSchema),
-  async (c) => {
-    const userId = c.get("userId") as string;
-    const id = c.req.param("id");
-    const updates = c.req.valid("json");
-    const { usecases } = container;
-    
-    try {
-      const category = await usecases.updateCategory(id, userId, updates);
-      return c.json({
-        category: {
-          ...category.props,
-          createdAt: category.props.createdAt.toISOString(),
-          updatedAt: category.props.updatedAt.toISOString(),
-        }
-      });
-    } catch (err) {
-      return c.json({ error: (err as Error).message }, 404);
-    }
-  }
-);
-
-// DELETE /categories/:id
-categories.delete("/categories/:id", async (c) => {
-  const userId = c.get("userId") as string;
-  const id = c.req.param("id");
-  const { usecases } = container;
-  
-  try {
-    await usecases.deleteCategory(id, userId);
-    return c.json({ message: "Category deleted" });
-  } catch (err) {
-    return c.json({ error: (err as Error).message }, 400);
-  }
-});
+  return router;
+}

@@ -33,6 +33,19 @@ export function makeSupabaseTransactionsRepo({ client }: SupabasePersistenceDeps
       return (data ?? []).map(toTransaction);
     },
 
+    async listByBudgetInPeriod(budgetId: string, startDate: Date, endDate: Date) {
+      const { data, error } = await client
+        .from(table)
+        .select()
+        .eq("budget_id", budgetId)
+        .gte("occurred_at", startDate.toISOString())
+        .lte("occurred_at", endDate.toISOString())
+        .order("occurred_at", { ascending: false });
+
+      if (error) throw error;
+      return (data ?? []).map(toTransaction);
+    },
+
     async listByUserInPeriod(userId: string, startDate: Date, endDate: Date) {
       const { data, error } = await client
         .from(table)
@@ -40,10 +53,38 @@ export function makeSupabaseTransactionsRepo({ client }: SupabasePersistenceDeps
         .eq("user_id", userId)
         .gte("occurred_at", startDate.toISOString())
         .lte("occurred_at", endDate.toISOString())
-        .order("occurred_at", { ascending: true });
+        .order("occurred_at", { ascending: false });
 
       if (error) throw error;
       return (data ?? []).map(toTransaction);
+    },
+
+    async sumSpentByBudgetInPeriod(budgetId: string, startDate: Date, endDate: Date) {
+      const { data, error } = await client
+        .from(table)
+        .select("amount_cents")
+        .eq("budget_id", budgetId)
+        .gte("occurred_at", startDate.toISOString())
+        .lte("occurred_at", endDate.toISOString());
+
+      if (error) throw error;
+      const rows = data ?? [];
+      return {
+        totalCents: rows.reduce((sum, row) => sum + Math.abs(row.amount_cents), 0),
+        count: rows.length,
+      };
+    },
+
+    async sumSpentByCategoryWithoutBudget(userId: string, categoryId: string) {
+      const { data, error } = await client
+        .from(table)
+        .select("amount_cents")
+        .eq("user_id", userId)
+        .eq("category_id", categoryId)
+        .is("budget_id", null);
+
+      if (error) throw error;
+      return (data ?? []).reduce((sum, row) => sum + Math.abs(row.amount_cents), 0);
     },
 
     async create(tx: Transaction) {

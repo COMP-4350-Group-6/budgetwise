@@ -1,9 +1,17 @@
 import { z } from "zod";
 
+// ============================================================================
+// Validation Schemas
+// ============================================================================
+
 const CategoryNameSchema = z.string()
   .min(1, "Category name cannot be empty")
   .max(50, "Category name too long")
   .regex(/^[a-zA-Z\s]+$/, "Category name can only contain letters A-Z and spaces");
+
+// ============================================================================
+// Input Schemas (for API validation)
+// ============================================================================
 
 export const CreateCategoryInputSchema = z.object({
   name: CategoryNameSchema,
@@ -17,6 +25,10 @@ export const CreateCategoryInputSchema = z.object({
 export const UpdateCategoryInputSchema = CreateCategoryInputSchema.partial().extend({
   isDefault: z.boolean().optional(),
 });
+
+// ============================================================================
+// Database Row Schema (snake_case, matches Supabase)
+// ============================================================================
 
 export const CategoryRowSchema = z.object({
   id: z.uuid(),
@@ -32,9 +44,13 @@ export const CategoryRowSchema = z.object({
   updated_at: z.coerce.date(),
 });
 
-export const CategoryDTO = z.object({
-  id: z.uuid(),
-  userId: z.uuid(),
+// ============================================================================
+// API DTO Schema (camelCase, for JSON responses)
+// ============================================================================
+
+export const CategoryDTOSchema = z.object({
+  id: z.string(),
+  userId: z.string(),
   name: CategoryNameSchema,
   description: z.string().nullable(),
   icon: z.string().nullable(),
@@ -46,7 +62,11 @@ export const CategoryDTO = z.object({
   updatedAt: z.coerce.date(),
 });
 
+// ============================================================================
+// Exported Types
+// ============================================================================
+
 export type CreateCategoryInput = z.infer<typeof CreateCategoryInputSchema>;
 export type UpdateCategoryInput = z.infer<typeof UpdateCategoryInputSchema>;
 export type CategoryRow = z.infer<typeof CategoryRowSchema>;
-export type CategoryDTO = z.infer<typeof CategoryDTO>;
+export type CategoryDTO = z.infer<typeof CategoryDTOSchema>;

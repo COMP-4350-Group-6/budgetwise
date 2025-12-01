@@ -2,6 +2,8 @@ import { Budget } from "@budget/domain";
 import type { BudgetsRepo } from "@budget/ports";
 import type { ClockPort } from "@budget/ports";
 import type { Currency, BudgetPeriod } from "@budget/domain";
+import type { BudgetDTO } from "@budget/schemas";
+import { toBudgetDTO } from "../presenters";
 
 export interface UpdateBudgetInput {
   categoryId?: string;
@@ -19,7 +21,7 @@ export function makeUpdateBudget(deps: {
   budgetsRepo: BudgetsRepo;
   clock: ClockPort;
 }) {
-  return async (id: string, userId: string, updates: UpdateBudgetInput): Promise<Budget> => {
+  return async (id: string, userId: string, updates: UpdateBudgetInput): Promise<BudgetDTO> => {
     const existing = await deps.budgetsRepo.getById(id);
     
     if (!existing) {
@@ -45,6 +47,6 @@ export function makeUpdateBudget(deps: {
     });
     
     await deps.budgetsRepo.update(updated);
-    return updated;
+    return toBudgetDTO(updated);
   };
 }

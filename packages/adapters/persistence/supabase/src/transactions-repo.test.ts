@@ -227,7 +227,7 @@ describe('makeSupabaseTransactionsRepo', () => {
       expect(mockChain.eq).toHaveBeenCalledWith('user_id', 'user-1');
       expect(mockChain.gte).toHaveBeenCalledWith('occurred_at', startDate.toISOString());
       expect(mockChain.lte).toHaveBeenCalledWith('occurred_at', endDate.toISOString());
-      expect(mockChain.order).toHaveBeenCalledWith('occurred_at', { ascending: true });
+      expect(mockChain.order).toHaveBeenCalledWith('occurred_at', { ascending: false });
 
       expect(result).toHaveLength(1);
       expect(result[0].props.id).toBe('tx-1');

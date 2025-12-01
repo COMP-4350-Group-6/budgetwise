@@ -2,7 +2,6 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { makeCreateCategory } from './create-category';
 import { makeInMemCategoriesRepo } from '@budget/adapters-persistence-local';
 import { makeSystemClock, makeUlid } from '@budget/adapters-system';
-import { Category } from '@budget/domain';
 
 describe('createCategory', () => {
   let categoriesRepo: ReturnType<typeof makeInMemCategoriesRepo>;
@@ -25,14 +24,14 @@ describe('createCategory', () => {
 
     const category = await createCategory(input);
 
-    expect(category).toBeInstanceOf(Category);
-    expect(category.props.userId).toBe(input.userId);
-    expect(category.props.name).toBe(input.name);
-    expect(category.props.isDefault).toBe(false);
-    expect(category.props.isActive).toBe(true);
-    expect(category.props.id).toBeDefined();
-    expect(category.props.createdAt).toBeInstanceOf(Date);
-    expect(category.props.updatedAt).toBeInstanceOf(Date);
+    expect(category).toHaveProperty("id");
+    expect(category.userId).toBe(input.userId);
+    expect(category.name).toBe(input.name);
+    expect(category.isDefault).toBe(false);
+    expect(category.isActive).toBe(true);
+    expect(category.id).toBeDefined();
+    expect(category.createdAt).toBeInstanceOf(Date);
+    expect(category.updatedAt).toBeInstanceOf(Date);
   });
 
   it('should create a category with all optional fields', async () => {
@@ -47,10 +46,10 @@ describe('createCategory', () => {
 
     const category = await createCategory(input);
 
-    expect(category.props.description).toBe(input.description);
-    expect(category.props.icon).toBe(input.icon);
-    expect(category.props.color).toBe(input.color);
-    expect(category.props.isActive).toBe(input.isActive);
+    expect(category.description).toBe(input.description);
+    expect(category.icon).toBe(input.icon);
+    expect(category.color).toBe(input.color);
+    expect(category.isActive).toBe(input.isActive);
   });
 
   it('should persist the category to the repository', async () => {
@@ -61,10 +60,11 @@ describe('createCategory', () => {
     };
 
     const category = await createCategory(input);
-    const retrieved = await categoriesRepo.getById(category.props.id);
+    // Repo returns domain entity with .props, usecase returns DTO
+    const retrieved = await categoriesRepo.getById(category.id);
 
     expect(retrieved).toBeDefined();
-    expect(retrieved?.props.id).toBe(category.props.id);
+    expect(retrieved?.props.id).toBe(category.id);
     expect(retrieved?.props.name).toBe(input.name);
     expect(retrieved?.props.icon).toBe(input.icon);
   });
@@ -80,9 +80,9 @@ describe('createCategory', () => {
       name: 'Food',
     });
 
-    expect(category1.props.id).not.toBe(category2.props.id);
-    expect(category1.props.userId).toBe('user-1');
-    expect(category2.props.userId).toBe('user-2');
+    expect(category1.id).not.toBe(category2.id);
+    expect(category1.userId).toBe('user-1');
+    expect(category2.userId).toBe('user-2');
   });
 
   it('should set default sortOrder', async () => {
@@ -91,7 +91,7 @@ describe('createCategory', () => {
       name: 'Test',
     });
 
-    expect(category.props.sortOrder).toBe(0);
+    expect(category.sortOrder).toBe(0);
   });
 
   it('should create inactive category when specified', async () => {
@@ -101,6 +101,6 @@ describe('createCategory', () => {
       isActive: false,
     });
 
-    expect(category.props.isActive).toBe(false);
+    expect(category.isActive).toBe(false);
   });
 });
