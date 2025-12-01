@@ -7,11 +7,6 @@ import {
   JWTPayload,
 } from "jose";
 
-type Variables = {
-  userId: string;
-  jwtPayload: JWTPayload;
-};
-
 type Env = {
   SUPABASE_URL?: string;
   SUPABASE_JWKS_URL?: string;
@@ -65,7 +60,7 @@ async function verifySupabaseToken(token: string, env: Env): Promise<JWTPayload>
   );
 }
 
-export async function authMiddleware(c: Context<{ Variables: Variables; Bindings: Env }>, next: Next) {
+export async function authMiddleware(c: Context, next: Next) {
   const auth = c.req.header("Authorization");
   if (!auth?.startsWith("Bearer ")) {
     throw new HTTPException(401, { message: "Unauthorized" });
@@ -84,9 +79,11 @@ export async function authMiddleware(c: Context<{ Variables: Variables; Bindings
     const userId = (payload.sub as string) || "";
     if (!userId) throw new Error("Missing sub claim");
 
-    // Store user info from token for use in routes
+    // Optionally grab more claims:
+    // const role = payload.role as string | undefined;
+    // const email = payload.email as string | undefined;
+
     c.set("userId", userId);
-    c.set("jwtPayload", payload);
     await next();
   } catch (err) {
     
