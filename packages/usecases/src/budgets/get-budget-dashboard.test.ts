@@ -56,7 +56,7 @@ describe('getBudgetDashboard', () => {
 
     await createBudget({
       userId: 'user-123',
-      categoryId: category.props.id,
+      categoryId: category.id,
       name: 'Monthly Groceries',
       amountCents: 50000,
       currency: 'USD',
@@ -83,7 +83,7 @@ describe('getBudgetDashboard', () => {
 
     const budget = await createBudget({
       userId: 'user-123',
-      categoryId: category.props.id,
+      categoryId: category.id,
       name: 'Monthly Groceries',
       amountCents: 50000,
       currency: 'USD',
@@ -94,16 +94,16 @@ describe('getBudgetDashboard', () => {
     // Add some transactions
     await addTransaction({
       userId: 'user-123',
-      budgetId: budget.props.id,
-      categoryId: budget.props.categoryId,
+      budgetId: budget.id,
+      categoryId: budget.categoryId,
       amountCents: 10000,
       occurredAt: new Date('2025-01-15'),
     });
 
     await addTransaction({
       userId: 'user-123',
-      budgetId: budget.props.id,
-      categoryId: budget.props.categoryId,
+      budgetId: budget.id,
+      categoryId: budget.categoryId,
       amountCents: 15000,
       occurredAt: new Date('2025-01-20'),
     });
@@ -125,7 +125,7 @@ describe('getBudgetDashboard', () => {
 
     const budget = await createBudget({
       userId: 'user-123',
-      categoryId: category.props.id,
+      categoryId: category.id,
       name: 'Monthly Groceries',
       amountCents: 50000,
       currency: 'USD',
@@ -137,7 +137,7 @@ describe('getBudgetDashboard', () => {
     // Overspend
     await addTransaction({
       userId: 'user-123',
-      budgetId: budget.props.id,
+      budgetId: budget.id,
       note: 'Big shopping',
       amountCents: 60000,
       currency: 'USD',
@@ -160,7 +160,7 @@ describe('getBudgetDashboard', () => {
 
     const budget = await createBudget({
       userId: 'user-123',
-      categoryId: category.props.id,
+      categoryId: category.id,
       name: 'Monthly Groceries',
       amountCents: 50000,
       currency: 'USD',
@@ -172,7 +172,7 @@ describe('getBudgetDashboard', () => {
     // Spend 85% of budget
     await addTransaction({
       userId: 'user-123',
-      budgetId: budget.props.id,
+      budgetId: budget.id,
       note: 'Shopping',
       amountCents: 42500,
       currency: 'USD',
@@ -194,7 +194,7 @@ describe('getBudgetDashboard', () => {
 
     await createBudget({
       userId: 'user-123',
-      categoryId: category.props.id,
+      categoryId: category.id,
       name: 'Groceries',
       amountCents: 50000,
       currency: 'USD',
@@ -204,7 +204,7 @@ describe('getBudgetDashboard', () => {
 
     await createBudget({
       userId: 'user-123',
-      categoryId: category.props.id,
+      categoryId: category.id,
       name: 'Dining Out',
       amountCents: 30000,
       currency: 'USD',
@@ -233,7 +233,7 @@ describe('getBudgetDashboard', () => {
 
     await createBudget({
       userId: 'user-1',
-      categoryId: cat1.props.id,
+      categoryId: cat1.id,
       name: 'Budget 1',
       amountCents: 50000,
       currency: 'USD',
@@ -243,7 +243,7 @@ describe('getBudgetDashboard', () => {
 
     await createBudget({
       userId: 'user-2',
-      categoryId: cat2.props.id,
+      categoryId: cat2.id,
       name: 'Budget 2',
       amountCents: 30000,
       currency: 'USD',

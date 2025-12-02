@@ -1,6 +1,8 @@
 import { Category } from "@budget/domain";
 import type { CategoriesRepo } from "@budget/ports";
 import type { ClockPort, IdPort } from "@budget/ports";
+import type { CategoryDTO } from "@budget/schemas";
+import { toCategoryDTO } from "../presenters";
 
 export interface CreateCategoryInput {
   userId: string;
@@ -16,7 +18,7 @@ export function makeCreateCategory(deps: {
   clock: ClockPort;
   id: IdPort;
 }) {
-  return async (input: CreateCategoryInput): Promise<Category> => {
+  return async (input: CreateCategoryInput): Promise<CategoryDTO> => {
     const now = deps.clock.now();
     
     const existing = await deps.categoriesRepo.listByUser(input.userId);
@@ -39,6 +41,6 @@ export function makeCreateCategory(deps: {
     });
     
     await deps.categoriesRepo.create(category);
-    return category;
+    return toCategoryDTO(category);
   };
 }

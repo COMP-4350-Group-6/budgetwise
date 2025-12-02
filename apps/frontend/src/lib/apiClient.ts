@@ -1,11 +1,19 @@
 import { authClient } from "./authContainer";
 
+// API v1 routes - these get the /v1 prefix
+const V1_ROUTES = ['/transactions', '/categories', '/budgets'];
+
 export async function apiFetch<T = Record<string, unknown>>(
   endpoint: string,
   options: RequestInit = {},
   authRequired: boolean = false
 ): Promise<T> {
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8787"; // <-- move inside
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8787";
+  
+  // Add /v1 prefix for versioned API routes
+  const isV1Route = V1_ROUTES.some(route => endpoint.startsWith(route));
+  const fullEndpoint = isV1Route ? `/v1${endpoint}` : endpoint;
+  
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     ...(options.headers as Record<string, string>),
@@ -19,10 +27,10 @@ export async function apiFetch<T = Record<string, unknown>>(
       throw new Error("Authentication required - please log in again");
     }
     headers["Authorization"] = `Bearer ${token}`;
-    console.log("Making authenticated request to:", endpoint);
+    console.log("Making authenticated request to:", fullEndpoint);
   }
 
-  const res = await fetch(`${API_BASE_URL}${endpoint}`, {
+  const res = await fetch(`${API_BASE_URL}${fullEndpoint}`, {
     ...options,
     headers,
   });

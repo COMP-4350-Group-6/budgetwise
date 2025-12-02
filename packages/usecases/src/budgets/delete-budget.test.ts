@@ -31,13 +31,13 @@ describe('deleteBudget (focused usecase tests)', () => {
     });
 
     // Sanity check it exists
-    const found = await budgetsRepo.getById(budget.props.id);
-    expect(found?.props.id).toBe(budget.props.id);
+    const found = await budgetsRepo.getById(budget.id);
+    expect(found?.props.id).toBe(budget.id);
 
     // Delete and verify gone
-    await expect(deleteBudget(budget.props.id, 'user-1')).resolves.toBeUndefined();
+    await expect(deleteBudget(budget.id, 'user-1')).resolves.toBeUndefined();
 
-    const after = await budgetsRepo.getById(budget.props.id);
+    const after = await budgetsRepo.getById(budget.id);
     expect(after).toBeNull();
 
     // Verify user listing is empty
@@ -61,11 +61,11 @@ describe('deleteBudget (focused usecase tests)', () => {
       startDate: new Date('2025-01-01'),
     });
 
-    await expect(deleteBudget(budget.props.id, 'intruder'))
+    await expect(deleteBudget(budget.id, 'intruder'))
       .rejects.toThrow('Unauthorized');
 
     // Ensure it still exists after failed delete
-    const stillThere = await budgetsRepo.getById(budget.props.id);
+    const stillThere = await budgetsRepo.getById(budget.id);
     expect(stillThere).not.toBeNull();
     expect(stillThere?.props.userId).toBe('owner');
   });
@@ -82,10 +82,10 @@ describe('deleteBudget (focused usecase tests)', () => {
     });
 
     // First delete works
-    await expect(deleteBudget(budget.props.id, 'user-2')).resolves.toBeUndefined();
+    await expect(deleteBudget(budget.id, 'user-2')).resolves.toBeUndefined();
 
     // Second delete should report not found
-    await expect(deleteBudget(budget.props.id, 'user-2'))
+    await expect(deleteBudget(budget.id, 'user-2'))
       .rejects.toThrow('Budget not found');
   });
 });

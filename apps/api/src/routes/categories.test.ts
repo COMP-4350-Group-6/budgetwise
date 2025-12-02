@@ -16,8 +16,7 @@ vi.mock('jose', () => {
   };
 });
 
-import { app } from '../app';
-import { container } from '../container';
+import { app, container } from '../test-app';
 
 interface CategoryDTO {
   id: string;
@@ -49,6 +48,7 @@ interface DeleteResponse {
 
 interface SeedResponse {
   categories: CategoryDTO[];
+  created: number;
   message: string;
 }
 
@@ -76,7 +76,7 @@ describe('Categories API Integration Tests', () => {
 
   describe('POST /categories - Create Category', () => {
     it('@critical should create a category with minimal data', async () => {
-      const res = await app.request('/categories', {
+      const res = await app.request('/v1/categories', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${authToken}`,
@@ -96,7 +96,7 @@ describe('Categories API Integration Tests', () => {
     });
 
     it('should create category with all optional fields', async () => {
-      const res = await app.request('/categories', {
+      const res = await app.request('/v1/categories', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${authToken}`,
@@ -119,7 +119,7 @@ describe('Categories API Integration Tests', () => {
     });
 
     it('should reject category without authorization', async () => {
-      const res = await app.request('/categories', {
+      const res = await app.request('/v1/categories', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -133,7 +133,7 @@ describe('Categories API Integration Tests', () => {
     });
 
     it('should reject category without name', async () => {
-      const res = await app.request('/categories', {
+      const res = await app.request('/v1/categories', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${authToken}`,
@@ -148,7 +148,7 @@ describe('Categories API Integration Tests', () => {
     });
 
     it('should create inactive category', async () => {
-      const res = await app.request('/categories', {
+      const res = await app.request('/v1/categories', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${authToken}`,
@@ -169,7 +169,7 @@ describe('Categories API Integration Tests', () => {
   describe('GET /categories - List Categories', () => {
     it('@critical should list all categories', async () => {
       // Create some categories first
-      const res1 = await app.request('/categories', {
+      const res1 = await app.request('/v1/categories', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${authToken}`,
@@ -179,7 +179,7 @@ describe('Categories API Integration Tests', () => {
       });
       expect(res1.status).toBe(201);
 
-      const res2 = await app.request('/categories', {
+      const res2 = await app.request('/v1/categories', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${authToken}`,
@@ -189,7 +189,7 @@ describe('Categories API Integration Tests', () => {
       });
       expect(res2.status).toBe(201);
 
-      const res = await app.request('/categories', {
+      const res = await app.request('/v1/categories', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${authToken}`,
@@ -203,7 +203,7 @@ describe('Categories API Integration Tests', () => {
 
     it('should filter active categories only', async () => {
       // Create active and inactive categories
-      await app.request('/categories', {
+      await app.request('/v1/categories', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${authToken}`,
@@ -212,7 +212,7 @@ describe('Categories API Integration Tests', () => {
         body: JSON.stringify({ name: 'Active 1', isActive: true }),
       });
 
-      await app.request('/categories', {
+      await app.request('/v1/categories', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${authToken}`,
@@ -221,7 +221,7 @@ describe('Categories API Integration Tests', () => {
         body: JSON.stringify({ name: 'Inactive 1', isActive: false }),
       });
 
-      const res = await app.request('/categories?active=true', {
+      const res = await app.request('/v1/categories?active=true', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${authToken}`,
@@ -234,7 +234,7 @@ describe('Categories API Integration Tests', () => {
     });
 
     it('should require authentication', async () => {
-      const res = await app.request('/categories', {
+      const res = await app.request('/v1/categories', {
         method: 'GET',
       });
 
@@ -244,7 +244,7 @@ describe('Categories API Integration Tests', () => {
 
   describe('POST /categories/seed - Seed Default Categories', () => {
     it('should seed default categories', async () => {
-      const res = await app.request('/categories/seed', {
+      const res = await app.request('/v1/categories/seed', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${authToken}`,
@@ -252,37 +252,39 @@ describe('Categories API Integration Tests', () => {
       });
 
       expect(res.status).toBe(201);
-      const data = await parseJson<CategoriesListResponse>(res);
+      const data = await parseJson<SeedResponse>(res);
       expect(data.categories.length).toBeGreaterThan(0);
+      expect(data.created).toBeGreaterThan(0);
       expect(data.message).toContain('Seeded');
       expect(data.categories.every((c) => c.isDefault)).toBe(true);
     });
 
     it('should not seed duplicates on second call', async () => {
       // First seed
-      const res1 = await app.request('/categories/seed', {
+      const res1 = await app.request('/v1/categories/seed', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${authToken}`,
         },
       });
 
-      const data1 = await parseJson<CategoriesListResponse>(res1);
+      const data1 = await parseJson<SeedResponse>(res1);
       const firstCount = data1.categories.length;
 
       // Second seed
-      const res2 = await app.request('/categories/seed', {
+      const res2 = await app.request('/v1/categories/seed', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${authToken}`,
         },
       });
 
-      const data2 = await parseJson<CategoriesListResponse>(res2);
+      const data2 = await parseJson<SeedResponse>(res2);
       expect(data2.categories.length).toBe(0); // No new categories
+      expect(data2.created).toBe(0);
 
       // Verify total count didn't change
-      const listRes = await app.request('/categories', {
+      const listRes = await app.request('/v1/categories', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${authToken}`,
@@ -294,7 +296,7 @@ describe('Categories API Integration Tests', () => {
     });
 
     it('should require authentication', async () => {
-      const res = await app.request('/categories/seed', {
+      const res = await app.request('/v1/categories/seed', {
         method: 'POST',
       });
 
@@ -305,7 +307,7 @@ describe('Categories API Integration Tests', () => {
   describe('PUT /categories/:id - Update Category', () => {
     it('should update category name', async () => {
       // Create category
-      const createRes = await app.request('/categories', {
+      const createRes = await app.request('/v1/categories', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${authToken}`,
@@ -318,7 +320,7 @@ describe('Categories API Integration Tests', () => {
       const categoryId = createData.category.id;
 
       // Update it
-      const updateRes = await app.request(`/categories/${categoryId}`, {
+      const updateRes = await app.request(`/v1/categories/${categoryId}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${authToken}`,
@@ -334,7 +336,7 @@ describe('Categories API Integration Tests', () => {
 
     it('should partially update category fields', async () => {
       // Create category with all fields
-      const createRes = await app.request('/categories', {
+      const createRes = await app.request('/v1/categories', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${authToken}`,
@@ -352,7 +354,7 @@ describe('Categories API Integration Tests', () => {
       const categoryId = createData.category.id;
 
       // Update only description
-      const updateRes = await app.request(`/categories/${categoryId}`, {
+      const updateRes = await app.request(`/v1/categories/${categoryId}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${authToken}`,
@@ -369,7 +371,7 @@ describe('Categories API Integration Tests', () => {
 
     it('should toggle category active status', async () => {
       // Create active category
-      const createRes = await app.request('/categories', {
+      const createRes = await app.request('/v1/categories', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${authToken}`,
@@ -382,7 +384,7 @@ describe('Categories API Integration Tests', () => {
       const categoryId = createData.category.id;
 
       // Deactivate
-      const updateRes = await app.request(`/categories/${categoryId}`, {
+      const updateRes = await app.request(`/v1/categories/${categoryId}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${authToken}`,
@@ -397,7 +399,7 @@ describe('Categories API Integration Tests', () => {
 
     it('should reject update from different user', async () => {
       // Create category
-      const createRes = await app.request('/categories', {
+      const createRes = await app.request('/v1/categories', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${authToken}`,
@@ -410,7 +412,7 @@ describe('Categories API Integration Tests', () => {
       const categoryId = createData.category.id;
 
       // Try to update as different user
-      const updateRes = await app.request(`/categories/${categoryId}`, {
+      const updateRes = await app.request(`/v1/categories/${categoryId}`, {
         method: 'PUT',
         headers: {
           'Authorization': 'Bearer different-user-token',
@@ -423,7 +425,7 @@ describe('Categories API Integration Tests', () => {
     });
 
     it('should reject updating non-existent category', async () => {
-      const res = await app.request('/categories/non-existent-id', {
+      const res = await app.request('/v1/categories/non-existent-id', {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${authToken}`,
@@ -439,7 +441,7 @@ describe('Categories API Integration Tests', () => {
   describe('DELETE /categories/:id - Delete Category', () => {
     it('should delete category without budgets', async () => {
       // Create category
-      const createRes = await app.request('/categories', {
+      const createRes = await app.request('/v1/categories', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${authToken}`,
@@ -452,7 +454,7 @@ describe('Categories API Integration Tests', () => {
       const categoryId = createData.category.id;
 
       // Delete it
-      const deleteRes = await app.request(`/categories/${categoryId}`, {
+      const deleteRes = await app.request(`/v1/categories/${categoryId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${authToken}`,
@@ -466,7 +468,7 @@ describe('Categories API Integration Tests', () => {
 
     it('should prevent deleting category with budgets', async () => {
       // Create category
-      const catRes = await app.request('/categories', {
+      const catRes = await app.request('/v1/categories', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${authToken}`,
@@ -479,7 +481,7 @@ describe('Categories API Integration Tests', () => {
       const categoryId = catData.category.id;
 
       // Create budget for this category
-      await app.request('/budgets', {
+      await app.request('/v1/budgets', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${authToken}`,
@@ -496,7 +498,7 @@ describe('Categories API Integration Tests', () => {
       });
 
       // Try to delete category
-      const deleteRes = await app.request(`/categories/${categoryId}`, {
+      const deleteRes = await app.request(`/v1/categories/${categoryId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${authToken}`,
@@ -509,7 +511,7 @@ describe('Categories API Integration Tests', () => {
     });
 
     it('should reject deleting non-existent category', async () => {
-      const res = await app.request('/categories/non-existent-id', {
+      const res = await app.request('/v1/categories/non-existent-id', {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${authToken}`,
@@ -521,7 +523,7 @@ describe('Categories API Integration Tests', () => {
 
     it('should reject deletion from different user', async () => {
       // Create category
-      const createRes = await app.request('/categories', {
+      const createRes = await app.request('/v1/categories', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${authToken}`,
@@ -534,7 +536,7 @@ describe('Categories API Integration Tests', () => {
       const categoryId = createData.category.id;
 
       // Try to delete as different user
-      const deleteRes = await app.request(`/categories/${categoryId}`, {
+      const deleteRes = await app.request(`/v1/categories/${categoryId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': 'Bearer different-user-token',
@@ -547,7 +549,7 @@ describe('Categories API Integration Tests', () => {
 
   describe('Boundary Tests - Category Creation', () => {
     it('should handle single character name', async () => {
-      const res = await app.request('/categories', {
+      const res = await app.request('/v1/categories', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${authToken}`,
@@ -563,7 +565,7 @@ describe('Categories API Integration Tests', () => {
 
     it('should handle maximum length name', async () => {
       const longName = 'A'.repeat(50);
-      const res = await app.request('/categories', {
+      const res = await app.request('/v1/categories', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${authToken}`,
@@ -579,7 +581,7 @@ describe('Categories API Integration Tests', () => {
 
     it('should reject Unicode characters in name but allow Unicode icon', async () => {
       // Invalid name with Unicode should be rejected per domain rules
-      const res1 = await app.request('/categories', {
+      const res1 = await app.request('/v1/categories', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${authToken}`,
@@ -593,7 +595,7 @@ describe('Categories API Integration Tests', () => {
       expect(res1.status).toBe(400);
 
       // Valid name with Unicode in icon should be accepted
-      const res2 = await app.request('/categories', {
+      const res2 = await app.request('/v1/categories', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${authToken}`,
@@ -610,7 +612,7 @@ describe('Categories API Integration Tests', () => {
     });
 
     it('should reject special characters in name', async () => {
-      const res = await app.request('/categories', {
+      const res = await app.request('/v1/categories', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${authToken}`,
@@ -628,7 +630,7 @@ describe('Categories API Integration Tests', () => {
   describe('Edge Cases - Concurrent Operations', () => {
     it('should handle creating multiple categories simultaneously', async () => {
       const promises = Array.from({ length: 10 }, (_, i) =>
-        app.request('/categories', {
+        app.request('/v1/categories', {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${authToken}`,
@@ -644,7 +646,7 @@ describe('Categories API Integration Tests', () => {
     });
 
     it('should allow duplicate names for different users', async () => {
-      const res1 = await app.request('/categories', {
+      const res1 = await app.request('/v1/categories', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer user-1-token`,
@@ -653,7 +655,7 @@ describe('Categories API Integration Tests', () => {
         body: JSON.stringify({ name: 'Food' }),
       });
 
-      const res2 = await app.request('/categories', {
+      const res2 = await app.request('/v1/categories', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer user-2-token`,

@@ -39,8 +39,8 @@ describe('Category Edge Cases & Boundary Tests', () => {
         name: 'A',
       });
 
-      expect(category.props.name).toBe('A');
-      expect(category.props.name.length).toBe(1);
+      expect(category.name).toBe('A');
+      expect(category.name.length).toBe(1);
     });
 
     it('should handle maximum length category name (50 chars)', async () => {
@@ -52,7 +52,7 @@ describe('Category Edge Cases & Boundary Tests', () => {
         name: longName,
       });
 
-      expect(category.props.name.length).toBe(50);
+      expect(category.name.length).toBe(50);
     });
 
     it('should reject Unicode and emoji in category names', async () => {
@@ -69,7 +69,7 @@ describe('Category Edge Cases & Boundary Tests', () => {
         name: 'Groceries',
         icon: '🛒🍎',
       });
-      expect(ok.props.icon).toBe('🛒🍎');
+      expect(ok.icon).toBe('🛒🍎');
     });
 
     it('should reject special characters in name', async () => {
@@ -83,7 +83,7 @@ describe('Category Edge Cases & Boundary Tests', () => {
         userId: 'user-123',
         name: 'Bills and Utilities',
       });
-      expect(category.props.name).toBe('Bills and Utilities');
+      expect(category.name).toBe('Bills and Utilities');
     });
 
     it('should reject name with only spaces', async () => {
@@ -104,7 +104,7 @@ describe('Category Edge Cases & Boundary Tests', () => {
         description: '',
       });
 
-      expect(category.props.description).toBe('');
+      expect(category.description).toBe('');
     });
 
     it('should handle very long description', async () => {
@@ -117,7 +117,7 @@ describe('Category Edge Cases & Boundary Tests', () => {
         description: longDescription,
       });
 
-      expect(category.props.description?.length).toBe(1000);
+      expect(category.description?.length).toBe(1000);
     });
 
     it('should handle multiline description', async () => {
@@ -128,7 +128,7 @@ describe('Category Edge Cases & Boundary Tests', () => {
         description: 'Line 1\nLine 2\nLine 3',
       });
 
-      expect(category.props.description).toContain('\n');
+      expect(category.description).toContain('\n');
     });
   });
 
@@ -141,7 +141,7 @@ describe('Category Edge Cases & Boundary Tests', () => {
         icon: '🍕🍔🍟',
       });
 
-      expect(category.props.icon).toBe('🍕🍔🍟');
+      expect(category.icon).toBe('🍕🍔🍟');
     });
 
     it('should handle empty icon', async () => {
@@ -152,7 +152,7 @@ describe('Category Edge Cases & Boundary Tests', () => {
         icon: '',
       });
 
-      expect(category.props.icon).toBe('');
+      expect(category.icon).toBe('');
     });
 
     it('should handle various color formats', async () => {
@@ -167,7 +167,7 @@ describe('Category Edge Cases & Boundary Tests', () => {
           color: colors[i],
         });
 
-        expect(category.props.color).toBe(colors[i]);
+        expect(category.color).toBe(colors[i]);
       }
     });
 
@@ -179,7 +179,7 @@ describe('Category Edge Cases & Boundary Tests', () => {
         color: 'transparent',
       });
 
-      expect(category.props.color).toBe('transparent');
+      expect(category.color).toBe('transparent');
     });
   });
 
@@ -192,7 +192,7 @@ describe('Category Edge Cases & Boundary Tests', () => {
         isActive: false,
       });
 
-      expect(category.props.isActive).toBe(false);
+      expect(category.isActive).toBe(false);
     });
 
     it('should toggle category between active and inactive multiple times', async () => {
@@ -203,22 +203,22 @@ describe('Category Edge Cases & Boundary Tests', () => {
       });
 
       // Toggle inactive
-      let updated = await updateCategory(category.props.id, 'user-123', {
+      let updated = await updateCategory(category.id, 'user-123', {
         isActive: false,
       });
-      expect(updated.props.isActive).toBe(false);
+      expect(updated.isActive).toBe(false);
 
       // Toggle active
-      updated = await updateCategory(category.props.id, 'user-123', {
+      updated = await updateCategory(category.id, 'user-123', {
         isActive: true,
       });
-      expect(updated.props.isActive).toBe(true);
+      expect(updated.isActive).toBe(true);
 
       // Toggle inactive again
-      updated = await updateCategory(category.props.id, 'user-123', {
+      updated = await updateCategory(category.id, 'user-123', {
         isActive: false,
       });
-      expect(updated.props.isActive).toBe(false);
+      expect(updated.isActive).toBe(false);
     });
 
     it('should list only active categories when filtering', async () => {
@@ -244,11 +244,11 @@ describe('Category Edge Cases & Boundary Tests', () => {
         name: 'High Priority',
       });
 
-      const updated = await updateCategory(category.props.id, 'user-123', {
+      const updated = await updateCategory(category.id, 'user-123', {
         sortOrder: -999,
       });
 
-      expect(updated.props.sortOrder).toBe(-999);
+      expect(updated.sortOrder).toBe(-999);
     });
 
     it('should handle very large sort order numbers', async () => {
@@ -258,11 +258,11 @@ describe('Category Edge Cases & Boundary Tests', () => {
         name: 'Low Priority',
       });
 
-      const updated = await updateCategory(category.props.id, 'user-123', {
+      const updated = await updateCategory(category.id, 'user-123', {
         sortOrder: 999999,
       });
 
-      expect(updated.props.sortOrder).toBe(999999);
+      expect(updated.sortOrder).toBe(999999);
     });
 
     it('should handle duplicate sort orders', async () => {
@@ -277,11 +277,11 @@ describe('Category Edge Cases & Boundary Tests', () => {
         name: 'Category Two',
       });
 
-      await updateCategory(cat1.props.id, 'user-123', { sortOrder: 5 });
-      await updateCategory(cat2.props.id, 'user-123', { sortOrder: 5 });
+      await updateCategory(cat1.id, 'user-123', { sortOrder: 5 });
+      await updateCategory(cat2.id, 'user-123', { sortOrder: 5 });
 
       const categories = await listCategories('user-123', false);
-      const sameSortOrder = categories.filter(c => c.props.sortOrder === 5);
+      const sameSortOrder = categories.filter(c => c.sortOrder === 5);
       
       expect(sameSortOrder).toHaveLength(2);
     });
@@ -295,31 +295,31 @@ describe('Category Edge Cases & Boundary Tests', () => {
 
       const all = await listCategories('user-123', false);
       
-      expect(first.length).toBeGreaterThan(0);
-      expect(second.length).toBe(first.length); // Subsequent call returns existing
-      expect(all.length).toBe(first.length);
+      expect(first.created).toBeGreaterThan(0);
+      expect(second.created).toBe(0); // Subsequent call creates nothing
+      expect(all.length).toBe(first.categories.length);
     });
 
     it('should seed different defaults for different users', async () => {
       // Reasoning: Each user gets their own defaults
-      const user1Defaults = await seedDefaultCategories('user-1');
-      const user2Defaults = await seedDefaultCategories('user-2');
+      const user1Result = await seedDefaultCategories('user-1');
+      const user2Result = await seedDefaultCategories('user-2');
 
       const user1Categories = await listCategories('user-1', false);
       const user2Categories = await listCategories('user-2', false);
 
-      expect(user1Defaults.length).toBeGreaterThan(0);
-      expect(user2Defaults.length).toBeGreaterThan(0);
-      expect(user1Categories.length).toBe(user1Defaults.length);
-      expect(user2Categories.length).toBe(user2Defaults.length);
+      expect(user1Result.created).toBeGreaterThan(0);
+      expect(user2Result.created).toBeGreaterThan(0);
+      expect(user1Categories.length).toBe(user1Result.categories.length);
+      expect(user2Categories.length).toBe(user2Result.categories.length);
     });
 
     it('should mark seeded categories as default', async () => {
       // Reasoning: Track which categories are defaults
-      const defaults = await seedDefaultCategories('user-123');
+      const result = await seedDefaultCategories('user-123');
 
-      for (const category of defaults) {
-        expect(category.props.isDefault).toBe(true);
+      for (const category of result.categories) {
+        expect(category.isDefault).toBe(true);
       }
     });
 
@@ -333,10 +333,10 @@ describe('Category Edge Cases & Boundary Tests', () => {
       });
 
       const all = await listCategories('user-123', false);
-      const defaultCats = all.filter(c => c.props.isDefault);
-      const customCats = all.filter(c => !c.props.isDefault);
+      const defaultCats = all.filter(c => c.isDefault);
+      const customCats = all.filter(c => !c.isDefault);
 
-      expect(custom.props.isDefault).toBe(false);
+      expect(custom.isDefault).toBe(false);
       expect(defaultCats.length).toBeGreaterThan(0);
       expect(customCats.length).toBe(1);
     });
@@ -352,7 +352,7 @@ describe('Category Edge Cases & Boundary Tests', () => {
 
       // Try to update as different user
       await expect(
-        updateCategory(cat1.props.id, 'user-2', { name: 'Hacked' })
+        updateCategory(cat1.id, 'user-2', { name: 'Hacked' })
       ).rejects.toThrow();
     });
 
@@ -370,9 +370,9 @@ describe('Category Edge Cases & Boundary Tests', () => {
       // Each user should have exactly 1 Food category
       for (const userId of users) {
         const categories = await listCategories(userId, false);
-        const foodCategories = categories.filter(c => c.props.name === 'Food');
+        const foodCategories = categories.filter(c => c.name === 'Food');
         expect(foodCategories).toHaveLength(1);
-        expect(foodCategories[0].props.userId).toBe(userId);
+        expect(foodCategories[0].userId).toBe(userId);
       }
     });
 
@@ -396,7 +396,7 @@ describe('Category Edge Cases & Boundary Tests', () => {
       const createBudget = makeCreateBudget({ budgetsRepo, clock, id });
       await createBudget({
         userId: 'user-123',
-        categoryId: category.props.id,
+        categoryId: category.id,
         name: 'Monthly Food',
         amountCents: 50000,
         currency: 'USD',
@@ -405,7 +405,7 @@ describe('Category Edge Cases & Boundary Tests', () => {
       });
 
       await expect(
-        deleteCategory(category.props.id, 'user-123')
+        deleteCategory(category.id, 'user-123')
       ).rejects.toThrow();
     });
 
@@ -417,7 +417,7 @@ describe('Category Edge Cases & Boundary Tests', () => {
       });
 
       await expect(
-        deleteCategory(category.props.id, 'user-123')
+        deleteCategory(category.id, 'user-123')
       ).resolves.not.toThrow();
     });
 
@@ -440,14 +440,14 @@ describe('Category Edge Cases & Boundary Tests', () => {
         color: '#FF0000',
       });
 
-      const updated = await updateCategory(category.props.id, 'user-123', {
+      const updated = await updateCategory(category.id, 'user-123', {
         name: 'New Name',
       });
 
-      expect(updated.props.name).toBe('New Name');
-      expect(updated.props.description).toBe('Original Description');
-      expect(updated.props.icon).toBe('🏠');
-      expect(updated.props.color).toBe('#FF0000');
+      expect(updated.name).toBe('New Name');
+      expect(updated.description).toBe('Original Description');
+      expect(updated.icon).toBe('🏠');
+      expect(updated.color).toBe('#FF0000');
     });
 
     it('should update timestamps on modification', async () => {
@@ -457,19 +457,19 @@ describe('Category Edge Cases & Boundary Tests', () => {
         name: 'Test',
       });
 
-      const originalUpdatedAt = category.props.updatedAt;
+      const originalUpdatedAt = category.updatedAt;
 
       // Wait a bit to ensure different timestamp
       await new Promise(resolve => setTimeout(resolve, 10));
 
-      const updated = await updateCategory(category.props.id, 'user-123', {
+      const updated = await updateCategory(category.id, 'user-123', {
         name: 'Updated',
       });
 
-      expect(updated.props.updatedAt.getTime()).toBeGreaterThan(
+      expect(updated.updatedAt.getTime()).toBeGreaterThan(
         originalUpdatedAt.getTime()
       );
-      expect(updated.props.createdAt).toEqual(category.props.createdAt);
+      expect(updated.createdAt).toEqual(category.createdAt);
     });
 
     it('should handle clearing optional fields', async () => {
@@ -482,15 +482,15 @@ describe('Category Edge Cases & Boundary Tests', () => {
         color: '#FF0000',
       });
 
-      const updated = await updateCategory(category.props.id, 'user-123', {
+      const updated = await updateCategory(category.id, 'user-123', {
         description: null,
         icon: null,
         color: null,
       });
 
-      expect(updated.props.description).toBeUndefined();
-      expect(updated.props.icon).toBeUndefined();
-      expect(updated.props.color).toBeUndefined();
+      expect(updated.description).toBeNull();
+      expect(updated.icon).toBeNull();
+      expect(updated.color).toBeNull();
     });
   });
 

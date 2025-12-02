@@ -42,7 +42,7 @@ describe('Budget Edge Cases & Boundary Tests', () => {
         startDate: new Date('2025-01-01'),
       });
 
-      expect(budget.props.amountCents).toBe(0);
+      expect(budget.amountCents).toBe(0);
     });
 
     it('should handle very large budget amounts (near MAX_SAFE_INTEGER)', async () => {
@@ -61,7 +61,7 @@ describe('Budget Edge Cases & Boundary Tests', () => {
         startDate: new Date('2025-01-01'),
       });
 
-      expect(budget.props.amountCents).toBe(largeBudget);
+      expect(budget.amountCents).toBe(largeBudget);
     });
 
     it('should handle 1 cent budgets', async () => {
@@ -76,7 +76,7 @@ describe('Budget Edge Cases & Boundary Tests', () => {
         startDate: new Date('2025-01-01'),
       });
 
-      expect(budget.props.amountCents).toBe(1);
+      expect(budget.amountCents).toBe(1);
     });
   });
 
@@ -96,13 +96,13 @@ describe('Budget Edge Cases & Boundary Tests', () => {
 
       await addTransaction({
         userId: 'user-123',
-        budgetId: budget.props.id,
-        categoryId: budget.props.categoryId,
+        budgetId: budget.id,
+        categoryId: budget.categoryId,
         amountCents: 1,
         occurredAt: new Date('2025-01-05'),
       });
 
-      const status = await getBudgetStatus(budget.props.id, 'user-123');
+      const status = await getBudgetStatus(budget.id, 'user-123');
       expect(status?.shouldAlert).toBe(true);
     });
 
@@ -122,15 +122,15 @@ describe('Budget Edge Cases & Boundary Tests', () => {
       // Spend 99%
       await addTransaction({
         userId: 'user-123',
-        budgetId: budget.props.id,
-        categoryId: budget.props.categoryId,
+        budgetId: budget.id,
+        categoryId: budget.categoryId,
         note: 'Almost all',
         amountCents: 49500,
         currency: 'USD',
         occurredAt: new Date('2025-01-05'),
       });
 
-      const status = await getBudgetStatus(budget.props.id, 'user-123');
+      const status = await getBudgetStatus(budget.id, 'user-123');
       expect(status?.shouldAlert).toBe(false);
       expect(status?.percentageUsed).toBeGreaterThanOrEqual(99);
     });
@@ -151,15 +151,15 @@ describe('Budget Edge Cases & Boundary Tests', () => {
       // Spend exactly 80%
       await addTransaction({
         userId: 'user-123',
-        budgetId: budget.props.id,
-        categoryId: budget.props.categoryId,
+        budgetId: budget.id,
+        categoryId: budget.categoryId,
         note: 'Exactly at threshold',
         amountCents: 8000,
         currency: 'USD',
         occurredAt: new Date('2025-01-05'),
       });
 
-      const status = await getBudgetStatus(budget.props.id, 'user-123');
+      const status = await getBudgetStatus(budget.id, 'user-123');
       expect(status?.percentageUsed).toBe(80);
       expect(status?.shouldAlert).toBe(true); // Should trigger at exactly threshold
     });
@@ -178,7 +178,7 @@ describe('Budget Edge Cases & Boundary Tests', () => {
         startDate: new Date(Date.UTC(1900, 0, 1)),
       });
 
-      expect(budget.props.startDate.getUTCFullYear()).toBe(1900);
+      expect(budget.startDate.getUTCFullYear()).toBe(1900);
     });
 
     it('should handle budget starting far in the future', async () => {
@@ -193,7 +193,7 @@ describe('Budget Edge Cases & Boundary Tests', () => {
         startDate: new Date('2099-12-31'),
       });
 
-      expect(budget.props.startDate.getFullYear()).toBe(2099);
+      expect(budget.startDate.getFullYear()).toBe(2099);
     });
 
     it('should handle very short-lived budget (same start and end date)', async () => {
@@ -210,7 +210,7 @@ describe('Budget Edge Cases & Boundary Tests', () => {
         endDate: date,
       });
 
-      expect(budget.props.startDate).toEqual(budget.props.endDate);
+      expect(budget.startDate).toEqual(budget.endDate);
     });
 
     it('should handle multi-year budget span', async () => {
@@ -226,7 +226,7 @@ describe('Budget Edge Cases & Boundary Tests', () => {
         endDate: new Date(Date.UTC(2035, 11, 31)),
       });
 
-      const yearsDiff = budget.props.endDate!.getUTCFullYear() - budget.props.startDate.getUTCFullYear();
+      const yearsDiff = budget.endDate!.getUTCFullYear() - budget.startDate.getUTCFullYear();
       expect(yearsDiff).toBe(10);
     });
   });
@@ -246,7 +246,7 @@ describe('Budget Edge Cases & Boundary Tests', () => {
         startDate: new Date('2025-01-01'),
       });
 
-      expect(budget.props.name).toHaveLength(100);
+      expect(budget.name).toHaveLength(100);
     });
 
     it('should handle minimum length budget name (1 char)', async () => {
@@ -261,7 +261,7 @@ describe('Budget Edge Cases & Boundary Tests', () => {
         startDate: new Date('2025-01-01'),
       });
 
-      expect(budget.props.name).toHaveLength(1);
+      expect(budget.name).toHaveLength(1);
     });
 
     it('should handle special characters and Unicode in name', async () => {
@@ -276,8 +276,8 @@ describe('Budget Edge Cases & Boundary Tests', () => {
         startDate: new Date('2025-01-01'),
       });
 
-      expect(budget.props.name).toContain('🍱');
-      expect(budget.props.name).toContain('月間食費');
+      expect(budget.name).toContain('🍱');
+      expect(budget.name).toContain('月間食費');
     });
   });
 
@@ -298,8 +298,8 @@ describe('Budget Edge Cases & Boundary Tests', () => {
       for (let i = 0; i < 10; i++) {
         await addTransaction({
           userId: 'user-123',
-          budgetId: budget.props.id,
-          categoryId: budget.props.categoryId,
+          budgetId: budget.id,
+          categoryId: budget.categoryId,
           note: `Coffee #${i + 1}`,
           amountCents: 50, // 50 cents each
           currency: 'USD',
@@ -307,7 +307,7 @@ describe('Budget Edge Cases & Boundary Tests', () => {
         });
       }
 
-      const status = await getBudgetStatus(budget.props.id, 'user-123');
+      const status = await getBudgetStatus(budget.id, 'user-123');
       expect(status?.spentCents).toBe(500);
       expect(status?.isOverBudget).toBe(false);
       expect(status?.transactionCount).toBe(10);
@@ -330,8 +330,8 @@ describe('Budget Edge Cases & Boundary Tests', () => {
       for (const month of months) {
         await addTransaction({
           userId: 'user-123',
-          budgetId: budget.props.id,
-          categoryId: budget.props.categoryId,
+          budgetId: budget.id,
+          categoryId: budget.categoryId,
           note: `Travel in month ${month}`,
           amountCents: 200000, // $2,000 per trip
           currency: 'USD',
@@ -339,7 +339,7 @@ describe('Budget Edge Cases & Boundary Tests', () => {
         });
       }
 
-      const status = await getBudgetStatus(budget.props.id, 'user-123');
+      const status = await getBudgetStatus(budget.id, 'user-123');
       expect(status?.spentCents).toBe(1000000); // $10,000 total
       expect(status?.percentageUsed).toBeCloseTo(83.33, 1);
     });
@@ -360,15 +360,15 @@ describe('Budget Edge Cases & Boundary Tests', () => {
 
       await addTransaction({
         userId: 'user-123',
-        budgetId: budget.props.id,
-        categoryId: budget.props.categoryId,
+        budgetId: budget.id,
+        categoryId: budget.categoryId,
         note: 'Huge expense',
         amountCents: 100000, // 10x over budget
         currency: 'USD',
         occurredAt: new Date('2025-01-15'),
       });
 
-      const status = await getBudgetStatus(budget.props.id, 'user-123');
+      const status = await getBudgetStatus(budget.id, 'user-123');
       expect(status?.isOverBudget).toBe(true);
       expect(status?.percentageUsed).toBe(1000);
       expect(status?.remainingCents).toBe(-90000);
@@ -388,15 +388,15 @@ describe('Budget Edge Cases & Boundary Tests', () => {
 
       await addTransaction({
         userId: 'user-123',
-        budgetId: budget.props.id,
-        categoryId: budget.props.categoryId,
+        budgetId: budget.id,
+        categoryId: budget.categoryId,
         note: 'Exact amount',
         amountCents: 50000,
         currency: 'USD',
         occurredAt: new Date('2025-01-15'),
       });
 
-      const status = await getBudgetStatus(budget.props.id, 'user-123');
+      const status = await getBudgetStatus(budget.id, 'user-123');
       expect(status?.remainingCents).toBe(0);
       expect(status?.percentageUsed).toBe(100);
       expect(status?.isOverBudget).toBe(false); // Not over, exactly at limit
@@ -416,15 +416,15 @@ describe('Budget Edge Cases & Boundary Tests', () => {
 
       await addTransaction({
         userId: 'user-123',
-        budgetId: budget.props.id,
-        categoryId: budget.props.categoryId,
+        budgetId: budget.id,
+        categoryId: budget.categoryId,
         note: 'Just over',
         amountCents: 50001,
         currency: 'USD',
         occurredAt: new Date('2025-01-15'),
       });
 
-      const status = await getBudgetStatus(budget.props.id, 'user-123');
+      const status = await getBudgetStatus(budget.id, 'user-123');
       expect(status?.isOverBudget).toBe(true);
       expect(status?.remainingCents).toBe(-1);
     });
@@ -446,8 +446,8 @@ describe('Budget Edge Cases & Boundary Tests', () => {
       // Add transaction
       await addTransaction({
         userId: 'user-123',
-        budgetId: budget.props.id,
-        categoryId: budget.props.categoryId,
+        budgetId: budget.id,
+        categoryId: budget.categoryId,
         note: 'Purchase',
         amountCents: 30000,
         currency: 'USD',
@@ -455,11 +455,11 @@ describe('Budget Edge Cases & Boundary Tests', () => {
       });
 
       // Increase budget
-      const updated = await updateBudget(budget.props.id, 'user-123', {
+      const updated = await updateBudget(budget.id, 'user-123', {
         amountCents: 100000, // Double the budget
       });
 
-      const status = await getBudgetStatus(updated.props.id, 'user-123');
+      const status = await getBudgetStatus(updated.id, 'user-123');
       expect(status?.percentageUsed).toBe(30); // 30k of 100k
       expect(status?.isOverBudget).toBe(false);
     });
@@ -478,8 +478,8 @@ describe('Budget Edge Cases & Boundary Tests', () => {
 
       await addTransaction({
         userId: 'user-123',
-        budgetId: budget.props.id,
-        categoryId: budget.props.categoryId,
+        budgetId: budget.id,
+        categoryId: budget.categoryId,
         note: 'Purchase',
         amountCents: 60000,
         currency: 'USD',
@@ -487,11 +487,11 @@ describe('Budget Edge Cases & Boundary Tests', () => {
       });
 
       // Cut budget below spending
-      const updated = await updateBudget(budget.props.id, 'user-123', {
+      const updated = await updateBudget(budget.id, 'user-123', {
         amountCents: 50000, // Below current $600 spending
       });
 
-      const status = await getBudgetStatus(updated.props.id, 'user-123');
+      const status = await getBudgetStatus(updated.id, 'user-123');
       expect(status?.isOverBudget).toBe(true);
       expect(status?.percentageUsed).toBe(120);
     });
@@ -514,8 +514,8 @@ describe('Budget Edge Cases & Boundary Tests', () => {
       const promises = Array.from({ length: 100 }, (_, i) =>
         addTransaction({
           userId: 'user-123',
-          budgetId: budget.props.id,
-          categoryId: budget.props.categoryId,
+          budgetId: budget.id,
+          categoryId: budget.categoryId,
           note: `Transaction ${i}`,
           amountCents: 500,
           currency: 'USD',
@@ -525,7 +525,7 @@ describe('Budget Edge Cases & Boundary Tests', () => {
 
       await Promise.all(promises);
 
-      const status = await getBudgetStatus(budget.props.id, 'user-123');
+      const status = await getBudgetStatus(budget.id, 'user-123');
       expect(status?.transactionCount).toBe(100);
       expect(status?.spentCents).toBe(50000); // 100 × $5
     });

@@ -1,6 +1,8 @@
 import { Category } from "@budget/domain";
 import type { CategoriesRepo } from "@budget/ports";
 import type { ClockPort } from "@budget/ports";
+import type { CategoryDTO } from "@budget/schemas";
+import { toCategoryDTO } from "../presenters";
 
 export interface UpdateCategoryInput {
   name?: string;
@@ -15,7 +17,7 @@ export function makeUpdateCategory(deps: {
   categoriesRepo: CategoriesRepo;
   clock: ClockPort;
 }) {
-  return async (id: string, userId: string, updates: UpdateCategoryInput): Promise<Category> => {
+  return async (id: string, userId: string, updates: UpdateCategoryInput): Promise<CategoryDTO> => {
     const existing = await deps.categoriesRepo.getById(id);
     
     if (!existing) {
@@ -38,6 +40,6 @@ export function makeUpdateCategory(deps: {
     });
     
     await deps.categoriesRepo.update(updated);
-    return updated;
+    return toCategoryDTO(updated);
   };
 }

@@ -15,8 +15,7 @@ vi.mock('jose', () => {
   };
 });
 
-import { app } from '../../src/app';
-import { container } from '../../src/container';
+import { app, container } from '../../src/test-app';
 
 interface CategoryCreateResponse {
   category: {
@@ -77,7 +76,7 @@ describe('Integration: Category + Budget + Transaction -> Dashboard', () => {
 
   it('@critical should reflect added transaction in dashboard totals', async () => {
     // 1) Create category
-    const catRes = await app.request('/categories', {
+    const catRes = await app.request('/v1/categories', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${authToken}`,
@@ -90,7 +89,7 @@ describe('Integration: Category + Budget + Transaction -> Dashboard', () => {
     const categoryId = catData.category.id;
 
     // 2) Create budget for category
-    const budgetRes = await app.request('/budgets', {
+    const budgetRes = await app.request('/v1/budgets', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${authToken}`,
@@ -110,7 +109,7 @@ describe('Integration: Category + Budget + Transaction -> Dashboard', () => {
     const budgetId = budgetData.budget.id;
 
     // 3) Add transaction against this budget
-    const txRes = await app.request('/transactions', {
+    const txRes = await app.request('/v1/transactions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${authToken}`,
@@ -127,7 +126,7 @@ describe('Integration: Category + Budget + Transaction -> Dashboard', () => {
     expect(txRes.status).toBe(201);
 
     // 4) Read dashboard and assert category totals decreased by transaction amount
-    const dashRes = await app.request('/budgets/dashboard', {
+    const dashRes = await app.request('/v1/budgets/dashboard', {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${authToken}`,
