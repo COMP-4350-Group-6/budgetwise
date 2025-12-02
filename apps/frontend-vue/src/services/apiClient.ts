@@ -44,6 +44,17 @@ export interface BudgetDashboard {
   }>;
 }
 
+export interface Transaction {
+  id: string;
+  amountCents: number;
+  occurredAt: string;
+  categoryId: string;
+  budgetId?: string;
+  description?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 interface ErrorResponse {
   error?: string;
 }
@@ -128,6 +139,43 @@ export class ApiClient {
 
     const data = (await response.json()) as { dashboard: BudgetDashboard };
     return data.dashboard;
+  }
+
+  async getTransactions(startDate?: string, endDate?: string): Promise<Transaction[]> {
+    const token = await this.getSessionToken();
+    if (!token) {
+      throw new Error('No active session');
+    }
+
+    let url = `${this.baseUrl}/transactions`;
+    const params = new URLSearchParams();
+    
+    if (startDate && endDate) {
+      params.append('start', startDate);
+      params.append('end', endDate);
+    } else {
+      // Default to last 30 days if no dates provided
+      params.append('days', '30');
+    }
+    params.append('limit', '1000'); // Get enough transactions for the month
+    
+    url += `?${params.toString()}`;
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const error = (await response.json().catch(() => ({}))) as ErrorResponse;
+      throw new Error(error?.error || `Failed to get transactions with status ${response.status}`);
+    }
+
+    const data = (await response.json()) as { transactions: Transaction[] };
+    return data.transactions;
   }
 }
 

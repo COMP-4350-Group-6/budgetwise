@@ -25,7 +25,7 @@
         <p class="error-text">{{ budgetError }}</p>
       </div>
       <div v-else-if="budget" class="budget-info">
-        <h3 class="budget-title">Budget Overview</h3>
+        <h3 class="budget-title">Budget Overview (Current Month)</h3>
         <div class="budget-item">
           <span class="budget-label">Current Budget:</span>
           <span class="budget-value">${{ formatCurrency(budget.totalBudgetCents) }}</span>
@@ -61,7 +61,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { apiClient, type User } from '@/services/apiClient';
+import { apiClient, type User, type BudgetDashboard } from '@/services/apiClient';
 
 const router = useRouter();
 
@@ -82,13 +82,40 @@ const formatCurrency = (cents: number): string => {
   });
 };
 
+const getCurrentMonthDates = () => {
+  const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+  
+  return {
+    start: startOfMonth.toISOString(),
+    end: endOfMonth.toISOString(),
+  };
+};
+
 const fetchBudgetData = async () => {
   budgetLoading.value = true;
   budgetError.value = null;
 
   try {
+    // Fetch budget dashboard for budget amounts
     const dashboard = await apiClient.getBudgetDashboard();
-    budget.value = dashboard;
+    
+    // Fetch transactions for current month only
+    const { start, end } = getCurrentMonthDates();
+    const transactions = await apiClient.getTransactions(start, end);
+    
+    // Calculate total spent from current month transactions only
+    // Only count expenses (negative amounts) or use absolute value
+    const currentMonthSpent = transactions.reduce((sum, tx) => {
+      return sum + Math.abs(tx.amountCents);
+    }, 0);
+    
+    // Update the dashboard with current month spending
+    budget.value = {
+      ...dashboard,
+      totalSpentCents: currentMonthSpent,
+    };
   } catch (err) {
     console.error('Failed to fetch budget data:', err);
     budgetError.value = err instanceof Error 
