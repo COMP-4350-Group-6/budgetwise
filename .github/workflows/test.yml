@@ -200,8 +200,9 @@ jobs:
             // Check if coverage was generated
             const coverageDir = path.join(process.cwd(), 'coverage');
             if (fs.existsSync(coverageDir)) {
+              const runUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
               coverageMessage += '✅ Coverage report has been generated for this PR.\n';
-              coverageMessage += '📈 View the full coverage report in the workflow artifacts.\n\n';
+              coverageMessage += `📈 [View Coverage Report](${runUrl})\n\n`;
               coverageMessage += '💡 **Note**: This includes coverage for all tests run in CI.';
             } else {
               coverageMessage += '⚠️ **Coverage Report**: No coverage data was generated.\n\n';
