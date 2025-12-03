@@ -39,9 +39,12 @@ export default function SpendingOverview({
   const router = useRouter();
 
   // Monday-first day labels for the weekly chart
-  const dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+  const dayNames = useMemo(
+    () => ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+    []
+  );
 
-  // ---------- WEEK RANGE (memoized) ----------
+  // ---------- WEEK RANGE ----------
   const { startOfWeek, endOfWeek, weekRangeLabel } = useMemo(() => {
     const now = new Date();
     const ref = new Date(now);
