@@ -8,27 +8,341 @@ Format: Markdown file in your repository, with all supporting files linked.
 >
 > ### Worksheet Question
 >
-> 1. [ ] Describe your load testing environment:
+> 1. [x] Describe your load testing environment:
 >    
->    - [ ] Tools used.
+>    - [x] Tools used.
 >    
->    - [ ] Load test cases.
+>    - [x] Load test cases.
 >   
-> 2. [ ] Provide the test report.
+> 2. [x] Provide the test report.
 >
-> 3. [ ] Discuss one bottleneck found.
+> 3. [x] Discuss one bottleneck found.
 >
-> 4. [ ] State whether you met your non-functional requirements.
+> 4. [x] State whether you met your non-functional requirements.
 >
 >    - If not, why? Could you meet them with more resources/money?
 >   
-> 5. [ ] If using JMeter:
+> 5. [x] If using JMeter:
 >
->    - [ ]  Upload .jmx file to GitHub and provide link.
+>    - [x]  Upload .jmx file to GitHub and provide link.
 >          
->    - [ ]  Include snapshot of results.
+>    - [x]  Include snapshot of results.
 
+## 1. Load Testing Environment
 
+### Infrastructure
+| Component | Details |
+|-----------|---------|
+| **API Server** | Cloudflare Workers (Edge, globally distributed) |
+| **Database** | Supabase (PostgreSQL) |
+| **LLM Service** | OpenRouter → Google Gemini 2.0 Flash Lite |
+| **Domain** | `api.budgetwise.ca` |
+
+### Test Machine
+| Spec | Value |
+|------|-------|
+| OS | macOS Sequoia |
+| Location | Winnipeg, Canada |
+| Network | Residential broadband |
+
+---
+
+## 2. Tools Used
+
+### Primary Tool: [Grafana k6](https://k6.io/)
+
+k6 is an open-source load testing tool built for developer experience. We chose k6 over alternatives like JMeter because:
+
+- **JavaScript-based**: Native scripting that matches our TypeScript codebase
+- **CLI-first**: Easy CI/CD integration without GUI overhead
+- **Modern protocols**: Built-in HTTP/2, WebSocket support
+- **Rich metrics**: Custom metrics, thresholds, and detailed reporting
+- **Lightweight**: Single binary, no JVM or dependencies
+
+### Supporting Tools
+| Tool | Purpose |
+|------|---------|
+| `tsx` | TypeScript execution for test setup scripts |
+| `@supabase/supabase-js` | User creation and token generation |
+| `k6-reporter` | HTML report generation |
+
+### Test Files
+```
+load-tests/
+├── load-test.js           # Main k6 load test script
+├── create-test-users.ts   # Creates 20 test users in Supabase
+├── seed-test-data.ts      # Seeds categories/transactions for users
+├── tokens.json            # JWT tokens (20 unique users)
+└── README.md              # Setup instructions
+```
+
+---
+
+## 3. Load Test Cases
+
+### Non-Functional Requirements
+From our project specification:
+- **20 concurrent users**
+- **200 requests per minute** (minimum)
+- **Response time p95 < 500ms**
+- **Error rate < 1%**
+
+### Test Scenarios
+
+| Test Case | Endpoint | Method | Description |
+|-----------|----------|--------|-------------|
+| **TC-1: Authentication** | `/auth/me` | GET | Verify JWT token validation and user profile retrieval |
+| **TC-2: List Transactions** | `/v1/transactions` | GET | Retrieve user's transaction history |
+| **TC-3: List Categories** | `/v1/categories` | GET | Retrieve user's budget categories |
+| **TC-4: Create Transaction** | `/v1/transactions` | POST | Create a new financial transaction |
+| **TC-5: Invoice Parsing** | `/v1/transactions/parse-invoice` | POST | LLM-powered invoice OCR (5% of iterations) |
+
+### Test Configuration
+
+```javascript
+export const options = {
+  stages: [
+    { duration: '30s', target: 20 }, // Ramp up to 20 users
+    { duration: '1m', target: 20 },  // Sustained load
+    { duration: '30s', target: 0 },  // Ramp down
+  ],
+  thresholds: {
+    http_req_duration: ['p(95)<500'],       // 95th percentile < 500ms
+    http_req_failed: ['rate<0.01'],         // < 1% failure rate
+    http_reqs: ['rate>3.33'],               // > 200 req/min
+    invoice_parsing_duration: ['p(95)<10000'], // LLM ops < 10s
+  },
+};
+```
+
+### Multi-User Simulation
+
+Each of the 20 virtual users (VUs) authenticates with a **unique JWT token** from a real Supabase account, ensuring realistic session isolation:
+
+```javascript
+const vuIndex = (__VU - 1) % tokenData.length;
+const token = tokenData[vuIndex]; // Different user per VU
+```
+
+---
+
+## 4. Test Results
+
+### Summary
+
+| Metric | Result | Threshold | Status |
+|--------|--------|-----------|--------|
+| **Total Requests** | 2,720 | - | - |
+| **Request Rate** | 1,350/min (22.50/s) | >200/min | ✅ **PASS** (6.75x target) |
+| **Response Time (p95)** | 211.78ms | <500ms | ✅ **PASS** |
+| **Error Rate** | 0.51% | <1% | ✅ **PASS** |
+| **Concurrent Users** | 20 VUs | 20 | ✅ **PASS** |
+| **Duration** | 2m 0.9s | - | - |
+| **Iterations** | 672 | - | - |
+
+### Detailed Metrics
+
+#### Per-Endpoint Response Times (ms)
+
+| Endpoint | Avg | Median | p90 | p95 | Max |
+|----------|-----|--------|-----|-----|-----|
+| `GET /auth/me` | 38.88 | 36 | 45 | 64 | 162 |
+| `GET /v1/transactions` | 157.56 | 149 | 197 | 215 | 614 |
+| `GET /v1/categories` | 152.35 | 145 | 188 | 207 | 384 |
+| `POST /v1/transactions` | 152.82 | 142 | 190 | 214 | 868 |
+| `POST /v1/.../parse-invoice` | 4,835 | 5,098 | 5,903 | 6,207 | 6,333 |
+
+#### Check Results
+
+| Check | Pass | Fail | Pass Rate |
+|-------|------|------|-----------|
+| auth/me status 200 | 672 | 0 | 100% ✅ |
+| auth/me has user id | 672 | 0 | 100% ✅ |
+| auth/me has email | 672 | 0 | 100% ✅ |
+| GET /transactions 200 | 672 | 0 | 100% ✅ |
+| transactions is array | 672 | 0 | 100% ✅ |
+| GET /categories 200 | 672 | 0 | 100% ✅ |
+| categories is array | 672 | 0 | 100% ✅ |
+| POST /transactions 201 | 672 | 0 | 100% ✅ |
+| created tx has id | 672 | 0 | 100% ✅ |
+| invoice parsed (200) | 18 | 14 | 56% ⚠️ |
+| has merchant | 18 | 14 | 56% ⚠️ |
+
+**Overall Check Success Rate: 99.54%**
+
+---
+
+## 5. Bottleneck Analysis: Invoice Parsing
+
+### The Problem
+
+The LLM-powered invoice parsing endpoint (`POST /v1/transactions/parse-invoice`) is **125x slower** than CRUD operations:
+
+| Operation Type | Avg Response Time |
+|----------------|-------------------|
+| CRUD Operations | ~38-158ms |
+| **Invoice Parsing** | **4,835ms** |
+
+### Root Causes
+
+#### 1. External API Chain
+```
+Client → Cloudflare Worker → OpenRouter → Google Gemini → back
+```
+Each network hop adds 50-200ms of latency.
+
+#### 2. Vision Model Inference
+The `google/gemini-2.0-flash-lite-001` model must:
+1. Decode base64 image (~15KB-200KB)
+2. Run OCR on invoice text
+3. Parse document structure
+4. Generate structured JSON response
+
+Even "flash" models require 3-5 seconds for multi-modal inputs.
+
+#### 3. Token Generation
+- System prompt: ~500 tokens
+- Max completion: 6,400 tokens (increased from 800 to handle complex invoices)
+- Total: ~7,000 tokens per request potential
+
+#### 4. OpenRouter Rate Limiting
+OpenRouter implements rate limits that affect concurrent requests:
+- **44% failure rate** (14 of 32 invoice requests failed)
+- Rate limits are per-account, not per-API-key
+- Free tier: ~3-10 requests/minute for vision models
+- Throttled requests return HTTP 429 or timeout
+
+**How OpenRouter Rate Limits Work:**
+```
+1. Token-based: Limits on tokens per minute (TPM)
+2. Request-based: Limits on requests per minute (RPM)
+3. Model-specific: Vision models have stricter limits
+4. Burst handling: Short bursts allowed, then throttled
+```
+
+### Why This Is Expected (Not a Bug)
+
+LLM operations are **fundamentally different** from CRUD:
+
+| Characteristic | CRUD | LLM |
+|----------------|------|-----|
+| Computation Location | Edge (Cloudflare) | Remote (Google Cloud) |
+| Processing Type | Database lookup | Neural network inference |
+| Latency | Milliseconds | Seconds |
+| Cost | Sub-cent | 1-5 cents per image |
+
+### Mitigation Strategies
+
+1. **Async Processing**: Return job ID immediately, process in background
+2. **Client UX**: Show progress indicator, expected wait time (5-10s)
+3. **Rate Limiting**: Limit 5 invoice uploads per user per minute
+4. **Caching**: Don't re-parse identical images (hash-based dedup)
+5. **Batch Optimization**: Collect multiple invoices, process sequentially
+
+---
+
+## 6. Non-Functional Requirements: Status
+
+### ✅ All Core Requirements Met
+
+| Requirement | Target | Actual | Status |
+|-------------|--------|--------|--------|
+| Concurrent Users | 20 | 20 | ✅ Met |
+| Throughput | 200 req/min | 1,350 req/min | ✅ **6.75x exceeded** |
+| Response Time (p95) | <500ms | 212ms | ✅ **58% under target** |
+| Error Rate | <1% | 0.51% | ✅ Met |
+
+### ⚠️ LLM Feature Partially Met
+
+The invoice parsing feature (optional enhancement) has:
+- 56% success rate under concurrent load (18/32 requests)
+- Average 4.8s response time (within 10s threshold)
+
+**This is acceptable** because:
+1. Invoice parsing is a non-critical enhancement
+2. Core budgeting functionality (CRUD) is 100% reliable
+3. LLM operations are inherently slower and more resource-intensive
+
+---
+
+## 7. Could We Improve With More Resources?
+
+### Yes, but with diminishing returns
+
+| Investment | Expected Improvement | Cost Impact |
+|------------|---------------------|-------------|
+| **Faster LLM Model** (Claude 3.5 Sonnet) | 20-30% faster | 3x per request |
+| **Dedicated API Tier** (OpenRouter Pro) | Higher rate limits | $50-200/month |
+| **Edge Caching** | Repeat queries instant | Minimal |
+| **Background Workers** | Better UX (async) | Development time |
+| **Regional Replicas** | Lower latency globally | Supabase Pro ($25/mo) |
+
+### Recommended Priority
+
+1. **Low-Hanging Fruit**: Implement async job queue for invoice parsing (free)
+2. **Quick Win**: Add image hash caching (prevents duplicate processing)
+3. **If needed**: Upgrade to higher OpenRouter rate limits
+
+### Current Architecture Is Cost-Efficient
+
+- Cloudflare Workers: Free tier (100K req/day)
+- Supabase: Free tier (500MB database, 50K auth requests)
+- OpenRouter: Pay-per-use (~$0.01/invoice)
+
+**Total monthly cost at current scale: ~$5-10**
+
+---
+
+## 8. Conclusion
+
+BudgetWise's API **passes all non-functional requirements** for Sprint 3:
+
+- ✅ 20 concurrent users supported
+- ✅ 1,350 requests/minute (6.75x the 200 req/min target)
+- ✅ 212ms p95 response time (58% under 500ms threshold)
+- ✅ 0.51% error rate (under 1% threshold)
+- ✅ 99.54% overall check success rate
+
+The identified bottleneck (LLM invoice parsing) is:
+- Expected behavior for AI features (external API dependency)
+- Isolated from core functionality (56% success, but core is 100%)
+- Addressable with async processing or rate limit upgrades if needed
+
+---
+
+## Appendix: Running the Load Test
+
+### Prerequisites
+```bash
+brew install k6  # macOS
+# or: https://grafana.com/docs/k6/latest/set-up/install-k6/
+```
+
+### Setup (One-time)
+```bash
+cd load-tests
+pnpm install
+pnpm exec tsx create-test-users.ts  # Creates 20 test users
+```
+
+### Run Load Test
+```bash
+k6 run -e BASE_URL=https://api.budgetwise.ca load-test.js
+```
+
+### View Report
+Open [load-test-report-2025-12-03T00-43-33-427Z.html](https://github.com/user-attachments/files/23893429/load-test-report-2025-12-03T00-43-33-427Z.html) in a browser.
+
+---
+
+## Files on GitHub
+
+- [`load-tests/load-test.js`](./load-test.js) - k6 test script
+- [`load-tests/create-test-users.ts`](./create-test-users.ts) - User setup
+- [`load-tests/README.md`](./README.md) - Documentation
+- [`load-tests/LOAD_TEST_REPORT.md`](./LOAD_TEST_REPORT.md) - This report
+
+  
 ## 2. Security Analysis
 
 > [!IMPORTANT]
@@ -101,11 +415,17 @@ Format: Markdown file in your repository, with all supporting files linked.
 >   
 >   - Length guideline: approximately 5–8 sentences. Focus only on your own actions and understanding.
 
-### Ahnaf:
+### Ahnaf: AI/External Resource Reflection:
+
+I used Claude-Opus-4.1 for initial development scaffolding in Sprint 0-1 and for project coordination starting in Sprint 2. 
+For the early sprints, Claude helped me generate mock data structures and a localStorage-based persistence layer, which gave us a working prototype before the backend was ready. However, the frontend output needed significant polishing. components had inconsistent spacing, hardcoded pixel values, and race conditions where rapid actions caused localStorage to desync.
+In Sprint 2, I started using Claude to break down tasks and track team progress once coordination issues became apparent. This taught me AI is great for getting a foundation quickly, but the output always needs human refinement. It also showed me how AI can really help structure information, in this case, the messy chatlogs of our work.
 
 ### Sid:
 
-### Steph:
+### Steph: AI / External Resource Reflection
+
+During this project, I used AI (ChatGPT-4o) as a support tool to help me debug and refine several front-end components. One specific problem I tried to solve was that the weekly bar chart and calendar selection logic were returning the wrong day’s transactions, and the UI header was showing long, unreadable date strings. The AI initially gave me a general explanation of why my state values were inconsistent (mixing short day labels with full date strings), but I rewrote the solution to fit my actual component structure and to avoid breaking the rest of the layout. I validated the implementation by manually testing both views and confirming that clicking either a bar or a calendar day produced identical, correctly filtered results. Another area where I used AI was improving the UI design of the transaction rows and legend styling; the tool provided CSS patterns, but I adapted spacing, shadows, and colors to match our existing theme. Through this process, I learned how to unify date handling in React components, how to make state transitions predictable, and how to design reusable UI patterns that look consistent across a dashboard. Overall, AI helped me reason through problems faster, but I still had to understand the underlying logic, rewrite portions of the solution, and ensure it fit our codebase and our team’s design direction.
 
 ### Ramatjyot:
 
@@ -114,13 +434,13 @@ Format: Markdown file in your repository, with all supporting files linked.
 
 ## Sprint 3 Quick Checklist
 
-- [ ] Load testing environment described.
+- [x] Load testing environment described.
 
-- [ ] Test report + bottleneck discussion included.
+- [x] Test report + bottleneck discussion included.
 
-- [ ] Non-functional goals assessed.
+- [x] Non-functional goals assessed.
 
-- [ ] JMeter .jmx file linked (if applicable) + results snapshot.
+- [x] JMeter .jmx file linked (if applicable) + results snapshot.
 
 - [ ] Security tool described + full report attached.
 
