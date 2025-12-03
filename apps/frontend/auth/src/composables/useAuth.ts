@@ -1,4 +1,4 @@
-import { ref, computed, readonly, onMounted } from 'vue';
+import { ref, computed, readonly } from 'vue';
 import { makeWebAuthApiContainer } from '@budget/composition-web-auth-api';
 import type { AuthUser, AuthResult, AuthState, LoginInput, SignupInput } from '@budget/schemas';
 import { config } from '@/config';

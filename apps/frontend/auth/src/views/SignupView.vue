@@ -1,11 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
 import { useAuth } from '@/composables/useAuth';
 import { SignupInputSchema } from '@budget/schemas';
 
-const router = useRouter();
-const route = useRoute();
 const { signup, isAuthenticated, isLoading, redirectToMainApp } = useAuth();
 
 const name = ref('');
