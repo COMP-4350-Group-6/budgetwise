@@ -7,7 +7,7 @@
  * Usage: npx tsx src/openapi-generator.ts
  */
 
-import { z } from "zod/v4";
+import { z } from "zod";
 import { createDocument } from "zod-openapi";
 import * as fs from "node:fs";
 import * as path from "node:path";
