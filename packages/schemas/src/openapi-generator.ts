@@ -1168,15 +1168,22 @@ function generateOpenAPISpec(): void {
     },
     components: {
       securitySchemes: {
+        cookieAuth: {
+          type: "apiKey",
+          in: "cookie",
+          name: "budgetwise_session",
+          description: "Session cookie set automatically after login. Contains JSON with accessToken and refreshToken.",
+        },
         bearerAuth: {
           type: "http",
           scheme: "bearer",
           bearerFormat: "JWT",
-          description: "JWT access token from /auth/login",
+          description: "JWT access token (alternative to cookie auth for API clients)",
         },
       },
     },
-    security: [{ bearerAuth: [] }],
+    // Cookie auth is primary, bearer is fallback
+    security: [{ cookieAuth: [] }, { bearerAuth: [] }],
   });
 
   // Get output directory
