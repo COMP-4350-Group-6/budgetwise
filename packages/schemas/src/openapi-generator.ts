@@ -372,6 +372,10 @@ function generateOpenAPISpec(): void {
     },
     servers: [
       {
+        url: "",
+        description: "Current server (same origin - works for deployed and local)",
+      },
+      {
         url: "http://localhost:8787",
         description: "Local development (start with: pnpm --filter @budget/api run dev)",
       },

@@ -44,7 +44,13 @@ docs.get("/docs", (c) => {
           SwaggerUIBundle.presets.apis,
           SwaggerUIBundle.SwaggerUIStandalonePreset
         ],
-        layout: "BaseLayout"
+        layout: "BaseLayout",
+        // Send cookies with requests (for session-based auth)
+        withCredentials: true,
+        requestInterceptor: function(req) {
+          req.credentials = 'include';
+          return req;
+        }
       });
     }
   </script>

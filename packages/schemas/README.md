@@ -174,8 +174,11 @@ The API serves Swagger UI directly at `/docs`:
    ```
    SUPABASE_URL=https://your-project.supabase.co
    SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+   SUPABASE_ANON_KEY=your-anon-key
    SUPABASE_JWT_SECRET=your-jwt-secret
    ```
+   
+   > **Note:** `SUPABASE_ANON_KEY` is required for auth routes. In newer Supabase projects, this is called the "Publishable key" (format: `sb_publishable_...`).
 
 2. **Start the local API server:**
    ```bash
@@ -186,14 +189,28 @@ The API serves Swagger UI directly at `/docs`:
 
 3. **Open Swagger UI:** http://localhost:8787/docs
 
-4. **Test endpoints** - Click "Try it out" on any endpoint
+4. **Testing with Authentication:**
+   
+   The API uses **cookie-based authentication**. Swagger UI is configured to automatically send cookies with requests.
+   
+   1. **Login first:** Execute `POST /auth/login` with your credentials
+   2. **Test protected endpoints:** The session cookie is sent automatically
+   3. **Example flow:**
+      - `POST /auth/login` → Returns user info, sets session cookie
+      - `GET /v1/budgets` → Cookie sent automatically, returns budgets
+      - `POST /auth/logout` → Clears session cookie
 
 ### Troubleshooting
 
 **Auth endpoints return 404:**
 - Auth routes only mount when `authProvider` is configured
-- Ensure your `.dev.vars` has valid Supabase credentials
+- Ensure your `.dev.vars` has `SUPABASE_ANON_KEY` (or Publishable key)
 - Check the terminal for errors like "tokenVerifier is required"
+
+**Protected endpoints return 401 Unauthorized:**
+- Make sure you logged in first via `POST /auth/login`
+- The session cookie should be set automatically
+- Check DevTools → Application → Cookies for `budgetwise_session`
 
 **"Cannot find module" errors:**
 - Run `pnpm install` at the root
