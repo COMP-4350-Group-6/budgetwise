@@ -212,7 +212,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: coverageMessage
-            });  # Only run on main/dev branches or when specifically needed
+            });
   full-test-suite:
     name: Full Test Suite (All Tests)
     runs-on: ubuntu-latest
