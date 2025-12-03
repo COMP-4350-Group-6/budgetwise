@@ -15,6 +15,9 @@ playwright-report/
 lcov.info
 lcov-report/
 
+# But track coverage reports in course-work for documentation
+!course-work/coverage-report-full/
+
 # Build outputs
 .next
 out

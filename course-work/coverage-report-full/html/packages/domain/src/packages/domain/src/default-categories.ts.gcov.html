@@ -1,0 +1,101 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - lcov.info - packages/domain/src/packages/domain/src/default-categories.ts</title>
+  <link rel="stylesheet" type="text/css" href="../../../../../../gcov.css">
+</head>
+
+<body>
+
+          <table width="100%" border=0 cellspacing=0 cellpadding=0>
+            <tr><td class="title">LCOV - code coverage report</td></tr>
+            <tr><td class="ruler"><img src="../../../../../../glass.png" width=3 height=3 alt=""></td></tr>
+
+            <tr>
+              <td width="100%">
+                <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="10%" class="headerValue"><a href="../../../../../../index.html">top level</a> - <a href="index.html">packages/domain/src/packages/domain/src</a> - default-categories.ts<span style="font-size: 80%;"> (source / <a href="default-categories.ts.func-c.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="5%"></td>
+            <td width="5%" class="headerCovTableHead">Coverage</td>
+            <td width="5%" class="headerCovTableHead" title="Covered + Uncovered code">Total</td>
+            <td width="5%" class="headerCovTableHead" title="Exercised code only">Hit</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">lcov.info</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntryLo">0.0&nbsp;%</td>
+            <td class="headerCovTableEntry">1</td>
+            <td class="headerCovTableEntry">0</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test Date:</td>
+            <td class="headerValue">2025-12-03 15:36:12</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntryHi">-</td>
+            <td class="headerCovTableEntry">0</td>
+            <td class="headerCovTableEntry">0</td>
+          </tr>
+                  <tr><td><img src="../../../../../../glass.png" width=3 height=3 alt=""></td></tr>
+                </table>
+              </td>
+            </tr>
+
+            <tr><td class="ruler"><img src="../../../../../../glass.png" width=3 height=3 alt=""></td></tr>
+          </table>
+
+          <table cellpadding=0 cellspacing=0 border=0>
+            <tr>
+              <td><br></td>
+            </tr>
+            <tr>
+              <td>
+<pre class="sourceHeading">            Line data    Source code</pre>
+<pre class="source">
+<span id="L1"><span class="lineNum">       1</span>              : export interface DefaultCategoryConfig {</span>
+<span id="L2"><span class="lineNum">       2</span>              :   name: string;</span>
+<span id="L3"><span class="lineNum">       3</span>              :   icon: string;</span>
+<span id="L4"><span class="lineNum">       4</span>              :   color: string;</span>
+<span id="L5"><span class="lineNum">       5</span>              :   description: string;</span>
+<span id="L6"><span class="lineNum">       6</span>              : }</span>
+<span id="L7"><span class="lineNum">       7</span>              : </span>
+<span id="L8"><span class="lineNum">       8</span> <span class="tlaUNC tlaBgUNC">           0 : export const DEFAULT_CATEGORIES: DefaultCategoryConfig[] = [</span></span>
+<span id="L9"><span class="lineNum">       9</span>              :   { name: &quot;Housing&quot;, icon: &quot;🏠&quot;, color: &quot;#FF6B6B&quot;, description: &quot;Rent, mortgage, property&quot; },</span>
+<span id="L10"><span class="lineNum">      10</span>              :   { name: &quot;Transportation&quot;, icon: &quot;🚗&quot;, color: &quot;#4ECDC4&quot;, description: &quot;Car, gas, public transit&quot; },</span>
+<span id="L11"><span class="lineNum">      11</span>              :   { name: &quot;Food&quot;, icon: &quot;🍔&quot;, color: &quot;#95E1D3&quot;, description: &quot;General food expenses&quot; },</span>
+<span id="L12"><span class="lineNum">      12</span>              :   { name: &quot;Groceries&quot;, icon: &quot;🛒&quot;, color: &quot;#45B7D1&quot;, description: &quot;Grocery shopping&quot; },</span>
+<span id="L13"><span class="lineNum">      13</span>              :   { name: &quot;Dining Out&quot;, icon: &quot;🍽️&quot;, color: &quot;#F38181&quot;, description: &quot;Restaurants, takeout&quot; },</span>
+<span id="L14"><span class="lineNum">      14</span>              :   { name: &quot;Entertainment&quot;, icon: &quot;🎬&quot;, color: &quot;#AA96DA&quot;, description: &quot;Movies, games, hobbies&quot; },</span>
+<span id="L15"><span class="lineNum">      15</span>              :   { name: &quot;Shopping&quot;, icon: &quot;🛍️&quot;, color: &quot;#FCBAD3&quot;, description: &quot;Clothing, personal items&quot; },</span>
+<span id="L16"><span class="lineNum">      16</span>              :   { name: &quot;Utilities&quot;, icon: &quot;💡&quot;, color: &quot;#FFA07A&quot;, description: &quot;Electric, water, internet&quot; },</span>
+<span id="L17"><span class="lineNum">      17</span>              :   { name: &quot;Healthcare&quot;, icon: &quot;⚕️&quot;, color: &quot;#98D8C8&quot;, description: &quot;Medical, insurance&quot; },</span>
+<span id="L18"><span class="lineNum">      18</span>              :   { name: &quot;Education&quot;, icon: &quot;📚&quot;, color: &quot;#6C5CE7&quot;, description: &quot;Tuition, courses, books&quot; },</span>
+<span id="L19"><span class="lineNum">      19</span>              :   { name: &quot;Travel&quot;, icon: &quot;✈️&quot;, color: &quot;#00B894&quot;, description: &quot;Trips, vacations&quot; },</span>
+<span id="L20"><span class="lineNum">      20</span>              :   { name: &quot;Subscriptions&quot;, icon: &quot;📱&quot;, color: &quot;#FDCB6E&quot;, description: &quot;Netflix, Spotify, etc.&quot; },</span>
+<span id="L21"><span class="lineNum">      21</span>              :   { name: &quot;Investments&quot;, icon: &quot;💰&quot;, color: &quot;#00CEC9&quot;, description: &quot;Stocks, savings&quot; },</span>
+<span id="L22"><span class="lineNum">      22</span>              :   { name: &quot;Salary&quot;, icon: &quot;💵&quot;, color: &quot;#55EFC4&quot;, description: &quot;Income, wages&quot; },</span>
+<span id="L23"><span class="lineNum">      23</span>              :   { name: &quot;Savings&quot;, icon: &quot;🐷&quot;, color: &quot;#81ECEC&quot;, description: &quot;Emergency fund, goals&quot; },</span>
+<span id="L24"><span class="lineNum">      24</span>              :   { name: &quot;Miscellaneous&quot;, icon: &quot;📦&quot;, color: &quot;#A29BFE&quot;, description: &quot;Other expenses&quot; },</span>
+<span id="L25"><span class="lineNum">      25</span>              : ];</span>
+        </pre>
+              </td>
+            </tr>
+          </table>
+          <br>
+
+          <table width="100%" border=0 cellspacing=0 cellpadding=0>
+            <tr><td class="ruler"><img src="../../../../../../glass.png" width=3 height=3 alt=""></td></tr>
+            <tr><td class="versionInfo">Generated by: <a href="https://github.com//linux-test-project/lcov" target="_parent">LCOV version 2.0-1</a></td></tr>
+          </table>
+          <br>
+
+</body>
+</html>

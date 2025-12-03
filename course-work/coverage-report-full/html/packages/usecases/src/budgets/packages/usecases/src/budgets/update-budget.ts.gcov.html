@@ -1,0 +1,128 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - lcov.info - packages/usecases/src/budgets/packages/usecases/src/budgets/update-budget.ts</title>
+  <link rel="stylesheet" type="text/css" href="../../../../../../../../gcov.css">
+</head>
+
+<body>
+
+          <table width="100%" border=0 cellspacing=0 cellpadding=0>
+            <tr><td class="title">LCOV - code coverage report</td></tr>
+            <tr><td class="ruler"><img src="../../../../../../../../glass.png" width=3 height=3 alt=""></td></tr>
+
+            <tr>
+              <td width="100%">
+                <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="10%" class="headerValue"><a href="../../../../../../../../index.html">top level</a> - <a href="index.html">packages/usecases/src/budgets/packages/usecases/src/budgets</a> - update-budget.ts<span style="font-size: 80%;"> (source / <a href="update-budget.ts.func-c.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="5%"></td>
+            <td width="5%" class="headerCovTableHead">Coverage</td>
+            <td width="5%" class="headerCovTableHead" title="Covered + Uncovered code">Total</td>
+            <td width="5%" class="headerCovTableHead" title="Exercised code only">Hit</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">lcov.info</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntryHi">100.0&nbsp;%</td>
+            <td class="headerCovTableEntry">9</td>
+            <td class="headerCovTableEntry">9</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test Date:</td>
+            <td class="headerValue">2025-12-03 15:36:12</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntryHi">100.0&nbsp;%</td>
+            <td class="headerCovTableEntry">2</td>
+            <td class="headerCovTableEntry">2</td>
+          </tr>
+                  <tr><td><img src="../../../../../../../../glass.png" width=3 height=3 alt=""></td></tr>
+                </table>
+              </td>
+            </tr>
+
+            <tr><td class="ruler"><img src="../../../../../../../../glass.png" width=3 height=3 alt=""></td></tr>
+          </table>
+
+          <table cellpadding=0 cellspacing=0 border=0>
+            <tr>
+              <td><br></td>
+            </tr>
+            <tr>
+              <td>
+<pre class="sourceHeading">            Line data    Source code</pre>
+<pre class="source">
+<span id="L1"><span class="lineNum">       1</span>              : import { Budget } from &quot;@budget/domain&quot;;</span>
+<span id="L2"><span class="lineNum">       2</span>              : import type { BudgetsRepo } from &quot;@budget/ports&quot;;</span>
+<span id="L3"><span class="lineNum">       3</span>              : import type { ClockPort } from &quot;@budget/ports&quot;;</span>
+<span id="L4"><span class="lineNum">       4</span>              : import type { Currency, BudgetPeriod } from &quot;@budget/domain&quot;;</span>
+<span id="L5"><span class="lineNum">       5</span>              : import type { BudgetDTO } from &quot;@budget/schemas&quot;;</span>
+<span id="L6"><span class="lineNum">       6</span>              : import { toBudgetDTO } from &quot;../presenters&quot;;</span>
+<span id="L7"><span class="lineNum">       7</span>              : </span>
+<span id="L8"><span class="lineNum">       8</span>              : export interface UpdateBudgetInput {</span>
+<span id="L9"><span class="lineNum">       9</span>              :   categoryId?: string;</span>
+<span id="L10"><span class="lineNum">      10</span>              :   name?: string;</span>
+<span id="L11"><span class="lineNum">      11</span>              :   amountCents?: number;</span>
+<span id="L12"><span class="lineNum">      12</span>              :   currency?: Currency;</span>
+<span id="L13"><span class="lineNum">      13</span>              :   period?: BudgetPeriod;</span>
+<span id="L14"><span class="lineNum">      14</span>              :   startDate?: Date;</span>
+<span id="L15"><span class="lineNum">      15</span>              :   endDate?: Date;</span>
+<span id="L16"><span class="lineNum">      16</span>              :   isActive?: boolean;</span>
+<span id="L17"><span class="lineNum">      17</span>              :   alertThreshold?: number;</span>
+<span id="L18"><span class="lineNum">      18</span>              : }</span>
+<span id="L19"><span class="lineNum">      19</span>              : </span>
+<span id="L20"><span class="lineNum">      20</span> <span class="tlaGNC tlaBgGNC">          33 : export function makeUpdateBudget(deps: {</span></span>
+<span id="L21"><span class="lineNum">      21</span>              :   budgetsRepo: BudgetsRepo;</span>
+<span id="L22"><span class="lineNum">      22</span>              :   clock: ClockPort;</span>
+<span id="L23"><span class="lineNum">      23</span>              : }) {</span>
+<span id="L24"><span class="lineNum">      24</span> <span class="tlaGNC">          33 :   return async (id: string, userId: string, updates: UpdateBudgetInput): Promise&lt;BudgetDTO&gt; =&gt; {</span></span>
+<span id="L25"><span class="lineNum">      25</span> <span class="tlaGNC">          13 :     const existing = await deps.budgetsRepo.getById(id);</span></span>
+<span id="L26"><span class="lineNum">      26</span>              :     </span>
+<span id="L27"><span class="lineNum">      27</span> <span class="tlaGNC">          13 :     if (!existing) {</span></span>
+<span id="L28"><span class="lineNum">      28</span> <span class="tlaGNC">           1 :       throw new Error(&quot;Budget not found&quot;);</span></span>
+<span id="L29"><span class="lineNum">      29</span>              :     }</span>
+<span id="L30"><span class="lineNum">      30</span>              :     </span>
+<span id="L31"><span class="lineNum">      31</span> <span class="tlaGNC">          12 :     if (existing.props.userId !== userId) {</span></span>
+<span id="L32"><span class="lineNum">      32</span> <span class="tlaGNC">           1 :       throw new Error(&quot;Unauthorized&quot;);</span></span>
+<span id="L33"><span class="lineNum">      33</span>              :     }</span>
+<span id="L34"><span class="lineNum">      34</span>              :     </span>
+<span id="L35"><span class="lineNum">      35</span> <span class="tlaGNC">          11 :     const updated = new Budget({</span></span>
+<span id="L36"><span class="lineNum">      36</span>              :       ...existing.props,</span>
+<span id="L37"><span class="lineNum">      37</span>              :       categoryId: updates.categoryId ?? existing.props.categoryId,</span>
+<span id="L38"><span class="lineNum">      38</span>              :       name: updates.name?.trim() ?? existing.props.name,</span>
+<span id="L39"><span class="lineNum">      39</span>              :       amountCents: updates.amountCents ?? existing.props.amountCents,</span>
+<span id="L40"><span class="lineNum">      40</span>              :       currency: updates.currency ?? existing.props.currency,</span>
+<span id="L41"><span class="lineNum">      41</span>              :       period: updates.period ?? existing.props.period,</span>
+<span id="L42"><span class="lineNum">      42</span>              :       startDate: updates.startDate ?? existing.props.startDate,</span>
+<span id="L43"><span class="lineNum">      43</span>              :       endDate: updates.endDate !== undefined ? updates.endDate : existing.props.endDate,</span>
+<span id="L44"><span class="lineNum">      44</span>              :       isActive: updates.isActive ?? existing.props.isActive,</span>
+<span id="L45"><span class="lineNum">      45</span>              :       alertThreshold: updates.alertThreshold !== undefined ? updates.alertThreshold : existing.props.alertThreshold,</span>
+<span id="L46"><span class="lineNum">      46</span>              :       updatedAt: deps.clock.now(),</span>
+<span id="L47"><span class="lineNum">      47</span>              :     });</span>
+<span id="L48"><span class="lineNum">      48</span>              :     </span>
+<span id="L49"><span class="lineNum">      49</span> <span class="tlaGNC">          13 :     await deps.budgetsRepo.update(updated);</span></span>
+<span id="L50"><span class="lineNum">      50</span> <span class="tlaGNC">          11 :     return toBudgetDTO(updated);</span></span>
+<span id="L51"><span class="lineNum">      51</span>              :   };</span>
+<span id="L52"><span class="lineNum">      52</span>              : }</span>
+        </pre>
+              </td>
+            </tr>
+          </table>
+          <br>
+
+          <table width="100%" border=0 cellspacing=0 cellpadding=0>
+            <tr><td class="ruler"><img src="../../../../../../../../glass.png" width=3 height=3 alt=""></td></tr>
+            <tr><td class="versionInfo">Generated by: <a href="https://github.com//linux-test-project/lcov" target="_parent">LCOV version 2.0-1</a></td></tr>
+          </table>
+          <br>
+
+</body>
+</html>

@@ -11,7 +11,7 @@ vi.mock("next/navigation", () => ({
 
 
 beforeEach(() => {
-  vi.spyOn(window.localStorage.__proto__, "setItem");
-  vi.spyOn(window.localStorage.__proto__, "getItem");
-  vi.spyOn(window.localStorage.__proto__, "removeItem");
+  vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {});
+  vi.spyOn(Storage.prototype, "getItem").mockImplementation(() => null);
+  vi.spyOn(Storage.prototype, "removeItem").mockImplementation(() => {});
 });

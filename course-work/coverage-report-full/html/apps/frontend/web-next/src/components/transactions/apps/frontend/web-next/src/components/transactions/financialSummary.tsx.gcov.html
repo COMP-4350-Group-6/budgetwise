@@ -1,0 +1,130 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - lcov.info - apps/frontend/web-next/src/components/transactions/apps/frontend/web-next/src/components/transactions/financialSummary.tsx</title>
+  <link rel="stylesheet" type="text/css" href="../../../../../../../../../../../../gcov.css">
+</head>
+
+<body>
+
+          <table width="100%" border=0 cellspacing=0 cellpadding=0>
+            <tr><td class="title">LCOV - code coverage report</td></tr>
+            <tr><td class="ruler"><img src="../../../../../../../../../../../../glass.png" width=3 height=3 alt=""></td></tr>
+
+            <tr>
+              <td width="100%">
+                <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="10%" class="headerValue"><a href="../../../../../../../../../../../../index.html">top level</a> - <a href="index.html">apps/frontend/web-next/src/components/transactions/apps/frontend/web-next/src/components/transactions</a> - financialSummary.tsx<span style="font-size: 80%;"> (source / <a href="financialSummary.tsx.func-c.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="5%"></td>
+            <td width="5%" class="headerCovTableHead">Coverage</td>
+            <td width="5%" class="headerCovTableHead" title="Covered + Uncovered code">Total</td>
+            <td width="5%" class="headerCovTableHead" title="Exercised code only">Hit</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">lcov.info</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntryLo">0.0&nbsp;%</td>
+            <td class="headerCovTableEntry">4</td>
+            <td class="headerCovTableEntry">0</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test Date:</td>
+            <td class="headerValue">2025-12-03 15:36:12</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntryLo">0.0&nbsp;%</td>
+            <td class="headerCovTableEntry">2</td>
+            <td class="headerCovTableEntry">0</td>
+          </tr>
+                  <tr><td><img src="../../../../../../../../../../../../glass.png" width=3 height=3 alt=""></td></tr>
+                </table>
+              </td>
+            </tr>
+
+            <tr><td class="ruler"><img src="../../../../../../../../../../../../glass.png" width=3 height=3 alt=""></td></tr>
+          </table>
+
+          <table cellpadding=0 cellspacing=0 border=0>
+            <tr>
+              <td><br></td>
+            </tr>
+            <tr>
+              <td>
+<pre class="sourceHeading">            Line data    Source code</pre>
+<pre class="source">
+<span id="L1"><span class="lineNum">       1</span>              : &quot;use client&quot;;</span>
+<span id="L2"><span class="lineNum">       2</span>              : </span>
+<span id="L3"><span class="lineNum">       3</span>              : import React from &quot;react&quot;;</span>
+<span id="L4"><span class="lineNum">       4</span>              : import styles from &quot;./financialSummary.module.css&quot;;</span>
+<span id="L5"><span class="lineNum">       5</span>              : import { TRANSACTION_STRINGS } from &quot;@/constants/strings&quot;;</span>
+<span id="L6"><span class="lineNum">       6</span>              : </span>
+<span id="L7"><span class="lineNum">       7</span>              : interface FinancialSummaryProps {</span>
+<span id="L8"><span class="lineNum">       8</span>              :   totalTransactions: number;</span>
+<span id="L9"><span class="lineNum">       9</span>              :   totalSpent: number;</span>
+<span id="L10"><span class="lineNum">      10</span>              :   averageTransaction: number;</span>
+<span id="L11"><span class="lineNum">      11</span>              : }</span>
+<span id="L12"><span class="lineNum">      12</span>              : </span>
+<span id="L13"><span class="lineNum">      13</span>              : /**</span>
+<span id="L14"><span class="lineNum">      14</span>              :  * FinancialSummary</span>
+<span id="L15"><span class="lineNum">      15</span>              :  * ----------------------------------------------------------</span>
+<span id="L16"><span class="lineNum">      16</span>              :  * Displays this month's financial summary:</span>
+<span id="L17"><span class="lineNum">      17</span>              :  * Total transactions, total spent, and average transaction.</span>
+<span id="L18"><span class="lineNum">      18</span>              :  * Uses string constants for all text.</span>
+<span id="L19"><span class="lineNum">      19</span>              :  * ----------------------------------------------------------</span>
+<span id="L20"><span class="lineNum">      20</span>              :  */</span>
+<span id="L21"><span class="lineNum">      21</span> <span class="tlaUNC tlaBgUNC">           0 : export default function FinancialSummary({</span></span>
+<span id="L22"><span class="lineNum">      22</span>              :   totalTransactions,</span>
+<span id="L23"><span class="lineNum">      23</span>              :   totalSpent,</span>
+<span id="L24"><span class="lineNum">      24</span>              :   averageTransaction,</span>
+<span id="L25"><span class="lineNum">      25</span>              : }: FinancialSummaryProps) {</span>
+<span id="L26"><span class="lineNum">      26</span> <span class="tlaUNC">           0 :   const { labels } = TRANSACTION_STRINGS;</span></span>
+<span id="L27"><span class="lineNum">      27</span>              : </span>
+<span id="L28"><span class="lineNum">      28</span> <span class="tlaUNC">           0 :   const formatCurrency = (value: number) =&gt;</span></span>
+<span id="L29"><span class="lineNum">      29</span> <span class="tlaUNC">           0 :     `$${value.toLocaleString(undefined, {</span></span>
+<span id="L30"><span class="lineNum">      30</span>              :       minimumFractionDigits: 2,</span>
+<span id="L31"><span class="lineNum">      31</span>              :       maximumFractionDigits: 2,</span>
+<span id="L32"><span class="lineNum">      32</span>              :     })}`;</span>
+<span id="L33"><span class="lineNum">      33</span>              : </span>
+<span id="L34"><span class="lineNum">      34</span> <span class="tlaUNC">           0 :   return (</span></span>
+<span id="L35"><span class="lineNum">      35</span>              :     &lt;div className={styles.card}&gt;</span>
+<span id="L36"><span class="lineNum">      36</span>              :       &lt;h2 className={styles.title}&gt;{TRANSACTION_STRINGS.trend.subtitle}&lt;/h2&gt;</span>
+<span id="L37"><span class="lineNum">      37</span>              : </span>
+<span id="L38"><span class="lineNum">      38</span>              :       &lt;div className={styles.row}&gt;</span>
+<span id="L39"><span class="lineNum">      39</span>              :         &lt;span className={styles.label}&gt;{labels.totalTransaction}&lt;/span&gt;</span>
+<span id="L40"><span class="lineNum">      40</span>              :         &lt;span className={styles.value}&gt;{totalTransactions}&lt;/span&gt;</span>
+<span id="L41"><span class="lineNum">      41</span>              :       &lt;/div&gt;</span>
+<span id="L42"><span class="lineNum">      42</span>              : </span>
+<span id="L43"><span class="lineNum">      43</span>              :       &lt;div className={styles.row}&gt;</span>
+<span id="L44"><span class="lineNum">      44</span>              :         &lt;span className={styles.label}&gt;{labels.totalSpent}&lt;/span&gt;</span>
+<span id="L45"><span class="lineNum">      45</span>              :         &lt;span className={styles.value}&gt;{formatCurrency(totalSpent)}&lt;/span&gt;</span>
+<span id="L46"><span class="lineNum">      46</span>              :       &lt;/div&gt;</span>
+<span id="L47"><span class="lineNum">      47</span>              : </span>
+<span id="L48"><span class="lineNum">      48</span>              :       &lt;div className={styles.row}&gt;</span>
+<span id="L49"><span class="lineNum">      49</span>              :         &lt;span className={styles.label}&gt;{labels.averageTransaction}&lt;/span&gt;</span>
+<span id="L50"><span class="lineNum">      50</span>              :         &lt;span className={styles.value}&gt;{formatCurrency(averageTransaction)}&lt;/span&gt;</span>
+<span id="L51"><span class="lineNum">      51</span>              :       &lt;/div&gt;</span>
+<span id="L52"><span class="lineNum">      52</span>              :     &lt;/div&gt;</span>
+<span id="L53"><span class="lineNum">      53</span>              :   );</span>
+<span id="L54"><span class="lineNum">      54</span>              : }</span>
+        </pre>
+              </td>
+            </tr>
+          </table>
+          <br>
+
+          <table width="100%" border=0 cellspacing=0 cellpadding=0>
+            <tr><td class="ruler"><img src="../../../../../../../../../../../../glass.png" width=3 height=3 alt=""></td></tr>
+            <tr><td class="versionInfo">Generated by: <a href="https://github.com//linux-test-project/lcov" target="_parent">LCOV version 2.0-1</a></td></tr>
+          </table>
+          <br>
+
+</body>
+</html>
