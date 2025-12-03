@@ -19,12 +19,14 @@ export const COLORS = {
 
   // Chart palette
   palette: [
-    "#4E7C66",
-    "#81C784",
-    "#AED581",
-    "#FFB74D",
-    "#EF5350",
-    "#BA68C8",
-    "#64B5F6",
+    "#4E7C66", // primary green
+    "#2D7FF9", // blue
+    "#F6B34E", // amber
+    "#E05858", // red
+    "#8B5CF6", // purple
+    "#10B981", // teal
+    "#F97316", // orange
+    "#F59E0B", // yellow-orange
   ],
+    zeroCategory: "#D1D5DB", // neutral gray for 0% categories
 };

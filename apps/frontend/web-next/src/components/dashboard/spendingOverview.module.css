@@ -76,9 +76,9 @@
 /* ===== DAILY TRANSACTIONS SECTION ===== */
 
 .todaysSection {
-  background: #faf9f6;
-  border-radius: 10px;
-  padding: 0.8rem;
+  background: #fffaf4;
+  border-radius: 12px;
+  padding: 1rem 1.2rem;
   border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
@@ -86,17 +86,63 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 0.6rem;
+  margin-bottom: 1rem;
+  padding-right: 0.3rem;
+}
+
+.txList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.txItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  background: #fff;
+  padding: 0.9rem 1rem;
+  border-radius: 14px;
+
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+.txItem:hover {
+  background: #f9f9f7;
+  transform: translateY(-1px);
+}
+
+.txName {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #111;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.txAmount {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #111;
+  font-variant-numeric: tabular-nums;
 }
 
 .addMini {
   background-color: #4e7c66;
-  color: #fff;
+  color: white;
+  padding: 0.35rem 0.9rem;
+  font-size: 0.78rem;
+  border-radius: 8px;
   border: none;
-  border-radius: 6px;
-  padding: 0.25rem 0.7rem;
-  font-size: 0.8rem;
   cursor: pointer;
+  transition: background 0.15s ease;
+}
+.addMini:hover {
+  background-color: #3f6654;
 }
 
 .empty {

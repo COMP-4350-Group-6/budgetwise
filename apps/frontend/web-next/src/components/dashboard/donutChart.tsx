@@ -1,13 +1,7 @@
 "use client";
 
 import React, { useMemo } from "react";
-import {
-  PieChart,
-  Pie,
-  Cell,
-  ResponsiveContainer,
-  Tooltip,
-} from "recharts";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import styles from "./donutChart.module.css";
 import { COLORS } from "@/constants/colors";
 import { TRANSACTION_STRINGS } from "@/constants/strings";
@@ -34,20 +28,26 @@ export default function DonutChart({ dashboard }: DonutChartProps) {
    * Memoized for performance.
    */
   const data = useMemo(() => {
-    if (!dashboard?.categories || dashboard.categories.length === 0)
-      return [];
+    if (!dashboard?.categories || dashboard.categories.length === 0) return [];
 
     const total = dashboard.categories.reduce(
       (sum, cat) => sum + cat.totalSpentCents,
       0
     );
 
-    return dashboard.categories.map((cat, i) => ({
-      name: cat.categoryName,
-      value: cat.totalSpentCents,
-      percent: total ? (cat.totalSpentCents / total) * 100 : 0,
-      color: COLORS.palette[i % COLORS.palette.length],
-    }));
+    return dashboard.categories.map((cat, i) => {
+      const percent = total ? (cat.totalSpentCents / total) * 100 : 0;
+      const isZero = cat.totalSpentCents === 0;
+
+      return {
+        name: cat.categoryName,
+        value: cat.totalSpentCents,
+        percent,
+        color: isZero
+          ? COLORS.zeroCategory
+          : COLORS.palette[i % COLORS.palette.length],
+      };
+    });
   }, [dashboard]);
 
   // ------------------ RENDER ------------------
@@ -86,9 +86,10 @@ export default function DonutChart({ dashboard }: DonutChartProps) {
                   ))}
                 </Pie>
                 <Tooltip
-                  formatter={(value: number, name: string) =>
-                    [`$${(value / 100).toFixed(2)}`, name]
-                  }
+                  formatter={(value: number, name: string) => [
+                    `$${(value / 100).toFixed(2)}`,
+                    name,
+                  ]}
                 />
               </PieChart>
             </ResponsiveContainer>
@@ -105,9 +106,7 @@ export default function DonutChart({ dashboard }: DonutChartProps) {
                   ></span>
                   <span className={styles.name}>{d.name}</span>
                 </div>
-                <span className={styles.percent}>
-                  {d.percent.toFixed(1)}%
-                </span>
+                <span className={styles.percent}>{d.percent.toFixed(1)}%</span>
               </div>
             ))}
           </div>
