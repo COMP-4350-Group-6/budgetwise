@@ -21,16 +21,29 @@ It enables users to manage categories, budgets, and transactions, with real-time
 
 ## Table of Contents
 
-- [Architecture & Design](#architecture--design)
-- [Project Structure](#project-structure)
-- [Setup Guide](#setup-guide)
-- [Running the App](#running-the-app)
-- [Testing](#testing)
-- [Known Issues](#known-issues)
-- [Branching Workflow](#branching-workflow)
-- [Versioning](#versioning)
-- [Acknowledgments](#acknowledgments)
-- [Further Reading](#further-reading)
+- [BudgetWise](#budgetwise)
+  - [Overview](#overview)
+  - [Table of Contents](#table-of-contents)
+  - [Architecture \& Design](#architecture--design)
+  - [Project Structure](#project-structure)
+  - [Setup Guide](#setup-guide)
+    - [Prerequisites](#prerequisites)
+    - [1. Clone and Install](#1-clone-and-install)
+    - [2. Environment Variables](#2-environment-variables)
+  - [Running the App](#running-the-app)
+    - [Backend/API](#backendapi)
+    - [API Documentation (Swagger UI)](#api-documentation-swagger-ui)
+    - [Frontend](#frontend)
+  - [Testing](#testing)
+    - [Quick Start](#quick-start)
+    - [What We Test](#what-we-test)
+    - [Test Types](#test-types)
+    - [Documentation](#documentation)
+  - [Known Issues](#known-issues)
+  - [Branching Workflow](#branching-workflow)
+  - [Versioning](#versioning)
+  - [Acknowledgments](#acknowledgments)
+  - [Further Reading](#further-reading)
 
 ---
 
@@ -128,6 +141,32 @@ pnpm install
 pnpm dev
 # API runs on http://localhost:8787 by default
 ```
+
+### API Documentation (Swagger UI)
+
+The API includes built-in interactive documentation via Swagger UI:
+
+1. **Start the API server:**
+   ```sh
+   cd apps/api && pnpm dev
+   ```
+
+2. **Open Swagger UI:** http://localhost:8787/docs
+
+3. **Available endpoints:**
+   - `GET /docs` - Interactive Swagger UI
+   - `GET /docs/openapi.json` - OpenAPI 3.1 spec (JSON)
+   - `GET /health` - Health check
+
+4. **Authentication flow:**
+   - Login via `POST /auth/login` → Sets session cookie automatically
+   - All `/v1/*` endpoints use the cookie for authentication
+   - Bearer tokens also supported for API clients
+
+> **Note:** To generate/update the OpenAPI spec from Zod schemas:
+> ```sh
+> cd packages/schemas && pnpm run openapi:generate
+> ```
 
 ### Frontend
 
