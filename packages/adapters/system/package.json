@@ -9,7 +9,7 @@
   },
   "dependencies": { "ulid": "^2.3.0", "@budget/ports": "workspace:*" },
   "devDependencies": {
-    "vitest": "^3.2.4",
-    "@vitest/coverage-v8": "^3.2.4"
+    "vitest": "^4.0.14",
+    "@vitest/coverage-v8": "^4.0.14"
   }
 }

@@ -45,7 +45,7 @@ describe('Categories API Integration Tests', () => {
   beforeAll(() => {
     const originalFetch = app.fetch.bind(app);
     (app as any).fetch = (req: Request, env?: any, event?: any) =>
-      originalFetch(req, { ...(env || {}), SUPABASE_JWT_SECRET: process.env.SUPABASE_JWT_SECRET, SUPABASE_URL: "https://test.supabase.co" }, event);
+      originalFetch(req, { ...(env || {}), SUPABASE_JWT_SECRET: "test-only", SUPABASE_URL: "https://test.supabase.co" }, event);
   });
   let authToken: string;
   let userId: string;

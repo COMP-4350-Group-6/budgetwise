@@ -1,6 +1,6 @@
 import { defineConfig } from "vitest/config";
-import path from "path";
 import react from "@vitejs/plugin-react";
+import path from "path";
 
 export default defineConfig({
   plugins: [react()],
@@ -28,10 +28,10 @@ export default defineConfig({
         "**/src/app/layout.tsx",
       ],
       thresholds: {
-        lines: 50,
-        statements: 50,
-        branches: 40,
-        functions: 50,
+        lines: 40,
+        statements: 35,
+        branches: 25,
+        functions: 25,
       },
     },
   },

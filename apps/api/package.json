@@ -20,7 +20,7 @@
     "dotenv": "^17.2.3",
     "jose": "^5.10.0",
     "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "^3.2.4",
+    "vitest": "^4.0.14",
     "wrangler": "^4.42.2"
   },
   "dependencies": {

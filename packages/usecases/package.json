@@ -18,6 +18,6 @@
   "devDependencies": {
     "@budget/adapters-persistence-local": "workspace:*",
     "@budget/adapters-system": "workspace:*",
-    "vitest": "^3.2.4"
+    "vitest": "^4.0.14"
   }
 }
