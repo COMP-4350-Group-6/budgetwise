@@ -2,7 +2,7 @@
 
 **Date:** December 3, 2025
 **Sprint:** 3
-**Team:** Group 2
+**Team:** Group 6
 
 ---
 
@@ -180,8 +180,8 @@ Even "flash" models require 3-5 seconds for multi-modal inputs.
 
 #### 3. Token Generation
 - System prompt: ~500 tokens
-- Max completion: 800 tokens
-- Total: ~1,300 tokens per request
+- Max completion: 6,400 tokens (increased from 800 to handle complex invoices)
+- Total: ~7,000 tokens per request potential
 
 #### 4. OpenRouter Rate Limiting
 OpenRouter implements rate limits that affect concurrent requests:
@@ -276,14 +276,15 @@ The invoice parsing feature (optional enhancement) has:
 BudgetWise's API **passes all non-functional requirements** for Sprint 3:
 
 - ✅ 20 concurrent users supported
-- ✅ 1,328 requests/minute (6.6x the 200 req/min target)
-- ✅ 227ms p95 response time (54% under 500ms threshold)
-- ✅ 0.40% error rate (under 1% threshold)
+- ✅ 1,350 requests/minute (6.75x the 200 req/min target)
+- ✅ 212ms p95 response time (58% under 500ms threshold)
+- ✅ 0.51% error rate (under 1% threshold)
+- ✅ 99.54% overall check success rate
 
 The identified bottleneck (LLM invoice parsing) is:
-- Expected behavior for AI features
-- Isolated from core functionality
-- Addressable with async processing if needed
+- Expected behavior for AI features (external API dependency)
+- Isolated from core functionality (56% success, but core is 100%)
+- Addressable with async processing or rate limit upgrades if needed
 
 ---
 
