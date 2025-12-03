@@ -38,27 +38,30 @@ export default function SpendingOverview({
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const router = useRouter();
 
-  // ---------- DATE CALCULATIONS ----------
-  const now = new Date();
-  const ref = new Date(now);
-  ref.setDate(now.getDate() + weekOffset * 7);
-
-  // Monday-start week
-  const startOfWeek = new Date(ref);
-  startOfWeek.setDate(ref.getDate() - ((ref.getDay() + 6) % 7));
-  startOfWeek.setHours(0, 0, 0, 0);
-
-  const endOfWeek = new Date(startOfWeek);
-  endOfWeek.setDate(startOfWeek.getDate() + 6);
-  endOfWeek.setHours(23, 59, 59, 999);
-
-  const weekRangeLabel = useMemo(
-    () => getWeekRangeLabel(startOfWeek, endOfWeek),
-    [startOfWeek, endOfWeek]
-  );
-
   // Monday-first day labels for the weekly chart
   const dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+  // ---------- WEEK RANGE (memoized) ----------
+  const { startOfWeek, endOfWeek, weekRangeLabel } = useMemo(() => {
+    const now = new Date();
+    const ref = new Date(now);
+    ref.setDate(now.getDate() + weekOffset * 7);
+
+    // Monday-start week
+    const start = new Date(ref);
+    start.setDate(ref.getDate() - ((ref.getDay() + 6) % 7));
+    start.setHours(0, 0, 0, 0);
+
+    const end = new Date(start);
+    end.setDate(start.getDate() + 6);
+    end.setHours(23, 59, 59, 999);
+
+    return {
+      startOfWeek: start,
+      endOfWeek: end,
+      weekRangeLabel: getWeekRangeLabel(start, end),
+    };
+  }, [weekOffset]);
 
   // Short label for header, e.g. "Tue"
   const selectedDayLabel = useMemo(() => {
@@ -74,8 +77,8 @@ export default function SpendingOverview({
     for (const tx of transactions) {
       const date = new Date(tx.occurredAt);
       if (date >= startOfWeek && date <= endOfWeek) {
-        // JS: 0=Sun..6=Sat → convert to Monday-first index 0..6
-        const jsIndex = date.getDay(); // 0–6
+        // JS day: 0=Sun..6=Sat → convert to Monday-first index 0..6
+        const jsIndex = date.getDay();
         const index = (jsIndex + 6) % 7; // Mon=0, Tue=1, ..., Sun=6
         const day = dayNames[index];
 
@@ -84,7 +87,7 @@ export default function SpendingOverview({
       }
     }
 
-    // Ensure consistent order Mon..Sun
+    // Ensure consistent Mon..Sun order
     return dayNames.map((day) => ({
       day,
       amount: totals.get(day) ?? 0,
@@ -92,7 +95,7 @@ export default function SpendingOverview({
   }, [transactions, startOfWeek, endOfWeek, dayNames]);
 
   // ---------- SELECTED DAY TRANSACTIONS ----------
-  // Same logic for both week & calendar views: match actual calendar date
+  // Same logic for both week & calendar: match actual calendar date
   const selectedTx = useMemo(() => {
     if (!selectedDay) return [];
 
@@ -145,7 +148,6 @@ export default function SpendingOverview({
     currentMonth
   )} ${currentMonth.getFullYear()}`;
 
-  // Simple local legend
   const legendLabels = {
     low: "< $50",
     mid: "$50–$150",
