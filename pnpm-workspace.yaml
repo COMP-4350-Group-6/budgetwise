@@ -1,9 +1,10 @@
 packages:
-  - apps/**
+  - apps/*
   - apps/frontend/web-next
   - packages/**
   - infra/**
   - e2e-tests
+  - load-tests
 
 onlyBuiltDependencies:
   - esbuild
