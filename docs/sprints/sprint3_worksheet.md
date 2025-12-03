@@ -342,6 +342,7 @@ Open [load-test-report-2025-12-03T00-43-33-427Z.html](https://github.com/user-at
 - [`load-tests/README.md`](./README.md) - Documentation
 - [`load-tests/LOAD_TEST_REPORT.md`](./LOAD_TEST_REPORT.md) - This report
 
+Full extensive report in [load-tests folder](https://github.com/COMP-4350-Group-6/budgetwise/tree/e0f226ea3405d8c4be177fdec12217225e56f876/load-tests)
   
 ## 2. Security Analysis
 
@@ -349,20 +350,19 @@ Open [load-test-report-2025-12-03T00-43-33-427Z.html](https://github.com/user-at
 >
 > ### Worksheet Question 
 >
-> 1. [ ] Describe your chosen security analysis tool and how you ran it.
+> 1. [x] Describe your chosen security analysis tool and how you ran it.
 >    
->    - [ ] Tool must analyze the main language used in your project.
+>    - [x] Tool must analyze the main language used in your project.
 >   
-> 2. [ ] Attach static analysis report as an appendix.
+> 2. [x] Attach static analysis report as an appendix.
 >
-> 3. [ ] Randomly select 5 detected problems and discuss what you see.
+> 3. [x] Randomly select 5 detected problems and discuss what you see.
 >
-> 4. [ ] **Required:** Handle or mitigate all Critical and High vulnerabilities.
+> 4. [x] **Required:** Handle or mitigate all Critical and High vulnerabilities.
 >
->    - [ ] Attach commit links for these fixes.
->   
-> 5. [ ] If no critical/high vulnerabilities: Discuss 2 other problems found.
+>    - [x] Attach commit links for these fixes.
 
+Security Analysis - [course-work/SECURITY_ANALYSIS.md](https://github.com/COMP-4350-Group-6/budgetwise/blob/e0f226ea3405d8c4be177fdec12217225e56f876/course-work/SECURITY_ANALYSIS.md)
 
 ## 3. Continuous Integration & Deployment (CI/CD)
 
@@ -528,7 +528,9 @@ I used Claude-Opus-4.1 for initial development scaffolding in Sprint 0-1 and for
 For the early sprints, Claude helped me generate mock data structures and a localStorage-based persistence layer, which gave us a working prototype before the backend was ready. However, the frontend output needed significant polishing. components had inconsistent spacing, hardcoded pixel values, and race conditions where rapid actions caused localStorage to desync.
 In Sprint 2, I started using Claude to break down tasks and track team progress once coordination issues became apparent. This taught me AI is great for getting a foundation quickly, but the output always needs human refinement. It also showed me how AI can really help structure information, in this case, the messy chatlogs of our work.
 
-### Sid:
+### Sid: AI / External Resource Reflection
+As an example of a problem I tried to solve, I will refer to commit [c3d0129](https://github.com/COMP-4350-Group-6/budgetwise/commit/c3d012937e853194b5c1bd55c50eff82308fd0ec). The goal of this update was to make the transition between pages smoother (improve UX). I used mostly Cursor's Composer and ChatGPT 5 to achieve this task. I had to input a sequence of refining prompts until it achieved the desired state. However, even though the goal of the update was achieved, I noticed my learning was hindered as I relied on the LLM too much and overlooked the documentation for the tools used. I noticed I focused too much on producing results and forgot to take some time to gain a proper understanding of the code. Perhaps the most important lesson I learned from this is that I need to put more efforts into finding the balance between output (results) and input (learning). Moving forward, I will also make sure to avoid jumping ahead and generating code with incomplete prompts and spend more time in the ideation / planning stage instead.
+
 
 ### Steph: AI / External Resource Reflection
 
@@ -537,6 +539,8 @@ During this project, I used AI (ChatGPT-4o) as a support tool to help me debug a
 ### Ramatjyot:
 
 ### Bryce:
+
+One problem I tried to solve with AI was the hierarchical budget dropdown feature. We had attempted several implementations that failed already so when it was my turn I went straight to AI for help. Even after trying many AI suggested approaches, none of them ever fully worked. So once I reached this wall I decided to finally step back and investigate whether the issue was elsewhere, and I realized the real problem was that our backend and database weren't set up to support hierarchical budgets in the first place. What I learned from this is that my approach was flawed. I went to AI first instead of fully understanding the system constraints which would have led me to a solution much faster. Once I recognized the architectural limitation, I suggested that we remove the multi budget feature since supporting it would require a major refactor of our business logic. In the real world that wouldn't be the correct decision, but given the scope of this course project, we chose not to implement it. The bigger lesson I can take away from this is that I need to completely understand and solve complex problems before I even think of AI, and when I do it should only be used as a coding aid or to solve problems small in scope, not a system wide problem solver.
 
 
 ## Sprint 3 Quick Checklist
