@@ -1,5 +1,5 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { vi } from "vitest";
+import { vi, Mock } from "vitest";
 import SignupPage from "@/app/(public)/signup/page";
 import { authService } from "@/app/services/authService";
 import { useRouter } from "next/navigation";
@@ -29,13 +29,13 @@ vi.mock("@/components/validation/PasswordRequirement", () => ({
 import { isPasswordValid } from "@/components/validation/PasswordRequirement";
 
 describe("SignupPage", () => {
-  let mockPush: any;
+  let mockPush: Mock;
 
   beforeEach(() => {
     mockPush = vi.fn();
-    (useRouter as any).mockReturnValue({ push: mockPush });
+    (useRouter as Mock).mockReturnValue({ push: mockPush });
     vi.clearAllMocks();
-    (isPasswordValid as any).mockReturnValue(true);
+    (isPasswordValid as Mock).mockReturnValue(true);
   });
 
   it("renders all fields correctly", () => {
@@ -63,7 +63,7 @@ describe("SignupPage", () => {
   });
 
   it("shows error if password does not meet requirements", async () => {
-    (isPasswordValid as any).mockReturnValue(false);
+    (isPasswordValid as Mock).mockReturnValue(false);
     render(<SignupPage />);
     fireEvent.change(screen.getByLabelText(/Full Name/i), { target: { value: "Bryce" } });
     fireEvent.change(screen.getByLabelText(/Email Address/i), { target: { value: "bryce@test.com" } });
@@ -79,7 +79,7 @@ describe("SignupPage", () => {
   });
 
   it("calls authService.signup when valid", async () => {
-    (authService.signup as any).mockResolvedValueOnce(true);
+    (authService.signup as Mock).mockResolvedValueOnce(true);
     render(<SignupPage />);
 
     fireEvent.change(screen.getByLabelText(/Full Name/i), { target: { value: "Bryce" } });
@@ -99,7 +99,7 @@ describe("SignupPage", () => {
   });
 
   it("shows error when signup fails", async () => {
-    (authService.signup as any).mockRejectedValueOnce(new Error("Server error"));
+    (authService.signup as Mock).mockRejectedValueOnce(new Error("Server error"));
     render(<SignupPage />);
     fireEvent.change(screen.getByLabelText(/Full Name/i), { target: { value: "Bryce" } });
     fireEvent.change(screen.getByLabelText(/Email Address/i), { target: { value: "bryce@test.com" } });

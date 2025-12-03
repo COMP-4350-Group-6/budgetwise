@@ -1,5 +1,5 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { vi } from "vitest";
+import { vi, Mock } from "vitest";
 import LoginPage from "@/app/(public)/login/page";
 import { authService } from "@/app/services/authService";
 import { useRouter } from "next/navigation";
@@ -17,11 +17,11 @@ vi.mock("@/app/services/authService", () => ({
 }));
 
 describe("LoginPage", () => {
-  let mockPush: any;
+  let mockPush: Mock;
 
   beforeEach(() => {
     mockPush = vi.fn();
-    (useRouter as any).mockReturnValue({ push: mockPush });
+    (useRouter as Mock).mockReturnValue({ push: mockPush });
     vi.clearAllMocks();
   });
 
@@ -47,7 +47,7 @@ describe("LoginPage", () => {
   });
 
   it("calls authService.login with correct credentials", async () => {
-    (authService.login as any).mockResolvedValueOnce(true);
+    (authService.login as Mock).mockResolvedValueOnce(true);
     render(<LoginPage />);
 
     fireEvent.change(screen.getByLabelText(/Email Address/i), {
@@ -66,7 +66,7 @@ describe("LoginPage", () => {
   });
 
   it("shows an error when login fails", async () => {
-    (authService.login as any).mockRejectedValueOnce(new Error("Invalid credentials"));
+    (authService.login as Mock).mockRejectedValueOnce(new Error("Invalid credentials"));
     render(<LoginPage />);
 
     fireEvent.change(screen.getByLabelText(/Email Address/i), {
@@ -82,7 +82,7 @@ describe("LoginPage", () => {
   });
 
   it("disables button while loading", async () => {
-    (authService.login as any).mockImplementation(
+    (authService.login as Mock).mockImplementation(
       () => new Promise((resolve) => setTimeout(() => resolve(true), 500))
     );
     render(<LoginPage />);

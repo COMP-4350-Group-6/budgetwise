@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import Sidebar from "@/components/sidebar/sidebar";
-import { vi } from "vitest";
+import { vi, Mock } from "vitest";
 import { useRouter } from "next/navigation";
 import { useSidebarState } from "@/app/(protected)/ProtectedLayoutClient";
 
@@ -17,8 +17,8 @@ describe("Sidebar Component", () => {
   const mockToggle = vi.fn();
 
   beforeEach(() => {
-    (useRouter as any).mockReturnValue({ push: mockPush });
-    (useSidebarState as any).mockReturnValue({
+    (useRouter as Mock).mockReturnValue({ push: mockPush });
+    (useSidebarState as Mock).mockReturnValue({
       collapsed: false,
       toggleCollapse: mockToggle,
     });
@@ -54,7 +54,7 @@ describe("Sidebar Component", () => {
   });
 
   it("renders collapsed version correctly", () => {
-    (useSidebarState as any).mockReturnValue({
+    (useSidebarState as Mock).mockReturnValue({
       collapsed: true,
       toggleCollapse: mockToggle,
     });
