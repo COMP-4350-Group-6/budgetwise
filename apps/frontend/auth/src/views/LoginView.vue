@@ -56,31 +56,25 @@ async function handleSubmit() {
 </script>
 
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-md w-full space-y-8">
-      <div>
-        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          Sign in to BudgetWise
-        </h2>
-        <p class="mt-2 text-center text-sm text-gray-600">
+  <div class="auth-page">
+    <div class="auth-container">
+      <div class="auth-header">
+        <h2 class="auth-title">Sign in to BudgetWise</h2>
+        <p class="auth-subtitle">
           Or
-          <router-link to="/signup" class="font-medium text-green-600 hover:text-green-500">
-            create a new account
-          </router-link>
+          <router-link to="/signup" class="link">create a new account</router-link>
         </p>
       </div>
       
-      <form class="mt-8 space-y-6" @submit.prevent="handleSubmit">
+      <form class="auth-form" @submit.prevent="handleSubmit">
         <!-- Error message -->
-        <div v-if="error" class="rounded-md bg-red-50 p-4">
-          <div class="flex">
-            <div class="text-sm text-red-700">{{ error }}</div>
-          </div>
+        <div v-if="error" class="error-box">
+          <div class="error-text">{{ error }}</div>
         </div>
         
-        <div class="rounded-md shadow-sm -space-y-px">
-          <div>
-            <label for="email" class="sr-only">Email address</label>
+        <div class="input-stack">
+          <div class="form-group">
+            <label for="email" class="form-label-sr">Email address</label>
             <input
               id="email"
               v-model="email"
@@ -88,13 +82,13 @@ async function handleSubmit() {
               type="email"
               autocomplete="email"
               required
-              class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
+              class="form-input"
               placeholder="Email address"
               :disabled="isSubmitting"
             />
           </div>
-          <div>
-            <label for="password" class="sr-only">Password</label>
+          <div class="form-group">
+            <label for="password" class="form-label-sr">Password</label>
             <input
               id="password"
               v-model="password"
@@ -102,16 +96,16 @@ async function handleSubmit() {
               type="password"
               autocomplete="current-password"
               required
-              class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
+              class="form-input"
               placeholder="Password"
               :disabled="isSubmitting"
             />
           </div>
         </div>
 
-        <div class="flex items-center justify-between">
+        <div class="flex justify-center">
           <div class="text-sm">
-            <router-link to="/forgot-password" class="font-medium text-green-600 hover:text-green-500">
+            <router-link to="/forgot-password" class="link">
               Forgot your password?
             </router-link>
           </div>
@@ -121,7 +115,7 @@ async function handleSubmit() {
           <button
             type="submit"
             :disabled="isSubmitting || isLoading"
-            class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="btn btn-primary"
           >
             <span v-if="isSubmitting">Signing in...</span>
             <span v-else>Sign in</span>

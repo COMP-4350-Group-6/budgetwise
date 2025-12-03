@@ -31,26 +31,26 @@ async function handleLogout() {
 </script>
 
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-md w-full space-y-8 text-center">
+  <div class="auth-page">
+    <div class="auth-container text-center">
       <div v-if="logoutComplete">
-        <h2 class="text-2xl font-bold text-gray-900">You've been logged out</h2>
-        <p class="mt-2 text-gray-600">Redirecting to login...</p>
+        <h2 class="auth-title">You've been logged out</h2>
+        <p class="auth-subtitle mt-2">Redirecting to login...</p>
       </div>
       
       <div v-else>
-        <h2 class="text-2xl font-bold text-gray-900">Log out of BudgetWise?</h2>
-        <p class="mt-2 text-gray-600">You'll need to sign in again to access your account.</p>
+        <h2 class="auth-title">Log out of BudgetWise?</h2>
+        <p class="auth-subtitle mt-2">You'll need to sign in again to access your account.</p>
         
-        <div v-if="error" class="mt-4 rounded-md bg-red-50 p-4">
-          <div class="text-sm text-red-700">{{ error }}</div>
+        <div v-if="error" class="error-box mt-4">
+          <div class="error-text">{{ error }}</div>
         </div>
         
         <div class="mt-6 flex gap-4 justify-center">
           <button
             @click="handleLogout"
             :disabled="isLoggingOut"
-            class="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50"
+            class="btn btn-danger"
           >
             <span v-if="isLoggingOut">Logging out...</span>
             <span v-else>Log out</span>
@@ -58,7 +58,7 @@ async function handleLogout() {
           
           <a
             :href="config.mainAppUrl"
-            class="px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+            class="btn btn-secondary"
           >
             Cancel
           </a>

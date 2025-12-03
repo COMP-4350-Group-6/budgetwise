@@ -11,21 +11,12 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div v-if="isLoading" class="min-h-screen flex items-center justify-center bg-gray-50">
-    <div class="text-green-700">Loading...</div>
+  <div v-if="isLoading" class="loading-screen">
+    <div class="loading-text">Loading...</div>
   </div>
   <RouterView v-else />
 </template>
 
 <style>
-/* Minimal global styles - using Tailwind classes in components */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-}
+@import '@/assets/main.css';
 </style>
