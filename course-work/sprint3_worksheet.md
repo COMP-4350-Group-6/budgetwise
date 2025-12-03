@@ -342,6 +342,7 @@ Open [load-test-report-2025-12-03T00-43-33-427Z.html](https://github.com/user-at
 - [`load-tests/README.md`](./README.md) - Documentation
 - [`load-tests/LOAD_TEST_REPORT.md`](./LOAD_TEST_REPORT.md) - This report
 
+Full extensive report in [load-tests folder](https://github.com/COMP-4350-Group-6/budgetwise/tree/e0f226ea3405d8c4be177fdec12217225e56f876/load-tests)
   
 ## 2. Security Analysis
 
@@ -349,20 +350,19 @@ Open [load-test-report-2025-12-03T00-43-33-427Z.html](https://github.com/user-at
 >
 > ### Worksheet Question 
 >
-> 1. [ ] Describe your chosen security analysis tool and how you ran it.
+> 1. [x] Describe your chosen security analysis tool and how you ran it.
 >    
->    - [ ] Tool must analyze the main language used in your project.
+>    - [x] Tool must analyze the main language used in your project.
 >   
-> 2. [ ] Attach static analysis report as an appendix.
+> 2. [x] Attach static analysis report as an appendix.
 >
-> 3. [ ] Randomly select 5 detected problems and discuss what you see.
+> 3. [x] Randomly select 5 detected problems and discuss what you see.
 >
-> 4. [ ] **Required:** Handle or mitigate all Critical and High vulnerabilities.
+> 4. [x] **Required:** Handle or mitigate all Critical and High vulnerabilities.
 >
->    - [ ] Attach commit links for these fixes.
->   
-> 5. [ ] If no critical/high vulnerabilities: Discuss 2 other problems found.
+>    - [x] Attach commit links for these fixes.
 
+Security Analysis - [course-work/SECURITY_ANALYSIS.md](https://github.com/COMP-4350-Group-6/budgetwise/blob/e0f226ea3405d8c4be177fdec12217225e56f876/course-work/SECURITY_ANALYSIS.md)
 
 ## 3. Continuous Integration & Deployment (CI/CD)
 
