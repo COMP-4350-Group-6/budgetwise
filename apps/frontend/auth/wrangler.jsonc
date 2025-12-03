@@ -6,29 +6,23 @@
 	"$schema": "node_modules/wrangler/config-schema.json",
 	"compatibility_date": "2025-12-02",
 	"pages_build_output_dir": "./dist",
-	"observability": {
-		"enabled": true
-	},
+	
 
-	// Environments: use `wrangler pages dev --env dev` or `wrangler pages deploy --env production`
-	"env": {
-		"dev": {
-			"name": "web-vue-dev",
-			"vars": {
-				"VITE_API_URL": "http://localhost:8787",
-				"VITE_MAIN_APP_URL": "http://localhost:3000",
-				"VITE_SUPABASE_URL": "https://yikylzhrskotiqnaitwz.supabase.co"
-				// VITE_COOKIE_DOMAIN is intentionally NOT set for local dev
-			}
-		},
-		"production": {
-			"name": "web-vue",
+	
+		
+			
+			
+			
+			
+	
+			"name": "auth-budgetwise",
 			"vars": {
 				"VITE_API_URL": "https://api.budgetwise.ca",
 				"VITE_MAIN_APP_URL": "https://budgetwise.ca",
 				"VITE_SUPABASE_URL": "https://yikylzhrskotiqnaitwz.supabase.co",
 				"VITE_COOKIE_DOMAIN": ".budgetwise.ca"
-			}
-		}
-	}
+			},
+	
+	
+ 
 }

@@ -1,5 +1,5 @@
 {
-	"name": "auth",
+	"name": "auth-budgetwise",
 	"version": "0.0.0",
 	"private": true,
 	"type": "module",
@@ -9,7 +9,7 @@
 	"scripts": {
 		"dev": "vite",
 		"build": "run-p type-check \"build-only {@}\" --",
-		"preview": "pnpm run build && wrangler pages dev --env dev",
+		"preview": "pnpm run build && wrangler pages dev ",
 		"test:unit": "vitest",
 		"build-only": "vite build",
 		"type-check": "vue-tsc --build",
@@ -17,7 +17,7 @@
 		"lint:eslint": "eslint . --fix --cache",
 		"lint": "run-s lint:*",
 		"format": "prettier --write --experimental-cli src/",
-		"deploy": "pnpm run build && wrangler pages deploy --env production",
+		"deploy": "pnpm run build && wrangler pages deploy",
 		"cf-typegen": "wrangler types"
 	},
 	"dependencies": {
