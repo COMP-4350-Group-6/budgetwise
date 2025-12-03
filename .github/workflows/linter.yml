@@ -30,9 +30,9 @@ jobs:
       - name: Super-linter
         uses: super-linter/super-linter/slim@v8.2.0
         env:
-          LINTER_RULES_PATH: .github/linters  
-          GITLEAKS_CONFIG_FILE: .customgitleaks.toml 
-          FILTER_REGEX_EXCLUDE: '.*(node_modules/).*'
+          LINTER_RULES_PATH: .github/linters
+          GITLEAKS_CONFIG_FILE: .customgitleaks.toml
+          FILTER_REGEX_EXCLUDE: '.*(node_modules/|load-tests/).*'
           VALIDATE_YAML: true
           VALIDATE_XML: true
           VALIDATE_GITLEAKS: true
