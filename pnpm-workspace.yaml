@@ -1,6 +1,7 @@
 packages:
   - apps/*
   - apps/frontend/web-next
+  - apps/frontend/auth
   - packages/**
   - infra/**
   - e2e-tests
