@@ -116,8 +116,7 @@ BudgetWise uses Cloudflare Workers and Pages for deployment, leveraging OpenNext
 ![Cloudflare Dashboard](./screenshots/cloudflare-dashboard.png)
 *Figure 4: Cloudflare dashboard showing deployment status and analytics*
 
-![Wrangler Deployment](./screenshots/wrangler-deployment.png)
-*Figure 5: Wrangler CLI deployment output showing build and upload progress*
+Deployments can be triggered via Wrangler CLI (`wrangler deploy`) or automatically through GitHub integration. The system automatically deploys to production on `main` branch merges and publishes preview URLs for every pull request and branch push.
 
 ### CD Benefits
 
@@ -137,8 +136,8 @@ BudgetWise uses Cloudflare Workers and Pages for deployment, leveraging OpenNext
 - **Cost Efficiency**: Pay-per-request pricing model
 
 #### 4. Preview URLs
-- **Branch Deployments**: Automatic preview deployments for each branch
-- **PR Previews**: Instant preview URLs for pull requests
+- **Branch Deployments**: Every branch gets both development and preview deployment URLs
+- **PR Previews**: Pull requests automatically show preview URLs for testing
 - **Testing Environment**: Isolated testing environments per deployment
 
 ![Preview URLs](./screenshots/preview-urls.png)
@@ -167,20 +166,68 @@ BudgetWise uses Cloudflare Workers and Pages for deployment, leveraging OpenNext
 1. **Code Push**: Developer pushes code to GitHub
 2. **CI Pipeline**: GitHub Actions runs tests and quality checks
 3. **Build**: Turbo builds affected packages in parallel
-4. **Deploy**: Cloudflare automatically deploys via Wrangler
-5. **Health Check**: Smoke tests validate production deployment
+4. **Deploy**: Cloudflare automatically deploys and generates branch/preview URLs
+5. **Health Check**: Smoke tests validate deployment
 
-![Deployment Flow](./screenshots/deployment-flow.png)
-*Figure 9: Complete CI/CD pipeline from code push to production*
+**Branch & Preview URLs:**
+- Every branch automatically gets both a development URL and preview deployment URL
+- Pull requests show preview URLs for testing
+- `main` branch deploys to production domain
+- `dev` branch can be configured for staging environment
 
 ### Environment Management
 
-- **Preview Environments**: Every branch gets a preview URL
+- **Preview Environments**: Every branch automatically gets a preview URL for testing
 - **Production**: `main` branch deploys to production domain
-- **Staging**: `dev` branch serves as staging environment
+- **Staging**: `dev` branch can be configured as staging environment (not yet set up)
+- **Branch URLs**: Each branch provides both development and preview deployment URLs
 
-![Environment Management](./screenshots/environment-management.png)
-*Figure 10: Branch-based environment management in Cloudflare*
+### CI/CD Flow Diagram
+
+```mermaid
+graph TD
+    A[Developer Push] --> B[GitHub Actions Trigger]
+    
+    B --> C[Detect Changes]
+    C --> D{Changed Files?}
+    
+    D -->|Frontend/API| E[Quick Checks]
+    D -->|Only Workflows| F[Skip Tests]
+    
+    E --> G[Type Check + Lint]
+    G --> H[Unit Tests]
+    G --> I[Integration Tests]
+    
+    H --> J[Coverage Report]
+    I --> J
+    
+    J --> K[Merge Coverage]
+    K --> L[Generate HTML Report]
+    L --> M[Upload Artifacts]
+    M --> N[PR Comment with Link]
+    
+    F --> O[Coverage Report Only]
+    O --> P[Generate Coverage]
+    P --> Q[PR Comment]
+    
+    N --> R[Deploy to Cloudflare]
+    Q --> R
+    R --> S{Branch Type}
+    
+    S -->|main| T[Production Deploy]
+    S -->|dev| U[Staging Deploy]
+    S -->|feature/*| V[Preview Deploy]
+    
+    T --> W[Smoke Tests]
+    U --> W
+    V --> W
+    
+    W --> X[Health Validation]
+    X --> Y[Success]
+    X --> Z[Alert on Failure]
+```
+
+*Figure 9: Complete CI/CD pipeline flow with branch-based deployments*
 
 ## Monitoring and Maintenance
 
@@ -199,12 +246,17 @@ BudgetWise uses Cloudflare Workers and Pages for deployment, leveraging OpenNext
 
 ### Cost Optimization
 
-- **Pay-per-Use**: Only pay for actual usage
+- **Free Tier**: Currently on Cloudflare's free tier with no costs
+- **Pay-per-Use**: Only pay for actual usage when exceeding free limits
 - **Caching**: R2 and edge caching reduce compute costs
 - **Selective Testing**: CI optimizations reduce GitHub Actions costs
 
-![Cost Analytics](./screenshots/cost-analytics.png)
-*Figure 13: Cloudflare billing dashboard showing usage-based pricing*
+**Sample Metrics & Observability:**
+- API response times and throughput metrics available in Cloudflare dashboard
+- Real-time logs and error tracking included in free tier
+- Performance monitoring and analytics data accessible via dashboard
+
+*Note: Sample metric PDFs and observability screenshots available in project documentation*
 
 ## Conclusion
 

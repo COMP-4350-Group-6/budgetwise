@@ -21,7 +21,8 @@ const ROOT_DIR = join(__dirname, '..');
 // Packages and apps to collect coverage from
 const COVERAGE_SOURCES = [
   'apps/api',
-  'apps/frontend',
+  'apps/frontend/auth',
+  'apps/frontend/web-next',
   'packages/adapters/auth-supabase',
   'packages/adapters/persistence/local',
   'packages/adapters/persistence/supabase',
@@ -155,7 +156,7 @@ function mergeCoverage() {
   }
   
   // Create merged coverage directory
-  const mergedCoverageDir = join(ROOT_DIR, 'coverage');
+  const mergedCoverageDir = join(ROOT_DIR, 'course-work', 'coverage-report-full');
   if (!existsSync(mergedCoverageDir)) {
     mkdirSync(mergedCoverageDir, { recursive: true });
   }
@@ -168,10 +169,10 @@ function mergeCoverage() {
   console.log(`\n✨ Merged ${totalFiles} coverage reports`);
   console.log(`📊 Output: ${relative(ROOT_DIR, mergedLcovPath)}`);
   console.log('\n💡 To generate HTML report, run:');
-  console.log('   genhtml coverage/lcov.info -o coverage/html');
+  console.log('   genhtml course-work/coverage-report-full/lcov.info -o course-work/coverage-report-full/html');
   console.log('   (Note: genhtml requires lcov to be installed: sudo apt-get install lcov)');
   console.log('\n💡 To view the HTML report:');
-  console.log('   xdg-open coverage/html/index.html\n');
+  console.log('   xdg-open course-work/coverage-report-full/html/index.html\n');
 }
 
 // Run the merge
