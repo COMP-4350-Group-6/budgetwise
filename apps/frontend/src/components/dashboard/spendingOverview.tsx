@@ -16,7 +16,11 @@ import { useRouter } from "next/navigation";
 
 // Constants & Utils
 import { TRANSACTION_STRINGS } from "@/constants/strings/transactionStrings";
-import { formatDayShort, getWeekRangeLabel, formatMonthLong } from "@/utils/dateHelpers";
+import {
+  formatDayShort,
+  getWeekRangeLabel,
+  formatMonthLong,
+} from "@/utils/dateHelpers";
 
 /**
  * Displays spending data in two modes:
@@ -39,6 +43,7 @@ export default function SpendingOverview({
   const ref = new Date(now);
   ref.setDate(now.getDate() + weekOffset * 7);
 
+  // Monday-start week
   const startOfWeek = new Date(ref);
   startOfWeek.setDate(ref.getDate() - ((ref.getDay() + 6) % 7));
   startOfWeek.setHours(0, 0, 0, 0);
@@ -52,37 +57,50 @@ export default function SpendingOverview({
     [startOfWeek, endOfWeek]
   );
 
-  const dayNames = Array.from({ length: 7 }, (_, i) =>
-    formatDayShort(new Date(2025, 0, i + 4)) //  Sunday start reference
-  );
+  // Monday-first day labels for the weekly chart
+  const dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+  // Short label for header, e.g. "Tue"
+  const selectedDayLabel = useMemo(() => {
+    if (!selectedDay) return null;
+    const d = new Date(selectedDay);
+    return formatDayShort(d);
+  }, [selectedDay]);
 
   // ---------- WEEKLY BAR CHART DATA ----------
   const weeklyData = useMemo(() => {
     const totals = new Map<string, number>();
+
     for (const tx of transactions) {
       const date = new Date(tx.occurredAt);
       if (date >= startOfWeek && date <= endOfWeek) {
-        const day = dayNames[date.getDay()];
+        // JS: 0=Sun..6=Sat → convert to Monday-first index 0..6
+        const jsIndex = date.getDay(); // 0–6
+        const index = (jsIndex + 6) % 7; // Mon=0, Tue=1, ..., Sun=6
+        const day = dayNames[index];
+
         const prev = totals.get(day) ?? 0;
         totals.set(day, prev + Math.abs(tx.amountCents) / 100);
       }
     }
+
+    // Ensure consistent order Mon..Sun
     return dayNames.map((day) => ({
       day,
       amount: totals.get(day) ?? 0,
     }));
-  }, [transactions, weekOffset]);
+  }, [transactions, startOfWeek, endOfWeek, dayNames]);
 
   // ---------- SELECTED DAY TRANSACTIONS ----------
+  // Same logic for both week & calendar views: match actual calendar date
   const selectedTx = useMemo(() => {
     if (!selectedDay) return [];
-    return transactions.filter(
-      (tx) =>
-        dayNames[new Date(tx.occurredAt).getDay()] === selectedDay &&
-        new Date(tx.occurredAt) >= startOfWeek &&
-        new Date(tx.occurredAt) <= endOfWeek
-    );
-  }, [selectedDay, transactions, startOfWeek, endOfWeek]);
+
+    return transactions.filter((tx) => {
+      const d = new Date(tx.occurredAt);
+      return d.toDateString() === selectedDay;
+    });
+  }, [selectedDay, transactions]);
 
   // ---------- CALENDAR HEATMAP ----------
   const getHeatClass = (val: number) => {
@@ -123,9 +141,11 @@ export default function SpendingOverview({
     });
   }, [transactions, currentMonth]);
 
-  const monthLabel = `${formatMonthLong(currentMonth)} ${currentMonth.getFullYear()}`;
+  const monthLabel = `${formatMonthLong(
+    currentMonth
+  )} ${currentMonth.getFullYear()}`;
 
-  // Simple local legend 
+  // Simple local legend
   const legendLabels = {
     low: "< $50",
     mid: "$50–$150",
@@ -233,6 +253,43 @@ export default function SpendingOverview({
               <span>High {legendLabels.high}</span>
             </div>
           </div>
+
+          {/* DAILY TRANSACTIONS (CALENDAR VIEW) */}
+          <div className={styles.todaysSection}>
+            <div className={styles.txHeader}>
+              <h4>
+                {selectedDayLabel
+                  ? `${selectedDayLabel}'s ${TRANSACTION_STRINGS.messages.todayTransactions}`
+                  : TRANSACTION_STRINGS.messages.todayTransactions}
+              </h4>
+              <button
+                onClick={() => router.push("/transactions")}
+                className={styles.addMini}
+              >
+                + {TRANSACTION_STRINGS.add}
+              </button>
+            </div>
+
+            {selectedTx.length === 0 ? (
+              <p className={styles.empty}>
+                {TRANSACTION_STRINGS.messages.noTransactions}
+              </p>
+            ) : (
+              <ul className={styles.txList}>
+                {selectedTx.map((tx) => (
+                  <li key={tx.id} className={styles.txItem}>
+                    <span className={styles.txName}>
+                      {tx.note || TRANSACTION_STRINGS.labels.description}
+                    </span>
+
+                    <span className={styles.txAmount}>
+                      ${(Math.abs(tx.amountCents) / 100).toFixed(2)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </>
       ) : (
         <>
@@ -252,20 +309,26 @@ export default function SpendingOverview({
                   dataKey="amount"
                   fill="#4E7C66"
                   radius={[6, 6, 0, 0]}
-                  onClick={(data) =>
-                    setSelectedDay((data.payload as { day: string }).day)
-                  }
+                  onClick={(data) => {
+                    const dayLabel = (data.payload as { day: string }).day;
+                    const index = dayNames.indexOf(dayLabel);
+                    if (index === -1) return;
+
+                    const date = new Date(startOfWeek);
+                    date.setDate(startOfWeek.getDate() + index);
+                    setSelectedDay(date.toDateString());
+                  }}
                 />
               </BarChart>
             </ResponsiveContainer>
           </div>
 
-          {/* DAILY TRANSACTIONS */}
+          {/* DAILY TRANSACTIONS (WEEK VIEW) */}
           <div className={styles.todaysSection}>
             <div className={styles.txHeader}>
               <h4>
-                {selectedDay
-                  ? `${selectedDay}'s ${TRANSACTION_STRINGS.messages.todayTransactions}`
+                {selectedDayLabel
+                  ? `${selectedDayLabel}'s ${TRANSACTION_STRINGS.messages.todayTransactions}`
                   : TRANSACTION_STRINGS.messages.todayTransactions}
               </h4>
               <button
@@ -282,12 +345,15 @@ export default function SpendingOverview({
               </p>
             ) : (
               <ul className={styles.txList}>
-                {selectedTx.map((tx, i) => (
-                  <li key={i}>
-                    <span>
+                {selectedTx.map((tx) => (
+                  <li key={tx.id} className={styles.txItem}>
+                    <span className={styles.txName}>
                       {tx.note || TRANSACTION_STRINGS.labels.description}
                     </span>
-                    <span>${(Math.abs(tx.amountCents) / 100).toFixed(2)}</span>
+
+                    <span className={styles.txAmount}>
+                      ${(Math.abs(tx.amountCents) / 100).toFixed(2)}
+                    </span>
                   </li>
                 ))}
               </ul>
