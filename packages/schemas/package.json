@@ -7,7 +7,13 @@
   "exports": { ".": { "import": "./dist/index.js", "types": "./dist/index.d.ts" } },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "openapi:generate": "node ./src/openapi-stub.cjs"
+    "openapi:generate": "npx tsx ./src/openapi-generator.ts"
   },
-  "dependencies": { "zod": "^4.1.12" }
+  "dependencies": {
+    "zod": "^4.1.12",
+    "zod-openapi": "^5.4.2"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0"
+  }
 }
