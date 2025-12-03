@@ -19,36 +19,6 @@
    - Timing attacks
    - Unsafe file system operations
 
-#### Installation
-
-```bash
-pnpm add -D eslint-plugin-security typescript-eslint -w
-```
-
-#### Configuration
-
-**Frontend ESLint Config** (`apps/frontend/eslint.config.mjs`):
-```javascript
-import security from "eslint-plugin-security";
-
-const eslintConfig = [
-  ...compat.extends("next/core-web-vitals", "next/typescript"),
-  security.configs.recommended,
-  // ... other config
-];
-```
-
-**API ESLint Config** (`apps/api/eslint.config.mjs`):
-```javascript
-import security from "eslint-plugin-security";
-import tseslint from "typescript-eslint";
-
-export default tseslint.config(
-  ...tseslint.configs.recommended,
-  security.configs.recommended,
-);
-```
-
 ### How We Ran the Analysis
 
 The security analysis was executed using the following command from the project root:
@@ -296,13 +266,5 @@ Total: 53 problems (0 errors, 53 warnings)
 
 ---
 
-## 7. Conclusion
-
-The eslint-plugin-security SAST tool successfully analyzed our TypeScript/JavaScript codebase and identified potential security patterns. All findings were reviewed and classified as low-risk due to:
-
-1. **Trusted data sources**: Most flagged patterns use database-generated IDs or enum values
-2. **TypeScript constraints**: Type system prevents many attack vectors at compile time
-3. **Context-specific safety**: The actual data flow in our application prevents exploitation
-
-The tool is now integrated into our CI/CD pipeline and will automatically scan all future code changes for security vulnerabilities.
-
+## AI Acknowledgement
+The creation of this security analysis report was assisted by Claude Opus 4.5 (Cursor).
