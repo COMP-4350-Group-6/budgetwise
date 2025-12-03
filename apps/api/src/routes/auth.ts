@@ -1,133 +1,186 @@
 import { Hono } from "hono";
+import type { Context } from "hono";
 import { zValidator } from "@hono/zod-validator";
-import { LoginInput, SignupInput, RefreshTokenInput, ForgotPasswordInput, ResetPasswordInput } from "@budget/schemas";
+import { getCookie, setCookie, deleteCookie } from "hono/cookie";
+import { 
+  LoginInputSchema, 
+  SignupInputSchema,
+  ForgotPasswordInputSchema, 
+  ResetPasswordInputSchema,
+  type AuthTokens,
+} from "@budget/schemas";
+import type { AuthProviderPort, TokenVerifierPort } from "@budget/ports";
 
+// ============================================================================
+// Cookie Configuration
+// ============================================================================
 
-export const auth = new Hono();
+const COOKIE_NAME = "budgetwise_session";
+const COOKIE_MAX_AGE = 60 * 60 * 24 * 7; // 7 days
 
-// POST /auth/signup
-auth.get("/auth", (c) => c.json({ message: "Auth API is running" }));
+function isProductionDomain(domain?: string): boolean {
+  return Boolean(domain && domain.length > 0 && !domain.includes('localhost'));
+}
 
-auth.post(
-  "/auth/signup",
-  zValidator("json", SignupInput),
-  async (c) => {
-    const body = c.req.valid("json");
-    
-    // TODO: Get use case from container
-    // const signupUseCase = container.getSignupUseCase();
-    // const result = await signupUseCase.execute(body);
-    
-    return c.json({
-      user: {
-        id: "user-123",
-        email: body.email,
-        name: body.name,
-        defaultCurrency: body.defaultCurrency,
-      },
-      accessToken: "jwt-access-token",
-      refreshToken: "jwt-refresh-token",
-    }, 201);
-  }
-);
+function getCookieOptions(domain?: string) {
+  const isProd = isProductionDomain(domain);
+  return {
+    httpOnly: true,
+    secure: isProd,
+    sameSite: "Lax" as const,
+    path: "/",
+    maxAge: COOKIE_MAX_AGE,
+    ...(isProd ? { domain } : {}),
+  };
+}
 
-// POST /auth/login
-auth.post(
-  "/auth/login",
-  zValidator("json", LoginInput),
-  async (c) => {
-    const body = c.req.valid("json");
-    
-    // TODO: Get use case from container
-    // const loginUseCase = container.getLoginUseCase();
-    // const result = await loginUseCase.execute(body);
-    
-    return c.json({
-      user: {
-        id: "user-123",
-        email: body.email,
-        name: "John Doe",
-        defaultCurrency: "USD",
-      },
-      accessToken: "jwt-access-token",
-      refreshToken: "jwt-refresh-token",
-    });
-  }
-);
+/** Helper to set session cookie */
+function setSessionCookie(c: Context, tokens: AuthTokens, domain?: string) {
+  setCookie(c, COOKIE_NAME, JSON.stringify(tokens), getCookieOptions(domain));
+}
 
-// POST /auth/logout
-auth.post("/auth/logout", async (c) => {
-  // TODO: Invalidate refresh token
-  // const logoutUseCase = container.getLogoutUseCase();
-  // await logoutUseCase.execute({ token: refreshToken });
-  
-  return c.json({ message: "Logged out successfully" });
-});
-
-// POST /auth/refresh
-auth.post(
-  "/auth/refresh",
-  zValidator("json", RefreshTokenInput),
-  async (c) => {
-    const body = c.req.valid("json");
-    
-    // TODO: Get use case from container
-    // const refreshUseCase = container.getRefreshTokenUseCase();
-    // const result = await refreshUseCase.execute(body);
-    
-    return c.json({
-      accessToken: "new-jwt-access-token",
-      refreshToken: "new-jwt-refresh-token",
-    });
-  }
-);
-
-// GET /auth/me (requires authentication)
-auth.get("/auth/me", async (c) => {
-  // TODO: Get user from auth middleware
-  // const userId = c.get("userId");
-  // const getUserUseCase = container.getGetUserUseCase();
-  // const user = await getUserUseCase.execute(userId);
-  const header = c.req.header("Authorization");
-  if (!header || !header.startsWith("Bearer ")) {
-    return c.json({ error: "Unauthorized" }, 401);
-  }
-  
-  return c.json({
-    id: "user-123",
-    email: "user@example.com",
-    name: "John Doe",
-    defaultCurrency: "USD",
-    createdAt: new Date().toISOString(),
+/** Helper to clear session cookie */
+function clearSessionCookie(c: Context, domain?: string) {
+  deleteCookie(c, COOKIE_NAME, {
+    path: "/",
+    ...(isProductionDomain(domain) ? { domain } : {}),
   });
-});
+}
 
-// POST /auth/forgot-password
-auth.post(
-  "/auth/forgot-password",
-  zValidator("json", ForgotPasswordInput),
-  async (c) => {
-    const body = c.req.valid("json");
-    
-    // TODO: Send password reset email
-    // const forgotPasswordUseCase = container.getForgotPasswordUseCase();
-    // await forgotPasswordUseCase.execute(body);
-    
-    return c.json({ message: "Password reset email sent" });
+/** Helper to get session tokens from cookie */
+function getSessionTokens(c: Context): AuthTokens | null {
+  const cookieValue = getCookie(c, COOKIE_NAME);
+  if (!cookieValue) return null;
+  try {
+    return JSON.parse(cookieValue);
+  } catch {
+    return null;
   }
-);
+}
 
-// POST /auth/reset-password
-auth.post(
-  "/auth/reset-password",
-  zValidator("json", ResetPasswordInput),
-  async (c) => {
+// ============================================================================
+// Route Dependencies
+// ============================================================================
+
+export interface AuthRouteDeps {
+  authProvider: AuthProviderPort;
+  tokenVerifier: TokenVerifierPort;
+  cookieDomain?: string;
+}
+
+// ============================================================================
+// Route Factory
+// ============================================================================
+
+export function createAuthRoutes(deps: AuthRouteDeps) {
+  const app = new Hono();
+  const { authProvider, tokenVerifier, cookieDomain } = deps;
+
+  // Health check
+  app.get("/auth", (c) => c.json({ status: "ok" }));
+
+  // POST /auth/signup
+  app.post("/auth/signup", zValidator("json", SignupInputSchema), async (c) => {
     const body = c.req.valid("json");
+    const result = await authProvider.signup(body);
     
-    // TODO: Send password reset email
-    // const resetPasswordUseCase = container.getResetPasswordUseCase();
-    // await resetPasswordUseCase.execute(body);
+    if (!result.success || !result.data) {
+      return c.json({ error: result.error }, 400);
+    }
+
+    const { user, tokens } = result.data;
+    
+    // Set cookie if we have valid tokens (email might need confirmation)
+    if (tokens.accessToken) {
+      setSessionCookie(c, tokens, cookieDomain);
+    }
+    
+    return c.json({ user }, 201);
+  });
+
+  // POST /auth/login
+  app.post("/auth/login", zValidator("json", LoginInputSchema), async (c) => {
+    const body = c.req.valid("json");
+    const result = await authProvider.login(body);
+    
+    if (!result.success || !result.data) {
+      return c.json({ error: result.error }, 401);
+    }
+
+    const { user, tokens } = result.data;
+    setSessionCookie(c, tokens, cookieDomain);
+    
+    return c.json({ user });
+  });
+
+  // POST /auth/logout
+  app.post("/auth/logout", async (c) => {
+    await authProvider.logout();
+    clearSessionCookie(c, cookieDomain);
+    return c.json({ message: "Logged out successfully" });
+  });
+
+  // POST /auth/refresh
+  app.post("/auth/refresh", async (c) => {
+    const tokens = getSessionTokens(c);
+    
+    if (!tokens) {
+      return c.json({ error: { code: "SESSION_EXPIRED", message: "No session found" } }, 401);
+    }
+
+    const result = await authProvider.refreshSession();
+    
+    if (!result.success || !result.data) {
+      clearSessionCookie(c, cookieDomain);
+      return c.json({ error: result.error }, 401);
+    }
+
+    setSessionCookie(c, result.data.tokens, cookieDomain);
+    return c.json({ message: "Session refreshed" });
+  });
+
+  // GET /auth/me - Verify token from cookie and return user
+  app.get("/auth/me", async (c) => {
+    const tokens = getSessionTokens(c);
+    
+    if (!tokens?.accessToken) {
+      return c.json({ error: "Unauthorized" }, 401);
+    }
+
+    const result = await tokenVerifier.verify(tokens.accessToken);
+    
+    if (!result.success || !result.data) {
+      clearSessionCookie(c, cookieDomain);
+      return c.json({ error: "Session expired" }, 401);
+    }
+    
+    return c.json({ 
+      user: {
+        id: result.data.userId,
+        email: result.data.email,
+      }
+    });
+  });
+
+  // POST /auth/forgot-password
+  app.post("/auth/forgot-password", zValidator("json", ForgotPasswordInputSchema), async (c) => {
+    const { email } = c.req.valid("json");
+    await authProvider.sendPasswordResetEmail(email);
+    // Always return success to not reveal if email exists
+    return c.json({ message: "If an account exists, a password reset email has been sent" });
+  });
+
+  // POST /auth/reset-password
+  app.post("/auth/reset-password", zValidator("json", ResetPasswordInputSchema), async (c) => {
+    const { token, newPassword } = c.req.valid("json");
+    const result = await authProvider.resetPassword(token, newPassword);
+    
+    if (!result.success) {
+      return c.json({ error: result.error }, 400);
+    }
     
     return c.json({ message: "Password reset successfully" });
-  }
-);
+  });
+
+  return app;
+}

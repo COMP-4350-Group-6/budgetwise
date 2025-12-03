@@ -60,3 +60,32 @@ export type CreateTransactionInput = z.infer<typeof CreateTransactionInputSchema
 export type UpdateTransactionInput = z.infer<typeof UpdateTransactionInputSchema>;
 export type CategorizationResult = z.infer<typeof CategorizationResultSchema>;
 export type ParsedInvoice = z.infer<typeof ParsedInvoiceSchema>;
+
+// ============================================================================
+// Usecase Input Types (API input + auth context)
+// ============================================================================
+
+export type AddTransactionInput = CreateTransactionInput & { userId: string };
+export type ModifyTransactionInput = UpdateTransactionInput & { transactionId: string; userId: string };
+export type DeleteTransactionInput = { transactionId: string; userId: string };
+export type ListTransactionsInput = {
+  userId: string;
+  startDate?: Date;
+  endDate?: Date;
+  days?: number;
+  limit?: number;
+};
+export type CategorizeTransactionInput = { transactionId: string; userId: string };
+export type ParseInvoiceInput = { userId: string; imageBase64: string };
+export type BulkImportTransactionsInput = {
+  userId: string;
+  transactions: Omit<CreateTransactionInput, 'userId'>[];
+  autoCategorize?: (transactionId: string, userId: string) => Promise<{ categoryId: string } | null>;
+};
+export type BulkImportResult = {
+  imported: number;
+  failed: number;
+  total: number;
+  success: TransactionDTO[];
+  errors: Array<{ index: number; error: string; data: unknown }>;
+};

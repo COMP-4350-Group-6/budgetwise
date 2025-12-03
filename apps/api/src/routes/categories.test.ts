@@ -1,20 +1,4 @@
-import { describe, it, expect, beforeEach, beforeAll, vi } from 'vitest';
-
-// Hoist a mock for 'jose' so auth middleware sees a valid user
-vi.mock('jose', () => {
-  return {
-    createRemoteJWKSet: vi.fn(() => ({})),
-    jwtVerify: vi.fn(async (token: string) => {
-      let sub = token;
-      if (token.includes('user-1')) sub = 'user-1';
-      else if (token.includes('user-2')) sub = 'user-2';
-      else if (token.includes('different-user')) sub = 'different-user';
-      else if (token.includes('test-token')) sub = 'test-user-123';
-      return { payload: { sub } } as any;
-    }),
-    decodeProtectedHeader: vi.fn(() => ({ alg: "ES256" })),
-  };
-});
+import { describe, it, expect, beforeEach, beforeAll } from 'vitest';
 
 import { app, container } from '../test-app';
 

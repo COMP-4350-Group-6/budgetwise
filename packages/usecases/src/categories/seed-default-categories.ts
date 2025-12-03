@@ -31,6 +31,7 @@ export function makeSeedDefaultCategories(deps: {
 
     for (let i = 0; i < DEFAULT_CATEGORIES.length; i++) {
       const config = DEFAULT_CATEGORIES[i];
+      if (!config) continue;
       const category = new Category({
         id: deps.id.ulid(),
         userId,
