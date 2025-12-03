@@ -171,10 +171,7 @@ jobs:
     name: Generate Coverage Report
     runs-on: ubuntu-latest
     needs: [unit-tests, integration-tests]
-    if: |
-      always() && 
-      github.event_name == 'pull_request' &&
-      (needs.unit-tests.result == 'success' || needs.integration-tests.result == 'success')
+    if: always() && (needs.unit-tests.result == 'success' || needs.integration-tests.result == 'success')
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -192,7 +189,6 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Download unit test coverage
-        if: needs.unit-tests.result == 'success'
         uses: actions/download-artifact@v4
         with:
           name: unit-test-coverage
@@ -200,7 +196,6 @@ jobs:
         continue-on-error: true
 
       - name: Download integration test coverage
-        if: needs.integration-tests.result == 'success'
         uses: actions/download-artifact@v4
         with:
           name: integration-test-coverage
@@ -209,14 +204,14 @@ jobs:
 
       - name: Merge coverage reports
         run: pnpm coverage:merge
+        continue-on-error: true
 
       - name: Install lcov (for genhtml)
         run: sudo apt-get update && sudo apt-get install -y lcov
       
       - name: Generate HTML report
         run: pnpm coverage:html
-
-      - name: Upload merged coverage
+        continue-on-error: true      - name: Upload merged coverage
         uses: actions/upload-artifact@v4
         with:
           name: merged-coverage
@@ -224,24 +219,55 @@ jobs:
           retention-days: 30
 
       - name: Comment coverage on PR
+        if: github.event_name == 'pull_request'
         uses: actions/github-script@v7
         with:
           script: |
             const fs = require('fs');
+            const path = require('path');
             
-            // Read coverage summary if available
-            let coverageMessage = '📊 **Coverage Report Generated**\n\n';
-            coverageMessage += 'View the full coverage report in the workflow artifacts.\n\n';
-            coverageMessage += '💡 **Tip**: Only tests for changed files were run to speed up CI.';
+            let coverageMessage = '📊 **Test Results Summary**\n\n';
+            
+            // Check test results
+            const unitTestsPassed = '${{ needs.unit-tests.result }}' === 'success';
+            const integrationTestsPassed = '${{ needs.integration-tests.result }}' === 'success';
+            
+            if (unitTestsPassed && integrationTestsPassed) {
+              coverageMessage += '✅ **All tests passed!**\n';
+              coverageMessage += '• Unit tests: ✅ Passed\n';
+              coverageMessage += '• Integration tests: ✅ Passed\n\n';
+            } else if (unitTestsPassed) {
+              coverageMessage += '✅ **Unit tests passed!**\n';
+              coverageMessage += '• Unit tests: ✅ Passed\n';
+              coverageMessage += '• Integration tests: ❌ Failed\n\n';
+            } else if (integrationTestsPassed) {
+              coverageMessage += '✅ **Integration tests passed!**\n';
+              coverageMessage += '• Unit tests: ❌ Failed\n';
+              coverageMessage += '• Integration tests: ✅ Passed\n\n';
+            } else {
+              coverageMessage += '❌ **All tests failed**\n\n';
+              return; // Don't post comment if everything failed
+            }
+            
+            // Check if coverage was generated
+            const coverageDir = path.join(process.cwd(), 'coverage');
+            if (fs.existsSync(coverageDir)) {
+              coverageMessage += '📈 **Coverage Report Generated**\n';
+              coverageMessage += 'View the full coverage report in the workflow artifacts.\n\n';
+            } else {
+              coverageMessage += '⚠️ **Coverage Report**: No coverage data available\n\n';
+            }
+            
+            if (github.event_name === 'pull_request') {
+              coverageMessage += '💡 **Note**: Only tests for changed files were run to speed up CI.';
+            }
             
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: coverageMessage
-            });
-
-  # Only run on main/dev branches or when specifically needed
+            });  # Only run on main/dev branches or when specifically needed
   full-test-suite:
     name: Full Test Suite (All Tests)
     runs-on: ubuntu-latest

@@ -31,6 +31,12 @@ const COVERAGE_SOURCES = [
   'packages/usecases',
 ];
 
+// CI artifact directories (when running in GitHub Actions)
+const CI_COVERAGE_SOURCES = [
+  'coverage-temp/unit',
+  'coverage-temp/integration',
+];
+
 /**
  * Find all lcov.info files recursively in a directory
  */
@@ -94,6 +100,25 @@ function mergeCoverage() {
   let allLcovContent = [];
   let totalFiles = 0;
   
+  // Check CI artifact directories first (GitHub Actions)
+  for (const source of CI_COVERAGE_SOURCES) {
+    const sourcePath = join(ROOT_DIR, source);
+    const lcovFiles = findLcovFiles(sourcePath);
+    
+    for (const lcovFile of lcovFiles) {
+      try {
+        const content = readFileSync(lcovFile, 'utf-8');
+        // CI artifacts should already have correct paths
+        allLcovContent.push(content);
+        totalFiles++;
+        console.log(`✅ Processed CI artifact: ${relative(ROOT_DIR, lcovFile)}`);
+      } catch (error) {
+        console.error(`❌ Error reading CI artifact ${lcovFile}:`, error.message);
+      }
+    }
+  }
+  
+  // Check local package coverage directories
   for (const source of COVERAGE_SOURCES) {
     const sourcePath = join(ROOT_DIR, source);
     const coveragePath = join(sourcePath, 'coverage');
