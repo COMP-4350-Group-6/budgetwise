@@ -8,7 +8,7 @@ BudgetWise implements a robust CI/CD pipeline using GitHub Actions for continuou
 - ✅ Comprehensive test coverage with parallel execution
 - ✅ Automated deployment to 300+ global edge locations
 - ✅ Intelligent change detection reducing CI time by ~60%
-- ✅ Zero-downtime deployments with instant rollbacks
+- ✅ Reliable edge computing deployments
 - ✅ Cost-effective solution on Cloudflare's free tier
 
 ---
@@ -160,25 +160,27 @@ The CI pipeline consists of three automated workflows:
 - `pnpm-lock.yaml` - Dependencies
 
 **Auto-Deployment Triggers:**
-- Git push to any branch → Instant preview URL
+- Git push to any branch → Instant preview URL (Cloudflare auto-deploys)
 - PR creation → Automatic testing environment
 - Main branch merge → Production deployment
+- **Note**: CI failures don't block deployments - Cloudflare deploys automatically, and failures occur naturally if builds are broken
 
 ### Deployment Process Flow
 
 ```mermaid
 graph TD
     A[Code Push] --> B[GitHub Actions CI]
-    B --> C{Tests Pass?}
-    C -->|Yes| D[Cloudflare Build]
-    C -->|No| E[Block Deployment]
-    D --> F{Branch Type}
-    F -->|main| G[Production Deploy]
-    F -->|feature/*| H[Preview Deploy]
-    G --> I[Smoke Tests]
-    H --> I
-    I --> J[Health Check]
-    J --> K[Success ✅]
+    A --> C[Cloudflare Auto-Deploy]
+    B --> D{Tests Pass?}
+    D -->|Yes| E[CI Success]
+    D -->|No| F[CI Failure]
+    C --> G{Branch Type}
+    G -->|main| H[Production Deploy]
+    G -->|feature/*| I[Preview Deploy]
+    H --> J[Smoke Tests]
+    I --> J
+    J --> K[Health Check]
+    K --> L[Success ✅]
 ```
 
 ### Environment Management

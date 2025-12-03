@@ -410,8 +410,8 @@ The CI pipeline consists of three automated workflows:
 
 ##### Test Workflow (`test.yml`)
 - **Purpose**: Comprehensive testing with intelligent change detection
-- **Triggers**: All pushes + PRs to `dev`/`main` branches
-- **Features**: Parallel execution, selective testing, coverage reporting
+- **Triggers**: All pushes to any branch + PRs to `dev`/`main` branches
+- **Features**: Parallel execution, selective testing, coverage reporting, change detection
 - **Performance**: ~3-5 minute execution for full test suite
 
 ##### Smoke Tests Workflow (`smoke-tests.yml`)
@@ -432,13 +432,14 @@ The CI pipeline consists of three automated workflows:
 - **Framework**: Next.js 15 with OpenNext.js adapter
 - **Runtime**: Cloudflare Workers (300+ edge locations)
 - **Caching**: R2 incremental cache + edge caching
-- **URL Pattern**: `https://[branch]-frontend.[user].workers.dev`
+- **Production URL**: `https://budgetwise.ca`
+- **Preview URLs**: Branch-based preview deployments
 
 **API Deployment:**
 - **Framework**: Hono.js on Cloudflare Workers
 - **Database**: Supabase with connection pooling
 - **Authentication**: JWT-based with Supabase integration
-- **URL Pattern**: `https://[project]-api.[user].workers.dev`
+- **Production URL**: `https://api.budgetwise.ca`
 
 #### Key Performance Metrics
 
@@ -478,6 +479,8 @@ The CI pipeline consists of three automated workflows:
 ---
 
 *Snapshots captured from actual CI/CD pipeline execution showing real workflow performance and deployment results.*
+
+**📋 For detailed CI/CD implementation including deployment flow diagrams, build configurations, and future improvements, see:** [CI_CD_REPORT.md](../CI_CD_REPORT.md)
 
 
 
