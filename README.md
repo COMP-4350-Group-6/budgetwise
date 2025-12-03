@@ -6,14 +6,28 @@ COMP 4350 - Full-Stack Budgeting Application
 
 ## ⚡ Quick Access
 
+### 📖 Documentation
 | Resource | Description |
 |----------|-------------|
-| 🌐 **[Swagger API Docs](http://localhost:8787/docs)** | Interactive API documentation (start API first) |
-| 📖 **[Architecture](docs/architecture/DESIGN.md)** | Clean architecture design & patterns |
-| 🧪 **[Testing Guide](docs/testing/TESTING_GUIDE.md)** | Test commands, coverage, best practices |
-| 📊 **[Load Test Report](load-tests/LOAD_TEST_REPORT.md)** | API performance under stress |
-| 🤖 **[LLM Profiler Dashboard](profiler/profiler-report.html)** | AI feature benchmarks |
-| 📋 **[OpenAPI Spec](packages/schemas/dist/openapi.yaml)** | OpenAPI 3.1 specification |
+| [**Architecture & Design**](docs/architecture/DESIGN.md) | Clean architecture patterns & decisions |
+| [**Testing Guide**](docs/testing/TESTING_GUIDE.md) | Commands, coverage, CI/CD strategy |
+| [**Local Setup Guide**](docs/setup/LOCAL_DEVELOPMENT_GUIDE.md) | Full local development setup |
+
+### 🔌 API & OpenAPI
+| Resource | Description |
+|----------|-------------|
+| [**Swagger UI**](http://localhost:8787/docs) | Interactive API explorer (run API first) |
+| [**OpenAPI YAML**](packages/schemas/dist/openapi.yaml) | OpenAPI 3.1 spec - copy to Swagger Editor |
+| [**OpenAPI JSON**](packages/schemas/dist/openapi.json) | OpenAPI 3.1 spec (JSON format) |
+| [**Schemas README**](packages/schemas/README.md) | How to generate and use the spec |
+
+### 📊 Performance & Testing
+| Resource | Description |
+|----------|-------------|
+| [**Load Test Report**](load-tests/LOAD_TEST_REPORT.md) | API performance under stress |
+| [**Load Test HTML**](load-tests/load-test-results-report.html) | Interactive charts & metrics |
+| [**LLM Profiler Dashboard**](profiler/profiler-report.html) | AI feature benchmarks (open in browser) |
+| [**Profiler README**](profiler/README.md) | How to run LLM benchmarks |
 
 ---
 
@@ -125,26 +139,35 @@ All documentation lives in [`docs/`](docs/README.md):
 
 ---
 
-## 🔌 API & OpenAPI
+## 🔌 API Documentation
 
-**Swagger UI:** http://localhost:8787/docs (interactive API explorer)
-
+### Option 1: Run Swagger UI Locally
 ```sh
-# Start API and open docs
 cd apps/api && pnpm dev
-# Then visit http://localhost:8787/docs
+# Open http://localhost:8787/docs
 ```
 
-**Authentication:**
-1. Login via `POST /auth/login` → Cookie set automatically
-2. All `/v1/*` endpoints work with session cookie
-3. Bearer tokens also supported for API clients
+### Option 2: Use OpenAPI Spec Directly
 
-**Generate OpenAPI spec from Zod schemas:**
+Copy the spec file to any OpenAPI tool:
+- **YAML:** [`packages/schemas/dist/openapi.yaml`](packages/schemas/dist/openapi.yaml)
+- **JSON:** [`packages/schemas/dist/openapi.json`](packages/schemas/dist/openapi.json)
+
+**Import to:**
+- [Swagger Editor](https://editor.swagger.io/) - Paste YAML/JSON
+- [Postman](https://postman.com/) - Import OpenAPI
+- [Insomnia](https://insomnia.rest/) - Import from file
+
+### Regenerate OpenAPI Spec
 ```sh
 cd packages/schemas && pnpm run openapi:generate
 # Output: packages/schemas/dist/openapi.yaml
 ```
+
+### Authentication
+1. Login via `POST /auth/login` → Cookie set automatically
+2. All `/v1/*` endpoints work with session cookie
+3. Bearer tokens also supported for API clients
 
 ---
 
