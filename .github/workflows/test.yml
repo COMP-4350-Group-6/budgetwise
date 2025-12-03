@@ -185,7 +185,34 @@ jobs:
         with:
           name: merged-coverage
           path: coverage/
-          retention-days: 30  # Only run on main/dev branches or when specifically needed
+          retention-days: 30
+
+      - name: Comment coverage on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            
+            let coverageMessage = '📊 **Coverage Report Generated**\n\n';
+            
+            // Check if coverage was generated
+            const coverageDir = path.join(process.cwd(), 'coverage');
+            if (fs.existsSync(coverageDir)) {
+              coverageMessage += '✅ Coverage report has been generated for this PR.\n';
+              coverageMessage += '📈 View the full coverage report in the workflow artifacts.\n\n';
+              coverageMessage += '💡 **Note**: This includes coverage for all tests run in CI.';
+            } else {
+              coverageMessage += '⚠️ **Coverage Report**: No coverage data was generated.\n\n';
+            }
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: coverageMessage
+            });  # Only run on main/dev branches or when specifically needed
   full-test-suite:
     name: Full Test Suite (All Tests)
     runs-on: ubuntu-latest
