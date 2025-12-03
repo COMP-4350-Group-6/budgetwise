@@ -22,12 +22,14 @@ const ALLOWED_ORIGINS = [
   "https://frontend.ramatjyot13-ca.workers.dev",
 ];
 
-const CLOUDFLARE_PREVIEW_PATTERN = /^https:\/\/[a-z0-9-]+-frontend\.ramatjyot13-ca\.workers\.dev$/;
+const CLOUDFLARE_WORKERS_PREVIEW_PATTERN = /^https:\/\/[a-z0-9-]+-frontend\.ramatjyot13-ca\.workers\.dev$/;
+const CLOUDFLARE_PAGES_PREVIEW_PATTERN = /^https:\/\/[a-z0-9-]+\.budgetwise-[a-z0-9-]+\.pages\.dev$/;
 
 function corsOrigin(origin: string | undefined): string {
   if (!origin) return "*"; // Allow Postman, CI tests
   if (ALLOWED_ORIGINS.includes(origin)) return origin;
-  if (CLOUDFLARE_PREVIEW_PATTERN.test(origin)) return origin;
+  if (CLOUDFLARE_WORKERS_PREVIEW_PATTERN.test(origin)) return origin;
+  if (CLOUDFLARE_PAGES_PREVIEW_PATTERN.test(origin)) return origin;
   return "";
 }
 
