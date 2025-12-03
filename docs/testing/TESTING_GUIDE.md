@@ -569,6 +569,91 @@ pnpm test:int
 
 ---
 
+## Load Testing
+
+### Overview
+
+We use **k6** for load testing the production API. Load tests validate performance under stress.
+
+**Location:** [`load-tests/`](../../load-tests/)
+
+### Running Load Tests
+
+```bash
+cd load-tests
+pnpm install
+k6 run load-test.js
+```
+
+### Configuration
+
+Edit `load-test.js` to customize:
+- Virtual users (VUs)
+- Test duration
+- Target endpoints
+- Thresholds
+
+### Results
+
+| Metric | Description |
+|--------|-------------|
+| `http_req_duration` | Request latency (p50, p95, p99) |
+| `http_reqs` | Total requests per second |
+| `http_req_failed` | Error rate |
+| `iterations` | Completed test iterations |
+
+**Reports:**
+- **[LOAD_TEST_REPORT.md](../../load-tests/LOAD_TEST_REPORT.md)** - Analysis and findings
+- **[load-test-results-report.html](../../load-tests/load-test-results-report.html)** - Interactive HTML report
+- **[load-test-results.json](../../load-tests/load-test-results.json)** - Raw metrics data
+
+**See:** [load-tests/README.md](../../load-tests/README.md) for full documentation.
+
+---
+
+## LLM Performance Profiling
+
+### Overview
+
+The [`profiler/`](../../profiler/) directory contains benchmarking tools for AI-powered features.
+
+### Running the Profiler
+
+```bash
+cd profiler
+npx tsx run-stats.ts
+```
+
+### What It Measures
+
+| Feature | Runs | Description |
+|---------|------|-------------|
+| **Auto-Categorization** | 100 | AI transaction categorization |
+| **Invoice Parsing** | 20 | AI receipt/invoice OCR |
+
+### Statistics Collected
+
+- Success rate
+- Mean/median latency
+- Percentiles (P50, P90, P95, P99)
+- Standard deviation
+- IQR (interquartile range)
+
+### Latest Benchmarks
+
+| Feature | Success | Mean | P50 | P95 |
+|---------|---------|------|-----|-----|
+| Auto-Categorization | 99% | 682ms | 596ms | 1103ms |
+| Invoice Parsing | 100% | 2695ms | 1788ms | 6601ms |
+
+### Output
+
+Interactive HTML report: **[profiler/profiler-report.html](../../profiler/profiler-report.html)**
+
+**See:** [profiler/README.md](../../profiler/README.md) for full documentation.
+
+---
+
 ## Smoke Tests
 
 ### What Are Smoke Tests?
@@ -801,6 +886,8 @@ pnpm test -- packages/domain/src/entities/budget.test.ts
 | Run with coverage | `pnpm test:coverage` |
 | View coverage report | `pnpm coverage:report` |
 | Run smoke tests (prod) | `pnpm test:smoke:production` |
+| Run load tests | `cd load-tests && k6 run load-test.js` |
+| Run LLM profiler | `cd profiler && npx tsx run-stats.ts` |
 | Debug smoke tests | `cd e2e-tests && pnpm test:ui` |
 | Watch mode | `pnpm test --watch` |
 | Run specific test | `pnpm test <file-path>` |
@@ -824,6 +911,16 @@ BudgetWise uses a comprehensive testing strategy:
 - ✅ Critical user flows
 - ✅ Performance
 - ✅ Security
+
+**Load testing** with k6:
+- ✅ API performance under stress
+- ✅ HTML and JSON reports
+- ✅ [View Report](../../load-tests/LOAD_TEST_REPORT.md)
+
+**LLM profiling** for AI features:
+- ✅ Auto-categorization benchmarks
+- ✅ Invoice parsing benchmarks
+- ✅ [View Dashboard](../../profiler/profiler-report.html)
 
 **Smart CI/CD** optimized for speed:
 - ✅ Fast feedback on PRs (5-8 min)
