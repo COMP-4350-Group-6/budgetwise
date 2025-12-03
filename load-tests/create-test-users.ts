@@ -28,8 +28,14 @@ if (fs.existsSync(envPath)) {
 }
 
 // Allow override from environment
-SUPABASE_URL = process.env.SUPABASE_URL || SUPABASE_URL || 'https://yikylzhrskotiqnaitwz.supabase.co';
+SUPABASE_URL = process.env.SUPABASE_URL || SUPABASE_URL;
 SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || SUPABASE_SERVICE_ROLE_KEY;
+
+if (!SUPABASE_URL) {
+  console.error('❌ Error: SUPABASE_URL not found');
+  console.error('   Checked: apps/api/.dev.vars and environment variables');
+  process.exit(1);
+}
 
 if (!SUPABASE_SERVICE_ROLE_KEY) {
   console.error('❌ Error: SUPABASE_SERVICE_ROLE_KEY not found');
@@ -47,7 +53,12 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
 });
 
 const NUM_USERS = 20;
-const TEST_PASSWORD = 'LoadTest123!'; // All test users share this password
+// SECURITY WARNING:
+// The test password below is hardcoded and shared across all test users.
+// This pattern is ONLY acceptable for local development and testing.
+// NEVER use hardcoded or shared passwords in production environments.
+// In production, always use unique, securely managed credentials.
+const TEST_PASSWORD = 'LoadTest123!';
 
 interface TestUser {
   email: string;
@@ -120,33 +131,6 @@ async function getTokensForUsers(users: TestUser[]): Promise<void> {
   }
 }
 
-async function seedDataForUsers(users: TestUser[]): Promise<void> {
-  console.log(`\nSeeding default categories for ${users.length} users...`);
-
-  for (const user of users) {
-    if (!user.id) continue;
-
-    try {
-      // Call the seed categories endpoint for each user
-      const response = await fetch(`${SUPABASE_URL.replace('.supabase.co', '')}-api.budgetwise.ca/categories/seed`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${user.accessToken}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (response.ok) {
-        console.log(`  ✓ ${user.email}: Categories seeded`);
-      } else {
-        console.log(`  ⚠️ ${user.email}: Categories may already exist`);
-      }
-    } catch {
-      // Ignore errors - categories might already exist
-    }
-  }
-}
-
 async function main() {
   // Step 1: Create users
   const users = await createTestUsers();
@@ -168,9 +152,6 @@ async function main() {
     fs.writeFileSync(path.join(__dirname, 'token.txt'), tokens[0]!);
     console.log(`✅ First token saved to load-tests/token.txt`);
   }
-
-  // Step 4: Try to seed data (optional, might fail if API not configured for external calls)
-  // await seedDataForUsers(usersWithTokens);
 
   console.log(`\n🎉 Done! Run load test with:`);
   console.log(`   k6 run -e BASE_URL=https://api.budgetwise.ca load-tests/load-test.js`);
