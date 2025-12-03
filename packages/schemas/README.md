@@ -164,16 +164,40 @@ const document = createDocument({
 
 The API serves Swagger UI directly at `/docs`:
 
-1. **Start the local API server:**
+1. **Set up local environment:**
    ```bash
-   pnpm --filter api run dev
-   # OR
-   cd apps/api && pnpm run dev
+   # Copy the example env file and fill in your Supabase credentials
+   cp apps/api/.dev.vars.example apps/api/.dev.vars
+   ```
+   
+   Edit `.dev.vars` with your credentials:
+   ```
+   SUPABASE_URL=https://your-project.supabase.co
+   SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+   SUPABASE_JWT_SECRET=your-jwt-secret
    ```
 
-2. **Open Swagger UI:** http://localhost:8787/docs
+2. **Start the local API server:**
+   ```bash
+   cd apps/api && pnpm run dev
+   ```
+   
+   The server runs locally using Wrangler (Cloudflare Workers dev server).
 
-3. **Test endpoints** - Click "Try it out" on any endpoint
+3. **Open Swagger UI:** http://localhost:8787/docs
+
+4. **Test endpoints** - Click "Try it out" on any endpoint
+
+### Troubleshooting
+
+**Auth endpoints return 404:**
+- Auth routes only mount when `authProvider` is configured
+- Ensure your `.dev.vars` has valid Supabase credentials
+- Check the terminal for errors like "tokenVerifier is required"
+
+**"Cannot find module" errors:**
+- Run `pnpm install` at the root
+- If issues persist, run `pnpm run build` in dependent packages
 
 ### Option 2: Swagger Editor (External)
 
