@@ -388,11 +388,11 @@ Open [load-test-report-2025-12-03T00-43-33-427Z.html](https://github.com/user-at
 >
 > ### Worksheet Question 
 >
-> 1. [ ]  Design Changes
+> 1. [x]  Design Changes
 >
 >    - In one paragraph: What would you change about the design of your project now that you’ve been through development?
 >   
-> 2. [ ]  Project Setup Changes
+> 2. [x]  Project Setup Changes
 >
 >   - In one paragraph: What would you change about the course/project setup?
 
@@ -401,7 +401,12 @@ Open [load-test-report-2025-12-03T00-43-33-427Z.html](https://github.com/user-at
        - Check-ins?
 
        - Process changes?
+### Design Changes
 
+Now that we’ve been through development, one major change we would make to the design of the project is ensuring a clearer separation between UI components, data-fetching logic, and layout responsibilities from the very beginning. As the app grew, certain components became tightly coupled with state and layout logic, which made updates and styling more complicated than necessary. If we were to start again, we would prioritize a more modular component structure, standardized styling patterns, and a shared UI design system to prevent inconsistencies across pages. We would also define clearer flows for user interactions (like spending breakdowns, weekly vs calendar views, and dashboard navigation) earlier in the design phase to avoid reworking these features mid-development.
+
+### Project Setup Changes
+For the overall course and project setup, one thing we would change is having clearer expectations around requirements and milestones earlier on. At times, it felt like key details - especially around the tech stack, documentation standards, and presentation format were inferred rather than explicitly given. More structured and consistent check-ins would have helped keep the group aligned, especially during weeks with heavier workloads across other courses. In terms of process, having dedicated time for planning and architectural decisions at the start of the project would have reduced refactoring later on, and a more guided approach to setting up CI/CD, testing strategy, and team workflows would have made the development process smoother.
 
 ## 4. Individual AI/External Reflections 
 
@@ -452,6 +457,6 @@ During this project, I used AI (ChatGPT-4o) as a support tool to help me debug a
 
 - [ ] CI and CD execution snapshots included.
 
-- [ ] Design changes paragraph included.
+- [x] Design changes paragraph included.
 
-- [ ] Project setup changes paragraph included.
+- [x] Project setup changes paragraph included.
