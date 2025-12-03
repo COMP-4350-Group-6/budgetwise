@@ -1,3 +1,4 @@
+---
 name: Run Tests
 
 on:
@@ -211,7 +212,9 @@ jobs:
       
       - name: Generate HTML report
         run: pnpm coverage:html
-        continue-on-error: true      - name: Upload merged coverage
+        continue-on-error: true
+
+      - name: Upload merged coverage
         uses: actions/upload-artifact@v4
         with:
           name: merged-coverage
