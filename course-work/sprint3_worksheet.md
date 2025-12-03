@@ -426,7 +426,9 @@ I used Claude-Opus-4.1 for initial development scaffolding in Sprint 0-1 and for
 For the early sprints, Claude helped me generate mock data structures and a localStorage-based persistence layer, which gave us a working prototype before the backend was ready. However, the frontend output needed significant polishing. components had inconsistent spacing, hardcoded pixel values, and race conditions where rapid actions caused localStorage to desync.
 In Sprint 2, I started using Claude to break down tasks and track team progress once coordination issues became apparent. This taught me AI is great for getting a foundation quickly, but the output always needs human refinement. It also showed me how AI can really help structure information, in this case, the messy chatlogs of our work.
 
-### Sid:
+### Sid: AI / External Resource Reflection
+As an example of a problem I tried to solve, I will refer to commit [c3d0129](https://github.com/COMP-4350-Group-6/budgetwise/commit/c3d012937e853194b5c1bd55c50eff82308fd0ec). The goal of this update was to make the transition between pages smoother (improve UX). I used mostly Cursor's Composer and ChatGPT 5 to achieve this task. I had to input a sequence of refining prompts until it achieved the desired state. However, even though the goal of the update was achieved, I noticed my learning was hindered as I relied on the LLM too much and overlooked the documentation for the tools used. I noticed I focused too much on producing results and forgot to take some time to gain a proper understanding of the code. Perhaps the most important lesson I learned from this is that I need to put more efforts into finding the balance between output (results) and input (learning). Moving forward, I will also make sure to avoid jumping ahead and generating code with incomplete prompts and spend more time in the ideation / planning stage instead.
+
 
 ### Steph: AI / External Resource Reflection
 
