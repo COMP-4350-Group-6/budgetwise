@@ -1,0 +1,58 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"main": ".open-next/worker.js",
+	"compatibility_date": "2025-10-11",
+	"compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+	"preview_urls": true,
+	"assets": {
+		"directory": ".open-next/assets",
+		"binding": "ASSETS"
+	},
+	"r2_buckets": [
+		// Use R2 incremental cache
+		// See https://opennext.js.org/cloudflare/caching
+		{
+			"binding": "NEXT_INC_CACHE_R2_BUCKET",
+			// Create the bucket before deploying
+			// You can change the bucket name if you want
+			// See https://developers.cloudflare.com/workers/wrangler/commands/#r2-bucket-create
+			"bucket_name": "cache"
+		}
+	],
+  
+	"observability": {
+		"enabled": false,
+		"head_sampling_rate": 1,
+		"logs": {
+			"enabled": true,
+			"head_sampling_rate": 1,
+			"persist": true,
+			"invocation_logs": true
+		},
+		"traces": {
+			"enabled": true,
+			"persist": true,
+			"head_sampling_rate": 1
+		}
+	},
+
+	// Environments: use `wrangler dev --env dev` or `wrangler deploy --env production`
+	"env": {
+		"dev": {
+			"name": "frontend-dev",
+			"vars": {
+				"NEXT_PUBLIC_API_URL": "http://localhost:8787",
+				"NEXT_PUBLIC_AUTH_APP_URL": "http://localhost:5173"
+				// NEXT_PUBLIC_COOKIE_DOMAIN is intentionally NOT set for local dev
+			}
+		},
+		"production": {
+			"name": "frontend",
+			"vars": {
+				"NEXT_PUBLIC_API_URL": "https://api.budgetwise.ca",
+				"NEXT_PUBLIC_AUTH_APP_URL": "https://auth.budgetwise.ca",
+				"NEXT_PUBLIC_COOKIE_DOMAIN": ".budgetwise.ca"
+			}
+		}
+	}
+}

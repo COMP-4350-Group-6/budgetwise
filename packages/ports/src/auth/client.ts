@@ -1,31 +1,33 @@
+import type {
+  AuthUser,
+  AuthResult,
+  AuthStateChangeCallback,
+  SignupInput,
+  LoginInput,
+} from '@budget/schemas';
+
 /**
- * Client-side authentication port.
- * Used for interacting with the auth API from the frontend.
+ * High-level auth client interface for use in components/hooks.
+ * Combines auth operations with session management and navigation.
  */
 export interface AuthClientPort {
-  signup(input: {
-    email: string;
-    password: string;
-    name: string;
-    defaultCurrency: string;
-  }): Promise<void>;
+  // Auth operations with built-in state management
+  signup(input: SignupInput): Promise<AuthResult<{ user: AuthUser; requiresConfirmation: boolean }>>;
+  login(input: LoginInput): Promise<AuthResult<{ user: AuthUser }>>;
+  logout(): Promise<AuthResult<void>>;
 
-  login(input: {
-    email: string;
-    password: string;
-  }): Promise<void>;
+  // Password reset flow
+  requestPasswordReset(email: string): Promise<AuthResult<void>>;
+  confirmPasswordReset(token: string, newPassword: string): Promise<AuthResult<void>>;
 
-  logout(): Promise<void>;
+  // Session access
+  getUser(): AuthUser | null;
+  getAccessToken(): string | null;
+  isAuthenticated(): boolean;
 
-  refreshToken(): Promise<void>;
+  // Reactive state
+  subscribe(callback: AuthStateChangeCallback): () => void;
 
-  getMe(): Promise<{
-    id: string;
-    email: string;
-    name: string;
-    defaultCurrency: string;
-    createdAt: string;
-  } | null>;
-
-  getSessionToken(): Promise<string | null>;
+  // Initialization
+  initialize(): Promise<void>;
 }

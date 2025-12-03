@@ -4,6 +4,7 @@
   "type": "module",
   "exports": { ".": "./src/index.ts" },
   "dependencies": {
-    "@budget/domain": "workspace:*"
+    "@budget/domain": "workspace:*",
+    "@budget/schemas": "workspace:*"
   }
 }

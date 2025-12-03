@@ -11,6 +11,7 @@ import {
   makeSupabaseServiceClient,
   SupabaseLLMCallsRepository,
 } from "@budget/adapters-persistence-supabase";
+import { makeSupabaseTokenVerifier, makeSupabaseAuthProvider } from "@budget/adapters-auth-supabase";
 import { OpenRouterCategorization, OpenRouterInvoiceParser } from "@budget/adapters-openrouter";
 import { LLMTracker } from "@budget/ports";
 import {
@@ -40,6 +41,8 @@ interface Env {
   OPENROUTER_API_KEY?: string;
   SUPABASE_URL?: string;
   SUPABASE_SERVICE_ROLE_KEY?: string;
+  SUPABASE_ANON_KEY?: string;
+  COOKIE_DOMAIN?: string; // e.g., ".budgetwise.ca"
 }
 
 export function makeContainer(env?: Env) {
@@ -51,9 +54,13 @@ export function makeContainer(env?: Env) {
   let txRepo = makeInMemTransactionsRepo();
   let llmCallsRepo: SupabaseLLMCallsRepository | undefined;
   let llmTracker: LLMTracker | undefined;
+  let tokenVerifier;
+  let authProvider;
 
   const supabaseUrl = env?.SUPABASE_URL;
   const supabaseServiceRoleKey = env?.SUPABASE_SERVICE_ROLE_KEY;
+  const supabaseAnonKey = env?.SUPABASE_ANON_KEY;
+  const cookieDomain = env?.COOKIE_DOMAIN;
 
   if (supabaseUrl && supabaseServiceRoleKey) {
     console.log(`[Container] Using Supabase at ${supabaseUrl}`);
@@ -69,6 +76,17 @@ export function makeContainer(env?: Env) {
     id = makeUuid();
     llmCallsRepo = new SupabaseLLMCallsRepository(supabaseClient);
     llmTracker = new LLMTracker(llmCallsRepo, id);
+    
+    // Create token verifier adapter (same pattern as other adapters)
+    tokenVerifier = makeSupabaseTokenVerifier({ supabaseUrl });
+    
+    // Create auth provider for login/signup (uses anon key for client-side auth)
+    if (supabaseAnonKey) {
+      authProvider = makeSupabaseAuthProvider({
+        supabaseUrl,
+        supabaseAnonKey,
+      });
+    }
   } else {
     console.log('[Container] Using in-memory repositories (no Supabase configured)');
   }
@@ -128,6 +146,12 @@ export function makeContainer(env?: Env) {
           })
         : undefined,
     },
+    // Auth infrastructure (for middleware)
+    tokenVerifier,
+    // Auth provider for login/signup routes
+    authProvider,
+    // Cookie domain for cross-subdomain sharing
+    cookieDomain,
     // Reset helper for tests/development: re-initialize in-memory repos and trackers
     reset: () => {
       // If using supabase we don't attempt to reset remote state here.
@@ -150,3 +174,6 @@ export function makeContainer(env?: Env) {
     },
   };
 }
+
+/** Container type - use this in apps instead of importing port interfaces */
+export type Container = ReturnType<typeof makeContainer>;

@@ -1,6 +1,6 @@
 packages:
   - apps/**
-  - frontend
+  - apps/frontend/web-next
   - packages/**
   - infra/**
   - e2e-tests

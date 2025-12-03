@@ -7,7 +7,9 @@ interface Env {
   SUPABASE_JWT_SECRET: string;
   SUPABASE_URL: string;
   SUPABASE_SERVICE_ROLE_KEY: string;
+  SUPABASE_ANON_KEY?: string;
   OPENROUTER_API_KEY?: string;
+  COOKIE_DOMAIN?: string; // e.g., ".budgetwise.ca" for production
 }
 
 // Cached instances for the worker isolate lifetime.
@@ -24,7 +26,9 @@ function getApp(env: Env): ReturnType<typeof createApp> {
     cachedContainer = makeContainer({
       SUPABASE_URL: env.SUPABASE_URL,
       SUPABASE_SERVICE_ROLE_KEY: env.SUPABASE_SERVICE_ROLE_KEY,
+      SUPABASE_ANON_KEY: env.SUPABASE_ANON_KEY,
       OPENROUTER_API_KEY: env.OPENROUTER_API_KEY,
+      COOKIE_DOMAIN: env.COOKIE_DOMAIN,
     });
     const deps = createAppDeps(cachedContainer);
     cachedApp = createApp(deps);

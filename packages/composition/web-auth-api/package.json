@@ -1,0 +1,18 @@
+{
+  "name": "@budget/composition-web-auth-api",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@budget/adapters-auth-api": "workspace:*",
+    "@budget/usecases": "workspace:*",
+    "@budget/schemas": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3"
+  }
+}
