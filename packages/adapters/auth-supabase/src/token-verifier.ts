@@ -7,7 +7,10 @@ export type TokenVerifierOptions = {
 };
 
 function deriveJwksUrl(supabaseUrl: string): string {
-  const base = supabaseUrl.replace(/\/+$/, "");
+  let base = supabaseUrl;
+  while (base.endsWith('/')) {
+    base = base.slice(0, -1);
+  }
   return `${base}/auth/v1/.well-known/jwks.json`;
 }
 
