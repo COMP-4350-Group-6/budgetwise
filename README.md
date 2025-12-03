@@ -38,6 +38,7 @@ It enables users to manage categories, budgets, and transactions, with real-time
     - [Quick Start](#quick-start)
     - [What We Test](#what-we-test)
     - [Test Types](#test-types)
+    - [Load Testing](#load-testing)
     - [Documentation](#documentation)
   - [Known Issues](#known-issues)
   - [Branching Workflow](#branching-workflow)
@@ -215,10 +216,27 @@ pnpm test:smoke:production
 | **Integration** | `packages/*/tests/integration/` | `pnpm test:int` | Test component interactions |
 | **Smoke/E2E** | `e2e-tests/smoke-tests/` | `pnpm test:smoke:production` | Validate production |
 
+### Load Testing
+
+The API has been load tested to validate performance under stress:
+
+```sh
+cd load-tests && pnpm install
+k6 run load-test.js
+```
+
+**Results:**
+- **[load-tests/LOAD_TEST_REPORT.md](load-tests/LOAD_TEST_REPORT.md)** - Analysis and findings
+- **[load-tests/load-test-results-report.html](load-tests/load-test-results-report.html)** - Interactive HTML report
+- **[load-tests/load-test-results.json](load-tests/load-test-results.json)** - Raw metrics data
+
+See **[load-tests/README.md](load-tests/README.md)** for setup and configuration.
+
 ### Documentation
 
 - **[TESTING_GUIDE.md](TESTING_GUIDE.md)** - Complete testing guide (commands, best practices, troubleshooting)
 - **[e2e-tests/README.md](e2e-tests/README.md)** - Smoke test documentation
+- **[load-tests/README.md](load-tests/README.md)** - Load testing guide
 - **[TESTING-RATIONALE.md](TESTING-RATIONALE.md)** - Domain-specific testing rationale
 - **[course-work/TESTING_PLAN.md](course-work/TESTING_PLAN.md)** - Original test plan
 
@@ -274,5 +292,9 @@ See [`ACKNOWLEDGMENTS.md`](ACKNOWLEDGMENTS.md) for more details and attributions
 - **[TESTING-RATIONALE.md](TESTING-RATIONALE.md)** — Domain-specific testing reasoning
 - **[ACKNOWLEDGMENTS.md](ACKNOWLEDGMENTS.md)** — AI usage and tool acknowledgments
 - **[test-coverage/test-summary.md](./test-coverage/test-summary.md)** — Test coverage reports
+- **[packages/schemas/README.md](packages/schemas/README.md)** — OpenAPI/Swagger documentation
+- **[packages/schemas/dist/openapi.yaml](packages/schemas/dist/openapi.yaml)** — OpenAPI 3.1 specification
 
-*For API documentation and sprint planning, see the [API Doc](https://docs.google.com/document/d/1tYB-VAGl5qK_Bi0bbtqdJ5mbaJzvSiDYkD_54Wbm0mI/edit?usp=sharing) and [`course-work/`](course-work/) folder.*
+*For interactive API documentation, visit `/docs` on any running API instance (e.g., http://localhost:8787/docs).*
+
+*For sprint planning, see the [`course-work/`](course-work/) folder.*
