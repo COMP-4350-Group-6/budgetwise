@@ -7,7 +7,7 @@
     "dev": "wrangler dev",
     "build": "tsc -p tsconfig.json && wrangler deploy --dry-run",
     "typecheck": "tsc -p tsconfig.json",
-    "lint": "echo skip",
+    "lint": "eslint src/",
     "test": "vitest run",
     "test:unit": "vitest run src/**/*.test.ts",
     "test:int": "vitest run tests/integration/**/*.int.test.{ts,tsx}",
