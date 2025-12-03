@@ -19,6 +19,7 @@ const ALLOWED_ORIGINS = [
   "https://budgetwise.ca",
   "https://www.budgetwise.ca",
   "https://auth.budgetwise.ca",
+  "https://api.budgetwise.ca",  // For smoke tests and direct API testing
   "https://frontend.ramatjyot13-ca.workers.dev",
 ];
 
