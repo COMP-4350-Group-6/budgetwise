@@ -4,8 +4,8 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "wrangler dev --env dev",
-    "build": "tsc -p tsconfig.json && wrangler deploy --env dev --dry-run",
+    "dev": "wrangler dev",
+    "build": "tsc -p tsconfig.json && wrangler deploy --dry-run",
     "typecheck": "tsc -p tsconfig.json",
     "lint": "echo skip",
     "test": "vitest run",
@@ -13,7 +13,7 @@
     "test:int": "vitest run tests/integration/**/*.int.test.{ts,tsx}",
     "test:critical": "vitest run -t @critical",
     "test:auth": "vitest run src/middleware/auth.test.ts",
-    "deploy": "wrangler deploy --env production"
+    "deploy": "wrangler deploy"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20251011.0",

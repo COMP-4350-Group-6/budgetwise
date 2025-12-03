@@ -5,10 +5,10 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
-    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview --env dev",
-    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy --env production",
-    "upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload --env production",
-    "cf-typegen": "wrangler types --env dev --env-interface CloudflareEnv cloudflare-env.d.ts",
+    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
+    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+    "upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload",
+    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
     "test": "vitest run",
     "test:unit": "vitest run src/**/*.test.ts src/**/*.test.tsx",
     "test:int": "vitest run tests/integration/**/*.int.test.{ts,tsx}",
@@ -28,8 +28,7 @@
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-icons": "^5.5.0",
-    "recharts": "^2.13.3",
-    "swr": "^2.3.7"
+    "recharts": "^2.13.3"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

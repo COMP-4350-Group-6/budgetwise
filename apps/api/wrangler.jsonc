@@ -24,17 +24,6 @@
     }
   },
 
-  // Environments: use `wrangler dev --env dev` or `wrangler deploy --env production`
-  "env": {
-    "dev": {
-      "name": "budget-api-dev",
-      "vars": {
-        "SUPABASE_URL": "https://yikylzhrskotiqnaitwz.supabase.co",
-        "SUPABASE_JWKS_URL": "https://yikylzhrskotiqnaitwz.supabase.co/auth/v1/.well-known/jwks.json"
-        // COOKIE_DOMAIN is intentionally NOT set for local dev (allows localhost cookies)
-      }
-    },
-    "production": {
       "name": "budget-api",
       "vars": {
         "SUPABASE_URL": "https://yikylzhrskotiqnaitwz.supabase.co",
@@ -42,5 +31,3 @@
         "COOKIE_DOMAIN": ".budgetwise.ca"
       }
     }
-  }
-}
