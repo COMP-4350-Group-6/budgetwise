@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { errors } from "./middleware/errors";
 import { health } from "./routes/health";
+import { docs } from "./routes/docs";
 import { createTransactionRoutes } from "./routes/transactions";
 import { createAuthRoutes } from "./routes/auth";
 import { createCategoryRoutes } from "./routes/categories";
@@ -61,6 +62,7 @@ export function createApp(deps: AppDeps) {
 
   // Public routes
   app.route("/", health);
+  app.route("/", docs);
   
   // Auth routes (public - login/signup don't need auth)
   if (authProvider) {

@@ -8,10 +8,11 @@
  */
 
 import { z } from "zod/v4";
-import { createDocument, createSchema } from "zod-openapi";
+import { createDocument } from "zod-openapi";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
+import YAML from "yaml";
 
 // ============================================================================
 // Schema Definitions with OpenAPI Metadata
@@ -49,8 +50,8 @@ const BudgetPeriodSchema = z
 // Auth Input Schemas
 const LoginInputSchema = z
   .object({
-    email: z.email().meta({ description: "User email address" }),
-    password: z.string().min(8).meta({ description: "User password (min 8 characters)" }),
+    email: z.email().meta({ description: "User email address", example: "user@example.com" }),
+    password: z.string().min(8).meta({ description: "User password (min 8 characters)", example: "securePass123" }),
   })
   .meta({
     id: "LoginInput",
@@ -59,9 +60,9 @@ const LoginInputSchema = z
 
 const SignupInputSchema = z
   .object({
-    email: z.email().meta({ description: "User email address" }),
-    password: z.string().min(8).meta({ description: "User password (min 8 characters)" }),
-    name: z.string().min(1).meta({ description: "User display name" }),
+    email: z.email().meta({ description: "User email address", example: "user@example.com" }),
+    password: z.string().min(8).meta({ description: "User password (min 8 characters)", example: "securePass123" }),
+    name: z.string().min(1).meta({ description: "User display name", example: "John Doe" }),
     defaultCurrency: CurrencySchema.default("USD"),
   })
   .meta({
@@ -145,14 +146,14 @@ const AuthErrorSchema = z
 // Budget Schemas
 const CreateBudgetInputSchema = z
   .object({
-    categoryId: z.string().min(1).meta({ description: "Category ID" }),
-    name: z.string().min(1).max(100).meta({ description: "Budget name" }),
-    amountCents: z.number().int().min(0).meta({ description: "Budget amount in cents" }),
+    categoryId: z.string().min(1).meta({ description: "Category ID", example: "01HXYZ123ABC" }),
+    name: z.string().min(1).max(100).meta({ description: "Budget name", example: "Groceries" }),
+    amountCents: z.number().int().min(0).max(100000000).meta({ description: "Budget amount in cents (e.g. 50000 = $500)", example: 50000 }),
     currency: CurrencySchema,
     period: BudgetPeriodSchema,
-    startDate: z.string().meta({ description: "Budget start date (ISO 8601)" }),
-    endDate: z.string().optional().meta({ description: "Budget end date (ISO 8601)" }),
-    alertThreshold: z.number().int().min(0).max(100).optional().meta({ description: "Alert threshold percentage" }),
+    startDate: z.string().meta({ description: "Budget start date (ISO 8601)", example: "2024-01-01" }),
+    endDate: z.string().optional().meta({ description: "Budget end date (ISO 8601)", example: "2024-12-31" }),
+    alertThreshold: z.number().int().min(0).max(100).optional().meta({ description: "Alert threshold percentage", example: 80 }),
     isActive: z.boolean().default(true).optional().meta({ description: "Whether budget is active" }),
   })
   .meta({
@@ -162,19 +163,19 @@ const CreateBudgetInputSchema = z
 
 const BudgetDTOSchema = z
   .object({
-    id: z.string().meta({ description: "Budget unique identifier" }),
-    userId: z.string().meta({ description: "Owner user ID" }),
-    categoryId: z.string().meta({ description: "Associated category ID" }),
-    name: z.string().meta({ description: "Budget name" }),
-    amountCents: z.number().int().meta({ description: "Budget amount in cents" }),
+    id: z.string().meta({ description: "Budget unique identifier", example: "01HXYZ123ABC" }),
+    userId: z.string().meta({ description: "Owner user ID", example: "01HXYZ456DEF" }),
+    categoryId: z.string().meta({ description: "Associated category ID", example: "01HXYZ789GHI" }),
+    name: z.string().meta({ description: "Budget name", example: "Groceries" }),
+    amountCents: z.number().int().meta({ description: "Budget amount in cents", example: 50000 }),
     currency: CurrencySchema,
     period: BudgetPeriodSchema,
-    startDate: z.string().meta({ description: "Budget start date" }),
-    endDate: z.string().nullable().meta({ description: "Budget end date" }),
-    isActive: z.boolean().meta({ description: "Whether budget is active" }),
-    alertThreshold: z.number().nullable().meta({ description: "Alert threshold percentage" }),
-    createdAt: z.string().meta({ description: "Creation timestamp" }),
-    updatedAt: z.string().meta({ description: "Last update timestamp" }),
+    startDate: z.string().meta({ description: "Budget start date", example: "2024-01-01T00:00:00Z" }),
+    endDate: z.string().nullable().meta({ description: "Budget end date", example: "2024-12-31T00:00:00Z" }),
+    isActive: z.boolean().meta({ description: "Whether budget is active", example: true }),
+    alertThreshold: z.number().nullable().meta({ description: "Alert threshold percentage", example: 80 }),
+    createdAt: z.string().meta({ description: "Creation timestamp", example: "2024-01-01T00:00:00Z" }),
+    updatedAt: z.string().meta({ description: "Last update timestamp", example: "2024-01-01T00:00:00Z" }),
   })
   .meta({
     id: "BudgetDTO",
@@ -184,12 +185,12 @@ const BudgetDTOSchema = z
 const BudgetStatusSchema = z
   .object({
     budget: BudgetDTOSchema,
-    spentCents: z.number().int().meta({ description: "Amount spent in cents" }),
-    remainingCents: z.number().int().meta({ description: "Remaining budget in cents" }),
-    percentageUsed: z.number().meta({ description: "Percentage of budget used" }),
-    isOverBudget: z.boolean().meta({ description: "Whether spending exceeded budget" }),
-    shouldAlert: z.boolean().meta({ description: "Whether to show alert" }),
-    transactionCount: z.number().int().meta({ description: "Number of transactions" }),
+    spentCents: z.number().int().meta({ description: "Amount spent in cents", example: 25000 }),
+    remainingCents: z.number().int().meta({ description: "Remaining budget in cents", example: 25000 }),
+    percentageUsed: z.number().meta({ description: "Percentage of budget used", example: 50.0 }),
+    isOverBudget: z.boolean().meta({ description: "Whether spending exceeded budget", example: false }),
+    shouldAlert: z.boolean().meta({ description: "Whether to show alert", example: false }),
+    transactionCount: z.number().int().meta({ description: "Number of transactions", example: 15 }),
   })
   .meta({
     id: "BudgetStatus",
@@ -199,12 +200,12 @@ const BudgetStatusSchema = z
 // Category Schemas
 const CreateCategoryInputSchema = z
   .object({
-    name: z.string().min(1).max(50).meta({ description: "Category name" }),
-    description: z.string().max(200).optional().meta({ description: "Category description" }),
-    icon: z.string().optional().meta({ description: "Category icon emoji" }),
-    color: z.string().regex(/^#[0-9A-F]{6}$/i).optional().meta({ description: "Category color (hex)" }),
+    name: z.string().min(1).max(50).meta({ description: "Category name", example: "Groceries" }),
+    description: z.string().max(200).optional().meta({ description: "Category description", example: "Food and household items" }),
+    icon: z.string().optional().meta({ description: "Category icon emoji", example: "🛒" }),
+    color: z.string().regex(/^#[0-9A-F]{6}$/i).optional().meta({ description: "Category color (hex)", example: "#4CAF50" }),
     isActive: z.boolean().default(true).meta({ description: "Whether category is active" }),
-    sortOrder: z.number().int().min(0).optional().meta({ description: "Display order" }),
+    sortOrder: z.number().int().min(0).max(1000).optional().meta({ description: "Display order", example: 1 }),
   })
   .meta({
     id: "CreateCategoryInput",
@@ -213,17 +214,17 @@ const CreateCategoryInputSchema = z
 
 const CategoryDTOSchema = z
   .object({
-    id: z.string().meta({ description: "Category unique identifier" }),
-    userId: z.string().meta({ description: "Owner user ID" }),
-    name: z.string().meta({ description: "Category name" }),
-    description: z.string().nullable().meta({ description: "Category description" }),
-    icon: z.string().nullable().meta({ description: "Category icon emoji" }),
-    color: z.string().nullable().meta({ description: "Category color (hex)" }),
-    isDefault: z.boolean().meta({ description: "Whether this is a default category" }),
-    isActive: z.boolean().meta({ description: "Whether category is active" }),
-    sortOrder: z.number().int().meta({ description: "Display order" }),
-    createdAt: z.string().meta({ description: "Creation timestamp" }),
-    updatedAt: z.string().meta({ description: "Last update timestamp" }),
+    id: z.string().meta({ description: "Category unique identifier", example: "01HXYZ123ABC" }),
+    userId: z.string().meta({ description: "Owner user ID", example: "01HXYZ456DEF" }),
+    name: z.string().meta({ description: "Category name", example: "Groceries" }),
+    description: z.string().nullable().meta({ description: "Category description", example: "Food and household items" }),
+    icon: z.string().nullable().meta({ description: "Category icon emoji", example: "🛒" }),
+    color: z.string().nullable().meta({ description: "Category color (hex)", example: "#4CAF50" }),
+    isDefault: z.boolean().meta({ description: "Whether this is a default category", example: false }),
+    isActive: z.boolean().meta({ description: "Whether category is active", example: true }),
+    sortOrder: z.number().int().meta({ description: "Display order", example: 1 }),
+    createdAt: z.string().meta({ description: "Creation timestamp", example: "2024-01-01T00:00:00Z" }),
+    updatedAt: z.string().meta({ description: "Last update timestamp", example: "2024-01-01T00:00:00Z" }),
   })
   .meta({
     id: "CategoryDTO",
@@ -233,11 +234,11 @@ const CategoryDTOSchema = z
 // Transaction Schemas
 const CreateTransactionInputSchema = z
   .object({
-    budgetId: z.string().optional().meta({ description: "Associated budget ID" }),
-    categoryId: z.string().optional().meta({ description: "Associated category ID" }),
-    amountCents: z.number().int().meta({ description: "Transaction amount in cents" }),
-    note: z.string().max(280).optional().meta({ description: "Transaction note" }),
-    occurredAt: z.string().meta({ description: "Transaction date (ISO 8601)" }),
+    budgetId: z.string().optional().meta({ description: "Associated budget ID", example: "01HXYZ789GHI" }),
+    categoryId: z.string().optional().meta({ description: "Associated category ID", example: "01HXYZ123ABC" }),
+    amountCents: z.number().int().min(-100000000).max(100000000).meta({ description: "Transaction amount in cents (e.g. 2500 = $25)", example: 2500 }),
+    note: z.string().max(280).optional().meta({ description: "Transaction note", example: "Weekly groceries" }),
+    occurredAt: z.string().meta({ description: "Transaction date (ISO 8601)", example: "2024-01-15T12:00:00Z" }),
   })
   .meta({
     id: "CreateTransactionInput",
@@ -246,15 +247,15 @@ const CreateTransactionInputSchema = z
 
 const TransactionDTOSchema = z
   .object({
-    id: z.string().meta({ description: "Transaction unique identifier" }),
-    userId: z.string().meta({ description: "Owner user ID" }),
-    budgetId: z.string().nullable().meta({ description: "Associated budget ID" }),
-    categoryId: z.string().nullable().meta({ description: "Associated category ID" }),
-    amountCents: z.number().int().meta({ description: "Transaction amount in cents" }),
-    note: z.string().nullable().meta({ description: "Transaction note" }),
-    occurredAt: z.string().meta({ description: "Transaction date" }),
-    createdAt: z.string().meta({ description: "Creation timestamp" }),
-    updatedAt: z.string().meta({ description: "Last update timestamp" }),
+    id: z.string().meta({ description: "Transaction unique identifier", example: "01HXYZ123ABC" }),
+    userId: z.string().meta({ description: "Owner user ID", example: "01HXYZ456DEF" }),
+    budgetId: z.string().nullable().meta({ description: "Associated budget ID", example: "01HXYZ789GHI" }),
+    categoryId: z.string().nullable().meta({ description: "Associated category ID", example: "01HXYZABC123" }),
+    amountCents: z.number().int().meta({ description: "Transaction amount in cents", example: 2500 }),
+    note: z.string().nullable().meta({ description: "Transaction note", example: "Weekly groceries" }),
+    occurredAt: z.string().meta({ description: "Transaction date", example: "2024-01-15T12:00:00Z" }),
+    createdAt: z.string().meta({ description: "Creation timestamp", example: "2024-01-15T12:00:00Z" }),
+    updatedAt: z.string().meta({ description: "Last update timestamp", example: "2024-01-15T12:00:00Z" }),
   })
   .meta({
     id: "TransactionDTO",
@@ -371,12 +372,12 @@ function generateOpenAPISpec(): void {
     },
     servers: [
       {
-        url: "https://api.budgetwise.app",
-        description: "Production API",
+        url: "http://localhost:8787",
+        description: "Local development (start with: pnpm --filter @budget/api run dev)",
       },
       {
-        url: "http://localhost:8787",
-        description: "Local development",
+        url: "https://api.budgetwise.app",
+        description: "Production API",
       },
     ],
     tags: [
@@ -388,12 +389,14 @@ function generateOpenAPISpec(): void {
       { name: "AI", description: "AI-powered features" },
     ],
     paths: {
-      // Auth endpoints
+      // ========================================================================
+      // Auth endpoints (public)
+      // ========================================================================
       "/auth/login": {
         post: {
           tags: ["Auth"],
           summary: "User login",
-          description: "Authenticate user with email and password",
+          description: "Authenticate user with email and password. Sets a session cookie on success.",
           requestBody: {
             required: true,
             content: {
@@ -404,7 +407,11 @@ function generateOpenAPISpec(): void {
             "200": {
               description: "Login successful",
               content: {
-                "application/json": { schema: AuthSessionSchema },
+                "application/json": {
+                  schema: z.object({
+                    user: AuthUserSchema,
+                  }),
+                },
               },
             },
             "401": {
@@ -431,7 +438,11 @@ function generateOpenAPISpec(): void {
             "201": {
               description: "Account created",
               content: {
-                "application/json": { schema: AuthSessionSchema },
+                "application/json": {
+                  schema: z.object({
+                    user: AuthUserSchema,
+                  }),
+                },
               },
             },
             "400": {
@@ -443,26 +454,43 @@ function generateOpenAPISpec(): void {
           },
         },
       },
+      "/auth/logout": {
+        post: {
+          tags: ["Auth"],
+          summary: "User logout",
+          description: "End the current session and clear cookies",
+          responses: {
+            "200": {
+              description: "Logged out successfully",
+              content: {
+                "application/json": {
+                  schema: z.object({
+                    message: z.string().meta({ example: "Logged out successfully" }),
+                  }),
+                },
+              },
+            },
+          },
+        },
+      },
       "/auth/refresh": {
         post: {
           tags: ["Auth"],
-          summary: "Refresh access token",
-          description: "Exchange refresh token for new access token",
-          requestBody: {
-            required: true,
-            content: {
-              "application/json": { schema: RefreshTokenInputSchema },
-            },
-          },
+          summary: "Refresh session",
+          description: "Refresh the current session using cookie credentials",
           responses: {
             "200": {
-              description: "Tokens refreshed",
+              description: "Session refreshed",
               content: {
-                "application/json": { schema: AuthTokensSchema },
+                "application/json": {
+                  schema: z.object({
+                    message: z.string().meta({ example: "Session refreshed" }),
+                  }),
+                },
               },
             },
             "401": {
-              description: "Invalid refresh token",
+              description: "No session or expired",
               content: {
                 "application/json": { schema: AuthErrorSchema },
               },
@@ -470,12 +498,112 @@ function generateOpenAPISpec(): void {
           },
         },
       },
-      // Budget endpoints
-      "/budgets": {
+      "/auth/me": {
+        get: {
+          tags: ["Auth"],
+          summary: "Get current user",
+          description: "Verify session and return current user info",
+          responses: {
+            "200": {
+              description: "Current user",
+              content: {
+                "application/json": {
+                  schema: z.object({
+                    user: z.object({
+                      id: z.string(),
+                      email: z.string(),
+                    }),
+                  }),
+                },
+              },
+            },
+            "401": {
+              description: "Unauthorized",
+              content: {
+                "application/json": { schema: ErrorResponseSchema },
+              },
+            },
+          },
+        },
+      },
+      "/auth/forgot-password": {
+        post: {
+          tags: ["Auth"],
+          summary: "Request password reset",
+          description: "Send a password reset email (always returns success for security)",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: z.object({
+                  email: z.email().meta({ description: "User email address", example: "user@example.com" }),
+                }),
+              },
+            },
+          },
+          responses: {
+            "200": {
+              description: "Request processed",
+              content: {
+                "application/json": {
+                  schema: z.object({
+                    message: z.string(),
+                  }),
+                },
+              },
+            },
+          },
+        },
+      },
+      "/auth/reset-password": {
+        post: {
+          tags: ["Auth"],
+          summary: "Reset password",
+          description: "Reset password using token from email",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: z.object({
+                  token: z.string().meta({ description: "Reset token from email" }),
+                  newPassword: z.string().min(8).meta({ description: "New password" }),
+                }),
+              },
+            },
+          },
+          responses: {
+            "200": {
+              description: "Password reset successfully",
+              content: {
+                "application/json": {
+                  schema: z.object({
+                    message: z.string(),
+                  }),
+                },
+              },
+            },
+            "400": {
+              description: "Invalid or expired token",
+              content: {
+                "application/json": { schema: AuthErrorSchema },
+              },
+            },
+          },
+        },
+      },
+      // ========================================================================
+      // Budget endpoints (protected - /v1/budgets)
+      // ========================================================================
+      "/v1/budgets": {
         get: {
           tags: ["Budgets"],
           summary: "List budgets",
           description: "Get all budgets for the authenticated user",
+          requestParams: {
+            query: z.object({
+              active: z.string().optional().meta({ description: "Filter active only (true/false)" }),
+            }),
+          },
           responses: {
             "200": {
               description: "List of budgets",
@@ -492,7 +620,7 @@ function generateOpenAPISpec(): void {
         post: {
           tags: ["Budgets"],
           summary: "Create budget",
-          description: "Create a new budget",
+          description: "Create a new budget for the authenticated user",
           requestBody: {
             required: true,
             content: {
@@ -503,44 +631,49 @@ function generateOpenAPISpec(): void {
             "201": {
               description: "Budget created",
               content: {
-                "application/json": { schema: BudgetDTOSchema },
+                "application/json": {
+                  schema: z.object({
+                    budget: BudgetDTOSchema,
+                  }),
+                },
               },
             },
-          },
-        },
-      },
-      "/budgets/{id}": {
-        get: {
-          tags: ["Budgets"],
-          summary: "Get budget",
-          description: "Get a specific budget by ID",
-          requestParams: {
-            path: z.object({
-              id: z.string().meta({ description: "Budget ID" }),
-            }),
-          },
-          responses: {
-            "200": {
-              description: "Budget details",
-              content: {
-                "application/json": { schema: BudgetDTOSchema },
-              },
-            },
-            "404": {
-              description: "Budget not found",
+            "400": {
+              description: "Validation error or invalid category",
               content: {
                 "application/json": { schema: ErrorResponseSchema },
               },
             },
           },
         },
+      },
+      "/v1/budgets/dashboard": {
+        get: {
+          tags: ["Budgets"],
+          summary: "Get budget dashboard",
+          description: "Get comprehensive budget dashboard with spending summaries",
+          responses: {
+            "200": {
+              description: "Budget dashboard data",
+              content: {
+                "application/json": {
+                  schema: z.object({
+                    dashboard: BudgetStatusSchema,
+                  }),
+                },
+              },
+            },
+          },
+        },
+      },
+      "/v1/budgets/{id}": {
         put: {
           tags: ["Budgets"],
           summary: "Update budget",
           description: "Update an existing budget",
           requestParams: {
             path: z.object({
-              id: z.string().meta({ description: "Budget ID" }),
+              id: z.string().meta({ description: "Budget ID", example: "01HXYZ123ABC" }),
             }),
           },
           requestBody: {
@@ -553,7 +686,17 @@ function generateOpenAPISpec(): void {
             "200": {
               description: "Budget updated",
               content: {
-                "application/json": { schema: BudgetDTOSchema },
+                "application/json": {
+                  schema: z.object({
+                    budget: BudgetDTOSchema,
+                  }),
+                },
+              },
+            },
+            "404": {
+              description: "Budget not found",
+              content: {
+                "application/json": { schema: ErrorResponseSchema },
               },
             },
           },
@@ -564,45 +707,72 @@ function generateOpenAPISpec(): void {
           description: "Delete a budget",
           requestParams: {
             path: z.object({
-              id: z.string().meta({ description: "Budget ID" }),
+              id: z.string().meta({ description: "Budget ID", example: "01HXYZ123ABC" }),
             }),
           },
           responses: {
             "200": {
               description: "Budget deleted",
               content: {
-                "application/json": { schema: SuccessResponseSchema },
+                "application/json": {
+                  schema: z.object({
+                    message: z.string().meta({ example: "Budget deleted" }),
+                  }),
+                },
+              },
+            },
+            "404": {
+              description: "Budget not found",
+              content: {
+                "application/json": { schema: ErrorResponseSchema },
               },
             },
           },
         },
       },
-      "/budgets/{id}/status": {
+      "/v1/budgets/{id}/status": {
         get: {
           tags: ["Budgets"],
           summary: "Get budget status",
-          description: "Get spending status for a budget",
+          description: "Get spending status for a specific budget",
           requestParams: {
             path: z.object({
-              id: z.string().meta({ description: "Budget ID" }),
+              id: z.string().meta({ description: "Budget ID", example: "01HXYZ123ABC" }),
             }),
           },
           responses: {
             "200": {
               description: "Budget status",
               content: {
-                "application/json": { schema: BudgetStatusSchema },
+                "application/json": {
+                  schema: z.object({
+                    status: BudgetStatusSchema,
+                  }),
+                },
+              },
+            },
+            "404": {
+              description: "Budget not found",
+              content: {
+                "application/json": { schema: ErrorResponseSchema },
               },
             },
           },
         },
       },
-      // Category endpoints
-      "/categories": {
+      // ========================================================================
+      // Category endpoints (protected - /v1/categories)
+      // ========================================================================
+      "/v1/categories": {
         get: {
           tags: ["Categories"],
           summary: "List categories",
           description: "Get all categories for the authenticated user",
+          requestParams: {
+            query: z.object({
+              active: z.string().optional().meta({ description: "Filter active only (true/false)" }),
+            }),
+          },
           responses: {
             "200": {
               description: "List of categories",
@@ -630,38 +800,51 @@ function generateOpenAPISpec(): void {
             "201": {
               description: "Category created",
               content: {
-                "application/json": { schema: CategoryDTOSchema },
+                "application/json": {
+                  schema: z.object({
+                    category: CategoryDTOSchema,
+                  }),
+                },
+              },
+            },
+            "400": {
+              description: "Validation error",
+              content: {
+                "application/json": { schema: ErrorResponseSchema },
               },
             },
           },
         },
       },
-      "/categories/{id}": {
-        get: {
+      "/v1/categories/seed": {
+        post: {
           tags: ["Categories"],
-          summary: "Get category",
-          description: "Get a specific category by ID",
-          requestParams: {
-            path: z.object({
-              id: z.string().meta({ description: "Category ID" }),
-            }),
-          },
+          summary: "Seed default categories",
+          description: "Create default categories for a new user",
           responses: {
-            "200": {
-              description: "Category details",
+            "201": {
+              description: "Default categories created",
               content: {
-                "application/json": { schema: CategoryDTOSchema },
+                "application/json": {
+                  schema: z.object({
+                    categories: z.array(CategoryDTOSchema),
+                    created: z.number().int().meta({ description: "Number of categories created" }),
+                    message: z.string(),
+                  }),
+                },
               },
             },
           },
         },
+      },
+      "/v1/categories/{id}": {
         put: {
           tags: ["Categories"],
           summary: "Update category",
           description: "Update an existing category",
           requestParams: {
             path: z.object({
-              id: z.string().meta({ description: "Category ID" }),
+              id: z.string().meta({ description: "Category ID", example: "01HXYZ123ABC" }),
             }),
           },
           requestBody: {
@@ -674,7 +857,17 @@ function generateOpenAPISpec(): void {
             "200": {
               description: "Category updated",
               content: {
-                "application/json": { schema: CategoryDTOSchema },
+                "application/json": {
+                  schema: z.object({
+                    category: CategoryDTOSchema,
+                  }),
+                },
+              },
+            },
+            "404": {
+              description: "Category not found",
+              content: {
+                "application/json": { schema: ErrorResponseSchema },
               },
             },
           },
@@ -685,31 +878,43 @@ function generateOpenAPISpec(): void {
           description: "Delete a category",
           requestParams: {
             path: z.object({
-              id: z.string().meta({ description: "Category ID" }),
+              id: z.string().meta({ description: "Category ID", example: "01HXYZ123ABC" }),
             }),
           },
           responses: {
             "200": {
               description: "Category deleted",
               content: {
-                "application/json": { schema: SuccessResponseSchema },
+                "application/json": {
+                  schema: z.object({
+                    message: z.string().meta({ example: "Category deleted" }),
+                  }),
+                },
+              },
+            },
+            "400": {
+              description: "Cannot delete category",
+              content: {
+                "application/json": { schema: ErrorResponseSchema },
               },
             },
           },
         },
       },
-      // Transaction endpoints
-      "/transactions": {
+      // ========================================================================
+      // Transaction endpoints (protected - /v1/transactions)
+      // ========================================================================
+      "/v1/transactions": {
         get: {
           tags: ["Transactions"],
           summary: "List transactions",
           description: "Get transactions for the authenticated user",
           requestParams: {
             query: z.object({
-              startDate: z.string().optional().meta({ description: "Filter start date" }),
-              endDate: z.string().optional().meta({ description: "Filter end date" }),
-              categoryId: z.string().optional().meta({ description: "Filter by category" }),
-              limit: z.number().int().optional().meta({ description: "Max results to return" }),
+              start: z.string().optional().meta({ description: "Start date (ISO 8601)", example: "2024-01-01" }),
+              end: z.string().optional().meta({ description: "End date (ISO 8601)", example: "2024-12-31" }),
+              days: z.string().optional().meta({ description: "Number of days to look back", example: "30" }),
+              limit: z.string().optional().meta({ description: "Max results to return", example: "50" }),
             }),
           },
           responses: {
@@ -739,38 +944,85 @@ function generateOpenAPISpec(): void {
             "201": {
               description: "Transaction created",
               content: {
-                "application/json": { schema: TransactionDTOSchema },
+                "application/json": {
+                  schema: z.object({
+                    transaction: TransactionDTOSchema,
+                  }),
+                },
+              },
+            },
+            "400": {
+              description: "Validation error",
+              content: {
+                "application/json": { schema: ErrorResponseSchema },
               },
             },
           },
         },
       },
-      "/transactions/{id}": {
-        get: {
+      "/v1/transactions/bulk-import": {
+        post: {
           tags: ["Transactions"],
-          summary: "Get transaction",
-          description: "Get a specific transaction by ID",
-          requestParams: {
-            path: z.object({
-              id: z.string().meta({ description: "Transaction ID" }),
-            }),
+          summary: "Bulk import transactions",
+          description: "Import multiple transactions at once",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: z.object({
+                  transactions: z.array(CreateTransactionInputSchema),
+                }),
+              },
+            },
           },
           responses: {
-            "200": {
-              description: "Transaction details",
+            "201": {
+              description: "All transactions imported",
               content: {
-                "application/json": { schema: TransactionDTOSchema },
+                "application/json": {
+                  schema: z.object({
+                    imported: z.number().int().meta({ description: "Number imported", example: 10 }),
+                    failed: z.number().int().meta({ description: "Number failed", example: 0 }),
+                    total: z.number().int().meta({ description: "Total processed", example: 10 }),
+                    success: z.array(TransactionDTOSchema),
+                    errors: z.array(z.object({
+                      index: z.number().int(),
+                      error: z.string(),
+                      data: z.unknown(),
+                    })),
+                  }),
+                },
+              },
+            },
+            "207": {
+              description: "Partial success (some failed)",
+              content: {
+                "application/json": {
+                  schema: z.object({
+                    imported: z.number().int(),
+                    failed: z.number().int(),
+                    total: z.number().int(),
+                    success: z.array(TransactionDTOSchema),
+                    errors: z.array(z.object({
+                      index: z.number().int(),
+                      error: z.string(),
+                      data: z.unknown(),
+                    })),
+                  }),
+                },
               },
             },
           },
         },
-        put: {
+      },
+      "/v1/transactions/{id}": {
+        patch: {
           tags: ["Transactions"],
           summary: "Update transaction",
-          description: "Update an existing transaction",
+          description: "Update an existing transaction (at least one field required)",
           requestParams: {
             path: z.object({
-              id: z.string().meta({ description: "Transaction ID" }),
+              id: z.string().meta({ description: "Transaction ID", example: "01HXYZ123ABC" }),
             }),
           },
           requestBody: {
@@ -783,7 +1035,17 @@ function generateOpenAPISpec(): void {
             "200": {
               description: "Transaction updated",
               content: {
-                "application/json": { schema: TransactionDTOSchema },
+                "application/json": {
+                  schema: z.object({
+                    transaction: TransactionDTOSchema,
+                  }),
+                },
+              },
+            },
+            "404": {
+              description: "Transaction not found",
+              content: {
+                "application/json": { schema: ErrorResponseSchema },
               },
             },
           },
@@ -794,27 +1056,30 @@ function generateOpenAPISpec(): void {
           description: "Delete a transaction",
           requestParams: {
             path: z.object({
-              id: z.string().meta({ description: "Transaction ID" }),
+              id: z.string().meta({ description: "Transaction ID", example: "01HXYZ123ABC" }),
             }),
           },
           responses: {
-            "200": {
-              description: "Transaction deleted",
+            "204": {
+              description: "Transaction deleted (no content)",
+            },
+            "404": {
+              description: "Transaction not found",
               content: {
-                "application/json": { schema: SuccessResponseSchema },
+                "application/json": { schema: ErrorResponseSchema },
               },
             },
           },
         },
       },
-      "/transactions/{id}/categorize": {
+      "/v1/transactions/{id}/categorize": {
         post: {
           tags: ["Transactions", "AI"],
           summary: "Auto-categorize transaction",
           description: "Use AI to suggest a category for a transaction",
           requestParams: {
             path: z.object({
-              id: z.string().meta({ description: "Transaction ID" }),
+              id: z.string().meta({ description: "Transaction ID", example: "01HXYZ123ABC" }),
             }),
           },
           responses: {
@@ -824,10 +1089,16 @@ function generateOpenAPISpec(): void {
                 "application/json": { schema: CategorizationResultSchema },
               },
             },
+            "503": {
+              description: "Auto-categorization not available",
+              content: {
+                "application/json": { schema: ErrorResponseSchema },
+              },
+            },
           },
         },
       },
-      "/transactions/parse-invoice": {
+      "/v1/transactions/parse-invoice": {
         post: {
           tags: ["Transactions", "AI"],
           summary: "Parse invoice image",
@@ -846,29 +1117,31 @@ function generateOpenAPISpec(): void {
             "200": {
               description: "Parsed invoice data",
               content: {
-                "application/json": { schema: ParsedInvoiceSchema },
+                "application/json": {
+                  schema: z.object({
+                    invoice: ParsedInvoiceSchema,
+                  }),
+                },
               },
             },
-          },
-        },
-      },
-      // User endpoints
-      "/users/me": {
-        get: {
-          tags: ["Users"],
-          summary: "Get current user",
-          description: "Get profile of authenticated user",
-          responses: {
-            "200": {
-              description: "User profile",
+            "400": {
+              description: "Could not parse invoice or missing image",
               content: {
-                "application/json": { schema: UserDTOSchema },
+                "application/json": { schema: ErrorResponseSchema },
+              },
+            },
+            "503": {
+              description: "Invoice parsing not available",
+              content: {
+                "application/json": { schema: ErrorResponseSchema },
               },
             },
           },
         },
       },
-      // Health endpoint
+      // ========================================================================
+      // Health endpoint (public)
+      // ========================================================================
       "/health": {
         get: {
           tags: ["Health"],
@@ -880,8 +1153,7 @@ function generateOpenAPISpec(): void {
               content: {
                 "application/json": {
                   schema: z.object({
-                    status: z.literal("ok"),
-                    timestamp: z.string(),
+                    ok: z.literal(true),
                   }),
                 },
               },
@@ -918,59 +1190,27 @@ function generateOpenAPISpec(): void {
   fs.writeFileSync(jsonPath, JSON.stringify(document, null, 2));
   console.log(`✅ Generated OpenAPI JSON: ${jsonPath}`);
 
-  // Write YAML (simple conversion)
+  // Write YAML using proper library
   const yamlPath = path.join(distDir, "openapi.yaml");
-  fs.writeFileSync(yamlPath, jsonToYaml(document));
+  fs.writeFileSync(yamlPath, YAML.stringify(document, { indent: 2, lineWidth: 0 }));
   console.log(`✅ Generated OpenAPI YAML: ${yamlPath}`);
+
+  // Write TypeScript export for runtime use
+  const tsPath = path.join(__dirname, "openapi-spec.ts");
+  const tsContent = `// AUTO-GENERATED - DO NOT EDIT
+// Run \`pnpm run openapi:generate\` to regenerate
+
+export const openApiSpec = ${JSON.stringify(document, null, 2)} as const;
+
+export type OpenApiSpec = typeof openApiSpec;
+`;
+  fs.writeFileSync(tsPath, tsContent);
+  console.log(`✅ Generated OpenAPI TypeScript: ${tsPath}`);
 
   // Print stats
   const schemaCount = Object.keys(document.components?.schemas ?? {}).length;
   const pathCount = Object.keys(document.paths ?? {}).length;
   console.log(`\n📊 Generated ${pathCount} paths and ${schemaCount} component schemas`);
-}
-
-// Simple JSON to YAML converter
-function jsonToYaml(obj: unknown, indent = 0): string {
-  const spaces = "  ".repeat(indent);
-
-  if (obj === null || obj === undefined) {
-    return "null";
-  }
-
-  if (typeof obj === "string") {
-    if (obj.includes("\n") || obj.includes(":") || obj.includes("#") || obj === "") {
-      return `"${obj.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
-    }
-    return obj;
-  }
-
-  if (typeof obj === "number" || typeof obj === "boolean") {
-    return String(obj);
-  }
-
-  if (Array.isArray(obj)) {
-    if (obj.length === 0) return "[]";
-    return obj.map((item) => `${spaces}- ${jsonToYaml(item, indent + 1).trimStart()}`).join("\n");
-  }
-
-  if (typeof obj === "object") {
-    const entries = Object.entries(obj);
-    if (entries.length === 0) return "{}";
-    return entries
-      .map(([key, value]) => {
-        const valueStr = jsonToYaml(value, indent + 1);
-        if (typeof value === "object" && value !== null && !Array.isArray(value) && Object.keys(value).length > 0) {
-          return `${spaces}${key}:\n${valueStr}`;
-        }
-        if (Array.isArray(value) && value.length > 0) {
-          return `${spaces}${key}:\n${valueStr}`;
-        }
-        return `${spaces}${key}: ${valueStr}`;
-      })
-      .join("\n");
-  }
-
-  return String(obj);
 }
 
 // Run generator
