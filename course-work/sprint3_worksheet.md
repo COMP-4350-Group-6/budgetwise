@@ -436,6 +436,8 @@ During this project, I used AI (ChatGPT-4o) as a support tool to help me debug a
 
 ### Bryce:
 
+One problem I tried to solve with AI was the hierarchical budget dropdown feature. We had attempted several implementations that failed already so when it was my turn I went straight to AI for help. Even after trying many AI suggested approaches, none of them ever fully worked. So once I reached this wall I decided to finally step back and investigate whether the issue was elsewhere, and I realized the real problem was that our backend and database weren't set up to support hierarchical budgets in the first place. What I learned from this is that my approach was flawed. I went to AI first instead of fully understanding the system constraints which would have led me to a solution much faster. Once I recognized the architectural limitation, I suggested that we remove the multi budget feature since supporting it would require a major refactor of our business logic. In the real world that wouldn't be the correct decision, but given the scope of this course project, we chose not to implement it. The bigger lesson I can take away from this is that I need to completely understand and solve complex problems before I even think of AI, and when I do it should only be used as a coding aid or to solve problems small in scope, not a system wide problem solver.
+
 
 ## Sprint 3 Quick Checklist
 
