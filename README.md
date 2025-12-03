@@ -40,6 +40,7 @@ It enables users to manage categories, budgets, and transactions, with real-time
     - [What We Test](#what-we-test)
     - [Test Types](#test-types)
     - [Load Testing](#load-testing)
+    - [LLM Performance Profiling](#llm-performance-profiling)
     - [Documentation](#documentation)
   - [Known Issues](#known-issues)
   - [Branching Workflow](#branching-workflow)
@@ -100,6 +101,7 @@ budgetwise/
 | **[`apps/frontend/`](apps/frontend/)** | Next.js web app | [`web-next/`](apps/frontend/web-next/) |
 | **[`packages/schemas/`](packages/schemas/)** | Zod schemas & OpenAPI | [`dist/openapi.yaml`](packages/schemas/dist/openapi.yaml), [`README.md`](packages/schemas/README.md) |
 | **[`load-tests/`](load-tests/)** | k6 load tests | [`LOAD_TEST_REPORT.md`](load-tests/LOAD_TEST_REPORT.md), [`load-test.js`](load-tests/load-test.js) |
+| **[`profiler/`](profiler/)** | LLM performance profiler | [`profiler-report.html`](profiler/profiler-report.html), [`run-stats.ts`](profiler/run-stats.ts) |
 | **[`e2e-tests/`](e2e-tests/)** | Playwright smoke tests | [`smoke-tests/`](e2e-tests/smoke-tests/) |
 | **[`course-work/`](course-work/)** | Sprint planning | Worksheets, testing plan |
 
@@ -240,6 +242,34 @@ k6 run load-test.js
 - **[load-tests/load-test-results.json](load-tests/load-test-results.json)** - Raw metrics data
 
 See **[load-tests/README.md](load-tests/README.md)** for setup and configuration.
+
+### LLM Performance Profiling
+
+The [`profiler/`](profiler/) directory contains benchmarking tools for AI/LLM-powered features:
+
+```sh
+cd profiler
+npx tsx run-stats.ts
+```
+
+**What it measures:**
+- **Auto-Categorization** - AI-powered transaction categorization (100 runs)
+- **Invoice Parsing** - AI-powered receipt/invoice OCR (20 runs)
+
+**Statistics collected:**
+- Success rate, mean/median latency
+- Percentiles (P50, P90, P95, P99)
+- Standard deviation, IQR
+- Histograms and box plots
+
+**Results:**
+- **[profiler/profiler-report.html](profiler/profiler-report.html)** - Interactive HTML dashboard with Chart.js visualizations
+
+**Latest benchmarks:**
+| Feature | Success Rate | Mean | Median (P50) | P95 |
+|---------|--------------|------|--------------|-----|
+| Auto-Categorization | 99% | 682ms | 596ms | 1103ms |
+| Invoice Parsing | 100% | 2695ms | 1788ms | 6601ms |
 
 ### Documentation
 
