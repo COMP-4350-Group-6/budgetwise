@@ -23,7 +23,7 @@ describe("Sidebar Component", () => {
       toggleCollapse: mockToggle,
     });
     localStorage.clear();
-    
+
     // Mock window.location
     Object.defineProperty(window, 'location', {
       value: { href: '' },
@@ -67,7 +67,7 @@ describe("Sidebar Component", () => {
   });
 
   it("renders collapsed version correctly", () => {
-    (useSidebarState as any).mockReturnValue({
+    (useSidebarState as Mock).mockReturnValue({
       collapsed: true,
       toggleCollapse: mockToggle,
     });

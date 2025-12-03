@@ -1,0 +1,18 @@
+{
+  "name": "load-tests",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "create-users": "tsx create-test-users.ts",
+    "generate-tokens": "tsx generate-token.ts",
+    "test": "k6 run load-test.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0",
+    "jose": "^5.2.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.7.0",
+    "@types/node": "^20.10.0"
+  }
+}
