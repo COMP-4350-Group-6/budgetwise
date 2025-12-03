@@ -5,3 +5,17 @@ title = "Custom Gitleaks configuration"
 # Use the default gitleaks config and disable only the generic-api-key rule
 useDefault = true
 disabledRules = ["generic-api-key"]
+
+# Allow test passwords in load test files (not real credentials)
+[[allowlist]]
+description = "Load test files with example/test credentials"
+paths = [
+    '''load-tests/.*'''
+]
+
+# Allow Supabase URLs (public project identifier, not a secret)
+[[allowlist]]
+description = "Supabase public URLs"
+regexes = [
+    '''yikylzhrskotiqnaitwz\.supabase\.co'''
+]
