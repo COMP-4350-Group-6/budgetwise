@@ -1,0 +1,15 @@
+/**
+ * Cloudflare Pages configuration for the auth app
+ * https://developers.cloudflare.com/pages/
+ */
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"pages_build_output_dir": "./dist",
+	"name": "auth-budgetwise",
+	"vars": {
+		"VITE_API_URL": "https://api.budgetwise.ca",
+		"VITE_MAIN_APP_URL": "https://budgetwise.ca",
+		"VITE_SUPABASE_URL": "https://yikylzhrskotiqnaitwz.supabase.co",
+		"VITE_COOKIE_DOMAIN": ".budgetwise.ca"
+	}
+}

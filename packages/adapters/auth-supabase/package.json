@@ -5,16 +5,17 @@
   "scripts": {
     "test": "vitest run",
     "test:unit": "vitest run src/*.test.ts",
-    "test:int": "vitest run tests/integration/**/*.int.test.{ts,tsx}"
+    "test:int": "vitest run tests/integration/*.int.test.ts"
   },
   "exports": {
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.45.4"
+    "@supabase/supabase-js": "^2.45.4",
+    "jose": "^5.9.6"
   },
   "devDependencies": {
     "dotenv": "^17.2.3",
-    "vitest": "^3.2.4"
+    "vitest": "^4.0.14"
   }
 }

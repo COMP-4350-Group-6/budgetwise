@@ -1,8 +1,8 @@
 /**
  * Dependency interfaces for API routes.
  * 
- * This file defines ONLY the function signatures that routes need injected.
- * DTOs and data types should be imported directly from @budget/schemas.
+ * This file defines the function signatures that routes need injected.
+ * Input/output types are imported from @budget/schemas.
  * 
  * Why this file exists:
  * - Routes need explicit interfaces for their dependencies (testability, clarity)
@@ -10,7 +10,9 @@
  * - deps.ts wires actual usecases to these interfaces
  */
 
+import type { AuthProviderPort } from "@budget/ports";
 import type {
+  // DTOs (outputs)
   TransactionDTO,
   CategoryDTO,
   BudgetDTO,
@@ -18,69 +20,42 @@ import type {
   BudgetDashboard,
   CategorizationResult,
   ParsedInvoice,
-  Currency,
-  BudgetPeriod,
+  // Usecase inputs
+  AddTransactionInput,
+  ModifyTransactionInput,
+  DeleteTransactionInput,
+  ListTransactionsInput,
+  CategorizeTransactionInput,
+  ParseInvoiceInput,
+  BulkImportTransactionsInput,
+  BulkImportResult,
+  AddCategoryInput,
+  ModifyCategoryInput,
+  SeedDefaultCategoriesResult,
+  AddBudgetInput,
+  ModifyBudgetInput,
+  UpdateBudgetInput,
 } from "@budget/schemas";
+
+/** Token verifier interface - matches what Container provides */
+import type { TokenVerifierPort } from "@budget/ports/auth";
+export type TokenVerifier = TokenVerifierPort;
 
 // ============================================================================
 // Transaction Route Dependencies
 // ============================================================================
 
 export interface TransactionDeps {
-  addTransaction: (input: {
-    userId: string;
-    budgetId?: string;
-    categoryId?: string;
-    amountCents: number;
-    note?: string;
-    occurredAt: Date;
-  }) => Promise<TransactionDTO>;
-  
-  updateTransaction: (input: {
-    transactionId: string;
-    userId: string;
-    budgetId?: string;
-    categoryId?: string;
-    amountCents?: number;
-    note?: string;
-    occurredAt?: Date;
-  }) => Promise<TransactionDTO | null>;
-  
-  deleteTransaction: (input: {
-    transactionId: string;
-    userId: string;
-  }) => Promise<boolean>;
-  
-  listTransactions: (params: {
-    userId: string;
-    startDate?: Date;
-    endDate?: Date;
-    days?: number;
-    limit?: number;
-  }) => Promise<TransactionDTO[]>;
+  addTransaction: (input: AddTransactionInput) => Promise<TransactionDTO>;
+  updateTransaction: (input: ModifyTransactionInput) => Promise<TransactionDTO | null>;
+  deleteTransaction: (input: DeleteTransactionInput) => Promise<boolean>;
+  listTransactions: (input: ListTransactionsInput) => Promise<TransactionDTO[]>;
   getTransaction: (id: string) => Promise<TransactionDTO | null>;
-  
-  bulkImportTransactions: (input: {
-    userId: string;
-    transactions: Array<{
-      budgetId?: string;
-      categoryId?: string;
-      amountCents: number;
-      note?: string;
-      occurredAt: Date;
-    }>;
-    autoCategorize?: (transactionId: string, userId: string) => Promise<{ categoryId: string } | null>;
-  }) => Promise<{
-    imported: number;
-    failed: number;
-    total: number;
-    success: TransactionDTO[];
-    errors: Array<{ index: number; error: string; data: unknown }>;
-  }>;
+  bulkImportTransactions: (input: BulkImportTransactionsInput) => Promise<BulkImportResult>;
   
   // Optional AI features
-  categorizeTransaction?: (input: { transactionId: string; userId: string }) => Promise<CategorizationResult | null>;
-  parseInvoice?: (input: { userId: string; imageBase64: string }) => Promise<ParsedInvoice | null>;
+  categorizeTransaction?: (input: CategorizeTransactionInput) => Promise<CategorizationResult | null>;
+  parseInvoice?: (input: ParseInvoiceInput) => Promise<ParsedInvoice | null>;
 }
 
 // ============================================================================
@@ -88,31 +63,11 @@ export interface TransactionDeps {
 // ============================================================================
 
 export interface CategoryDeps {
-  createCategory: (input: {
-    userId: string;
-    name: string;
-    description?: string;
-    icon?: string;
-    color?: string;
-    isActive?: boolean;
-  }) => Promise<CategoryDTO>;
-  
+  createCategory: (input: AddCategoryInput) => Promise<CategoryDTO>;
   listCategories: (userId: string, activeOnly?: boolean) => Promise<CategoryDTO[]>;
-  
-  updateCategory: (id: string, userId: string, updates: {
-    name?: string;
-    description?: string;
-    icon?: string;
-    color?: string;
-    isActive?: boolean;
-  }) => Promise<CategoryDTO>;
-  
+  updateCategory: (id: string, userId: string, updates: Partial<ModifyCategoryInput>) => Promise<CategoryDTO>;
   deleteCategory: (id: string, userId: string) => Promise<void>;
-  seedDefaultCategories: (userId: string) => Promise<{
-    categories: CategoryDTO[];
-    created: number;
-    message: string;
-  }>;
+  seedDefaultCategories: (userId: string) => Promise<SeedDefaultCategoriesResult>;
   getCategory: (id: string) => Promise<CategoryDTO | null>;
 }
 
@@ -121,33 +76,9 @@ export interface CategoryDeps {
 // ============================================================================
 
 export interface BudgetDeps {
-  createBudget: (input: {
-    userId: string;
-    categoryId: string;
-    name: string;
-    amountCents: number;
-    currency: Currency;
-    period: BudgetPeriod;
-    startDate: Date;
-    endDate?: Date;
-    alertThreshold?: number;
-    isActive?: boolean;
-  }) => Promise<BudgetDTO>;
-  
+  createBudget: (input: AddBudgetInput) => Promise<BudgetDTO>;
   listBudgets: (userId: string, activeOnly?: boolean) => Promise<BudgetDTO[]>;
-  
-  updateBudget: (id: string, userId: string, updates: {
-    categoryId?: string;
-    name?: string;
-    amountCents?: number;
-    currency?: Currency;
-    period?: BudgetPeriod;
-    startDate?: Date;
-    endDate?: Date;
-    alertThreshold?: number;
-    isActive?: boolean;
-  }) => Promise<BudgetDTO>;
-  
+  updateBudget: (id: string, userId: string, updates: UpdateBudgetInput) => Promise<BudgetDTO>;
   deleteBudget: (id: string, userId: string) => Promise<void>;
   getBudgetStatus: (id: string, userId: string) => Promise<BudgetStatus | null>;
   getBudgetDashboard: (userId: string) => Promise<BudgetDashboard>;
@@ -164,4 +95,11 @@ export interface AppDeps {
   transactions: TransactionDeps;
   categories: CategoryDeps;
   budgets: BudgetDeps;
+  tokenVerifier: TokenVerifier;
+  // Optional auth infrastructure
+  authProvider?: AuthProviderPort;
+  cookieDomain?: string;
 }
+
+// Re-export for convenience
+export type { AuthProviderPort } from "@budget/ports";

@@ -70,3 +70,16 @@ export type CreateCategoryInput = z.infer<typeof CreateCategoryInputSchema>;
 export type UpdateCategoryInput = z.infer<typeof UpdateCategoryInputSchema>;
 export type CategoryRow = z.infer<typeof CategoryRowSchema>;
 export type CategoryDTO = z.infer<typeof CategoryDTOSchema>;
+
+// ============================================================================
+// Usecase Input Types (API input + auth context)
+// ============================================================================
+
+export type AddCategoryInput = CreateCategoryInput & { userId: string };
+export type ModifyCategoryInput = UpdateCategoryInput & { id: string; userId: string };
+export type DeleteCategoryInput = { id: string; userId: string };
+export type SeedDefaultCategoriesResult = {
+  categories: CategoryDTO[];
+  created: number;
+  message: string;
+};

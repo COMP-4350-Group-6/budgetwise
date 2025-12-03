@@ -1,16 +1,15 @@
-# Example environment variables for local development
-# Copy this file to .dev.vars and fill in your values
+# Sensitive secrets for local development
+# Non-sensitive config (URLs, domains) is in wrangler.jsonc
 
-# LOCAL SUPABASE
-# When you run `supabase start`, copy these values from the output:
-SUPABASE_JWT_SECRET=<copy-from-supabase-start-output>
-SUPABASE_SERVICE_ROLE_KEY=<copy-from-supabase-start-output>
+# Supabase secrets (required)
+# Get from: https://supabase.com/dashboard/project/YOUR_PROJECT/settings/api
+SUPABASE_SERVICE_ROLE_KEY=<your-service-role-key>
+SUPABASE_ANON_KEY=<your-anon-key>
+SUPABASE_JWT_SECRET=<your-jwt-secret>
 
-# CLOUD SUPABASE (when not using local)
-# Get these from: https://supabase.com/dashboard/project/YOUR_PROJECT/settings/api
-# SUPABASE_JWT_SECRET=<your-cloud-jwt-secret>
-# SUPABASE_SERVICE_ROLE_KEY=<your-cloud-service-role-key>
+# Database connection (for migrations/direct DB access)
+DATABASE_URL=postgresql://postgres:<password>@db.<project>.supabase.co:5432/postgres
 
-# OPTIONAL: AI features
+# Optional: AI features
 # Get from: https://openrouter.ai/keys
 OPENROUTER_API_KEY=<your-openrouter-key-or-leave-empty>

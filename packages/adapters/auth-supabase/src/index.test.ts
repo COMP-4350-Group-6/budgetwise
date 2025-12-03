@@ -6,6 +6,7 @@ const mockAuth = {
   signInWithPassword: vi.fn(),
   signOut: vi.fn(),
   getUser: vi.fn(),
+  getSession: vi.fn(),
 };
 
 // Mock the supabase-js createClient to return the above mock
@@ -15,63 +16,90 @@ vi.mock("@supabase/supabase-js", () => {
   };
 });
 
-import { makeSupabaseAuthClient } from "./index";
+import { makeSupabaseAuthProvider } from "./index";
 
 const DUMMY_URL = "https://example.supabase.co";
 const DUMMY_KEY = "anon-key";
 
-describe("makeSupabaseAuthClient", () => {
+describe("makeSupabaseAuthProvider", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it("getMe maps Supabase user to domain shape", async () => {
+  it("getSession maps Supabase session to domain shape", async () => {
     const createdAt = "2025-01-01T00:00:00.000Z";
-    mockAuth.getUser.mockResolvedValueOnce({
+    mockAuth.getSession.mockResolvedValueOnce({
       data: {
-        user: {
-          id: "user-1",
-          email: "test@example.com",
-          user_metadata: { name: "Test User", defaultCurrency: "CAD" },
-          created_at: createdAt,
+        session: {
+          user: {
+            id: "user-1",
+            email: "test@example.com",
+            user_metadata: { name: "Test User", defaultCurrency: "CAD" },
+            created_at: createdAt,
+          },
+          access_token: "access-token",
+          refresh_token: "refresh-token",
+          expires_at: 1234567890,
         },
       },
       error: null,
     });
 
-    const client = makeSupabaseAuthClient({ supabaseUrl: DUMMY_URL, supabaseAnonKey: DUMMY_KEY });
-    const me = await client.getMe();
+    const client = makeSupabaseAuthProvider({ supabaseUrl: DUMMY_URL, supabaseAnonKey: DUMMY_KEY });
+    const session = await client.getSession();
 
-    expect(me).toEqual({
-      id: "user-1",
-      email: "test@example.com",
-      name: "Test User",
-      defaultCurrency: "CAD",
-      createdAt,
+    expect(session).toEqual({
+      user: {
+        id: "user-1",
+        email: "test@example.com",
+        name: "Test User",
+        defaultCurrency: "CAD",
+        createdAt,
+      },
+      tokens: {
+        accessToken: "access-token",
+        refreshToken: "refresh-token",
+        expiresAt: 1234567890000,
+      },
     });
   });
 
-  it("getMe returns null when no user is authenticated", async () => {
-    mockAuth.getUser.mockResolvedValueOnce({ data: { user: null }, error: null });
+  it("getSession returns null when no session", async () => {
+    mockAuth.getSession.mockResolvedValueOnce({ data: { session: null }, error: null });
 
-    const client = makeSupabaseAuthClient({ supabaseUrl: DUMMY_URL, supabaseAnonKey: DUMMY_KEY });
-    const me = await client.getMe();
+    const client = makeSupabaseAuthProvider({ supabaseUrl: DUMMY_URL, supabaseAnonKey: DUMMY_KEY });
+    const session = await client.getSession();
 
-    expect(me).toBeNull();
+    expect(session).toBeNull();
   });
 
-  it("signup forwards metadata and throws on Supabase error", async () => {
+  it("signup forwards metadata and returns error result on Supabase error", async () => {
     // First, successful call to check argument forwarding
-    mockAuth.signUp.mockResolvedValueOnce({ data: {}, error: null });
+    mockAuth.signUp.mockResolvedValueOnce({ 
+      data: { 
+        user: {
+          id: "user-1",
+          email: "new@example.com",
+          user_metadata: { name: "New User", defaultCurrency: "USD" },
+          created_at: "2025-01-01T00:00:00.000Z",
+        },
+        session: {
+          access_token: "token",
+          refresh_token: "refresh",
+        },
+      }, 
+      error: null 
+    });
 
-    const client = makeSupabaseAuthClient({ supabaseUrl: DUMMY_URL, supabaseAnonKey: DUMMY_KEY });
-    await client.signup({
+    const client = makeSupabaseAuthProvider({ supabaseUrl: DUMMY_URL, supabaseAnonKey: DUMMY_KEY });
+    const result = await client.signup({
       email: "new@example.com",
       password: "password123",
       name: "New User",
       defaultCurrency: "USD",
     });
 
+    expect(result.success).toBe(true);
     expect(mockAuth.signUp).toHaveBeenCalledTimes(1);
     expect(mockAuth.signUp).toHaveBeenCalledWith({
       email: "new@example.com",
@@ -80,11 +108,54 @@ describe("makeSupabaseAuthClient", () => {
     });
 
     // Then, error path
-    const supaErr = new Error("Signup failed");
+    const supaErr = { message: "Signup failed" };
     mockAuth.signUp.mockResolvedValueOnce({ data: null, error: supaErr });
-    await expect(
-      client.signup({ email: "e@e.com", password: "x", name: "N", defaultCurrency: "CAD" })
-    ).rejects.toBe(supaErr);
+    const errorResult = await client.signup({ 
+      email: "e@e.com", 
+      password: "x", 
+      name: "N", 
+      defaultCurrency: "CAD" 
+    });
+    
+    expect(errorResult.success).toBe(false);
+    expect(errorResult.error).toBeDefined();
+  });
+
+  it("login returns session on success", async () => {
+    mockAuth.signInWithPassword.mockResolvedValueOnce({
+      data: {
+        user: {
+          id: "user-1",
+          email: "test@example.com",
+          user_metadata: { name: "Test User", defaultCurrency: "CAD" },
+          created_at: "2025-01-01T00:00:00.000Z",
+        },
+        session: {
+          access_token: "access-token",
+          refresh_token: "refresh-token",
+        },
+      },
+      error: null,
+    });
+
+    const client = makeSupabaseAuthProvider({ supabaseUrl: DUMMY_URL, supabaseAnonKey: DUMMY_KEY });
+    const result = await client.login({ email: "test@example.com", password: "password" });
+
+    expect(result.success).toBe(true);
+    expect(result.data?.user.email).toBe("test@example.com");
+  });
+
+  it("login returns error on invalid credentials", async () => {
+    mockAuth.signInWithPassword.mockResolvedValueOnce({
+      data: { user: null, session: null },
+      error: { message: "Invalid login credentials" },
+    });
+
+    const client = makeSupabaseAuthProvider({ supabaseUrl: DUMMY_URL, supabaseAnonKey: DUMMY_KEY });
+    const result = await client.login({ email: "test@example.com", password: "wrong" });
+
+    expect(result.success).toBe(false);
+    expect(result.error?.code).toBe("INVALID_CREDENTIALS");
   });
 });
 

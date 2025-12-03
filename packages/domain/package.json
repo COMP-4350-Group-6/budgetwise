@@ -15,10 +15,9 @@
     "dev": "pnpm build -w",
     "lint": "echo skip",
     "test": "vitest run",
-    "test:unit": "vitest run src/*.test.ts",
-    "test:int": "vitest run tests/integration/**/*.int.test.{ts,tsx}"
+    "test:unit": "vitest run src/*.test.ts"
   },
   "devDependencies": {
-    "vitest": "^3.2.4"
+    "vitest": "^4.0.14"
   }
 }

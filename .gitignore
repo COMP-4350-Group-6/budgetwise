@@ -119,3 +119,10 @@ next-env.d.ts
 # Profiler outputs
 profiler-output.txt
 **/profiler-results/**
+
+# Load test secrets and generated reports
+load-tests/token.txt
+load-tests/tokens.json
+load-tests/*.html
+load-tests/*.json
+!load-tests/package.json

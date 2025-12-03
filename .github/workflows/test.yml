@@ -1,3 +1,4 @@
+---
 name: Run Tests
 
 on:
@@ -102,21 +103,11 @@ jobs:
         if: github.event_name == 'pull_request'
         run: |
           # Use Turbo's cache and filter to run only affected tests
-          pnpm turbo run test:unit --filter="...[origin/${{ github.base_ref }}]" --cache-dir=.turbo
+          pnpm turbo run test:unit --filter="...[origin/${{ github.base_ref }}]" -- --coverage
 
       - name: Run all unit tests
         if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev')
-        run: pnpm test:unit
-
-      - name: Upload unit test coverage
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: unit-test-coverage
-          path: |
-            packages/*/coverage/lcov.info
-            apps/*/coverage/lcov.info
-          retention-days: 7
+        run: pnpm turbo run test:unit -- --coverage
 
   # Integration tests - slower, require setup
   integration-tests:
@@ -146,35 +137,22 @@ jobs:
       - name: Run integration tests (changed packages only)
         if: github.event_name == 'pull_request'
         run: |
-          pnpm turbo run test:int --filter="...[origin/${{ github.base_ref }}]" --cache-dir=.turbo
+          pnpm turbo run test:int --filter="...[origin/${{ github.base_ref }}]" -- --coverage
         env:
           NODE_ENV: test
 
       - name: Run all integration tests
         if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev')
-        run: pnpm test:int
+        run: pnpm turbo run test:int -- --coverage
         env:
           NODE_ENV: test
-
-      - name: Upload integration test coverage
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: integration-test-coverage
-          path: |
-            packages/*/coverage/lcov.info
-            apps/*/coverage/lcov.info
-          retention-days: 7
 
   # Coverage report - combine all coverage
   coverage-report:
     name: Generate Coverage Report
     runs-on: ubuntu-latest
-    needs: [unit-tests, integration-tests]
-    if: |
-      always() && 
-      github.event_name == 'pull_request' &&
-      (needs.unit-tests.result == 'success' || needs.integration-tests.result == 'success')
+    needs: [detect-changes]
+    if: always()
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -191,30 +169,16 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Download unit test coverage
-        if: needs.unit-tests.result == 'success'
-        uses: actions/download-artifact@v4
-        with:
-          name: unit-test-coverage
-          path: coverage-temp/unit
+      - name: Run tests with coverage
+        run: pnpm test:coverage
         continue-on-error: true
-
-      - name: Download integration test coverage
-        if: needs.integration-tests.result == 'success'
-        uses: actions/download-artifact@v4
-        with:
-          name: integration-test-coverage
-          path: coverage-temp/integration
-        continue-on-error: true
-
-      - name: Merge coverage reports
-        run: pnpm coverage:merge
 
       - name: Install lcov (for genhtml)
         run: sudo apt-get update && sudo apt-get install -y lcov
       
       - name: Generate HTML report
         run: pnpm coverage:html
+        continue-on-error: true
 
       - name: Upload merged coverage
         uses: actions/upload-artifact@v4
@@ -224,15 +188,25 @@ jobs:
           retention-days: 30
 
       - name: Comment coverage on PR
+        if: github.event_name == 'pull_request'
         uses: actions/github-script@v7
         with:
           script: |
             const fs = require('fs');
+            const path = require('path');
             
-            // Read coverage summary if available
             let coverageMessage = '📊 **Coverage Report Generated**\n\n';
-            coverageMessage += 'View the full coverage report in the workflow artifacts.\n\n';
-            coverageMessage += '💡 **Tip**: Only tests for changed files were run to speed up CI.';
+            
+            // Check if coverage was generated
+            const coverageDir = path.join(process.cwd(), 'coverage');
+            if (fs.existsSync(coverageDir)) {
+              const runUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+              coverageMessage += '✅ Coverage report has been generated for this PR.\n';
+              coverageMessage += `📈 [View Coverage Report](${runUrl})\n\n`;
+              coverageMessage += '💡 **Note**: This includes coverage for all tests run in CI.';
+            } else {
+              coverageMessage += '⚠️ **Coverage Report**: No coverage data was generated.\n\n';
+            }
             
             github.rest.issues.createComment({
               issue_number: context.issue.number,
@@ -240,8 +214,6 @@ jobs:
               repo: context.repo.repo,
               body: coverageMessage
             });
-
-  # Only run on main/dev branches or when specifically needed
   full-test-suite:
     name: Full Test Suite (All Tests)
     runs-on: ubuntu-latest

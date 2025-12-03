@@ -1,19 +1,4 @@
-import { describe, it, expect, beforeEach, beforeAll, vi } from 'vitest';
-
-// Hoist a mock for 'jose' so auth middleware sees a valid user
-vi.mock('jose', () => {
-  return {
-    createRemoteJWKSet: vi.fn(() => ({})),
-    jwtVerify: vi.fn(async (token: string) => {
-      let sub = token;
-      if (token.includes('user-1')) sub = 'user-1';
-      else if (token.includes('user-2')) sub = 'user-2';
-      else if (token.includes('different-user')) sub = 'different-user';
-      return { payload: { sub } } as any;
-    }),
-    decodeProtectedHeader: vi.fn(() => ({ alg: "ES256" })),
-  };
-});
+import { describe, it, expect, beforeEach, beforeAll } from 'vitest';
 
 import { app, container } from '../test-app';
 
@@ -67,7 +52,7 @@ describe('Budgets API Integration Tests', () => {
   beforeAll(() => {
     const originalFetch = app.fetch.bind(app);
     (app as any).fetch = (req: Request, env?: any, event?: any) =>
-      originalFetch(req, { ...(env || {}), SUPABASE_JWT_SECRET: process.env.SUPABASE_JWT_SECRET, SUPABASE_URL: "https://test.supabase.co" }, event);
+      originalFetch(req, { ...(env || {}), SUPABASE_JWT_SECRET: "test-only", SUPABASE_URL: "https://test.supabase.co" }, event);
   });
   let authToken: string;
   let userId: string;

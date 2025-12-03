@@ -113,3 +113,12 @@ export type BudgetPeriod = z.infer<typeof BudgetPeriodSchema>;
 export type BudgetStatus = z.infer<typeof BudgetStatusSchema>;
 export type CategoryBudgetSummary = z.infer<typeof CategoryBudgetSummarySchema>;
 export type BudgetDashboard = z.infer<typeof BudgetDashboardSchema>;
+
+// ============================================================================
+// Usecase Input Types (API input + auth context)
+// ============================================================================
+
+export type AddBudgetInput = CreateBudgetInput & { userId: string };
+export type ModifyBudgetInput = UpdateBudgetInput & { id: string; userId: string };
+export type DeleteBudgetInput = { id: string; userId: string };
+export type GetBudgetStatusInput = { id: string; userId: string };

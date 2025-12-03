@@ -1,239 +1,184 @@
 # BudgetWise
 
-COMP 4350 - Project Code
+COMP 4350 - Full-Stack Budgeting Application
 
 ---
 
-Sprint 1 Worksheet: [Sprint 1 Worksheet](course-work/sprint1_worksheet.md)
+## ⚡ Quick Access
 
-Sprint 2 Worksheet: [Sprint 2 Worksheet](course-work/sprint2_worksheet.md)
+### 📖 Documentation
+| Resource | Description |
+|----------|-------------|
+| [**Architecture & Design**](docs/architecture/DESIGN.md) | Clean architecture patterns & decisions |
+| [**Testing Guide**](docs/testing/TESTING_GUIDE.md) | Commands, coverage, CI/CD strategy |
+| [**Local Setup Guide**](docs/setup/LOCAL_DEVELOPMENT_GUIDE.md) | Full local development setup |
 
-Sprint 3 Worksheet: [Sprint 3 Worksheet](course-work/sprint3_worksheet.md)
+### 🔌 API & OpenAPI
+| Resource | Description |
+|----------|-------------|
+| [**Swagger UI**](http://localhost:8787/docs) | Interactive API explorer (run API first) |
+| [**OpenAPI YAML**](packages/schemas/dist/openapi.yaml) | OpenAPI 3.1 spec - copy to Swagger Editor |
+| [**OpenAPI JSON**](packages/schemas/dist/openapi.json) | OpenAPI 3.1 spec (JSON format) |
+| [**Schemas README**](packages/schemas/README.md) | How to generate and use the spec |
 
-Testing Plan: [Testing Plan](course-work/TESTING_PLAN.md)
+### 📊 Performance & Testing
+| Resource | Description |
+|----------|-------------|
+| [**Load Test Report**](load-tests/LOAD_TEST_REPORT.md) | API performance under stress |
+| [**Load Test HTML**](load-tests/load-test-results-report.html) | Interactive charts & metrics |
+| [**LLM Profiler Dashboard**](profiler/profiler-report.html) | AI feature benchmarks (open in browser) |
+| [**Profiler README**](profiler/README.md) | How to run LLM benchmarks |
+
+---
 
 ## Overview
 
-BudgetWise is a full-stack budgeting application built with [Clean Architecture](DESIGN.md) principles in a monorepo.  
-It enables users to manage categories, budgets, and transactions, with real-time dashboards and smart alerts.
+BudgetWise is a full-stack budgeting application built with [Clean Architecture](docs/architecture/DESIGN.md) principles in a monorepo. It enables users to manage categories, budgets, and transactions, with real-time dashboards and AI-powered features.
 
 ---
 
-## Table of Contents
+## Prerequisites
 
-- [Architecture & Design](#architecture--design)
-- [Project Structure](#project-structure)
-- [Setup Guide](#setup-guide)
-- [Running the App](#running-the-app)
-- [Testing](#testing)
-- [Known Issues](#known-issues)
-- [Branching Workflow](#branching-workflow)
-- [Versioning](#versioning)
-- [Acknowledgments](#acknowledgments)
-- [Further Reading](#further-reading)
+- **Node.js** v18+ ([download](https://nodejs.org/))
+- **pnpm** package manager ([install](https://pnpm.io/installation))
+- **Supabase** account ([sign up free](https://supabase.com/))
 
----
+## Quick Start
 
-## Architecture & Design
+### 1. Clone and Install
 
-BudgetWise follows [Clean Architecture](DESIGN.md) and Hexagonal Architecture patterns:
+```sh
+git clone <repo-url> && cd budgetwise
+pnpm install
+```
 
-- **Domain**: Pure business logic, no dependencies.
-- **Ports**: Interfaces for repositories and services.
-- **Adapters**: Implementations for persistence, system, and auth.
-- **Use Cases**: Application logic, orchestrates domain and ports.
-- **Composition**: Dependency injection containers for each runtime.
-- **Apps**: Entry points (API, frontend).
+### 2. Configure Supabase
 
-**Key Design Choices:**
+Create a Supabase project and get your credentials from the dashboard.
 
-- **Monorepo**: All packages and apps in a single repository for atomic commits and easy dependency management.
-- **Barrel Exports**: Each package uses `index.ts` for clean imports.
-- **Cloudflare Workers**: API deployed to edge for low latency.
-- **Next.js Frontend**: Deployed to Cloudflare Pages.
+**API environment** (create `apps/api/.dev.vars`):
+```env
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+SUPABASE_JWT_SECRET=your-jwt-secret
+OPENROUTER_API_KEY=your-openrouter-key  # Optional: for AI features
+```
 
-For a detailed explanation of these choices and the rationale, see [DESIGN.md](DESIGN.md).
+**Frontend environment** (create `apps/frontend/web-next/.env.local`):
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8787
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your-anon-key
+```
+
+### 3. Start the App
+
+```sh
+# Terminal 1: Start API (http://localhost:8787)
+cd apps/api && pnpm dev
+
+# Terminal 2: Start Frontend (http://localhost:3000)
+cd apps/frontend/web-next && pnpm dev
+```
+
+> 📖 Detailed setup: [docs/setup/LOCAL_DEVELOPMENT_GUIDE.md](docs/setup/LOCAL_DEVELOPMENT_GUIDE.md)
 
 ---
 
 ## Project Structure
 
-```sh
+```
 budgetwise/
 ├── apps/
-│   ├── api/         # Backend API (Hono, Cloudflare Worker)
-│   └── frontend/    # Next.js frontend
+│   ├── api/              # Backend REST API (Hono + Cloudflare Workers)
+│   └── frontend/         # Next.js web application
 ├── packages/
-│   ├── domain/      # Business logic (entities, value objects)
-│   ├── ports/       # Interfaces for repositories/services
-│   ├── adapters/    # Implementations (in-memory, firebase, system)
-│   ├── usecases/    # Application logic
-│   ├── schemas/     # API validation schemas
-│   └── composition/ # Dependency injection containers
-├── course-work/     # Sprint worksheets and planning
-├── infra/           # Infrastructure configs (firebase, cloudflare)
-├── .env*            # Environment variables (see below)
-├── README.md        # This file
-├── DESIGN.md        # Architecture/design rationale
-├── TESTING.md       # Testing strategy and guide
-├── ACKNOWLEDGMENTS.md
-└── ...
+│   ├── domain/           # Business logic
+│   ├── schemas/          # Zod schemas + OpenAPI spec
+│   └── ...               # ports, adapters, usecases, composition
+├── docs/                 # All documentation
+├── load-tests/           # k6 load testing
+├── profiler/             # LLM performance benchmarks
+└── e2e-tests/            # Playwright smoke tests
 ```
-
-For more on the folder structure and rationale, see [DESIGN.md](DESIGN.md#package-structure).
 
 ---
 
-## Setup Guide
+## 📚 Documentation
 
-### Prerequisites
+All documentation lives in [`docs/`](docs/README.md):
 
-- [Node.js](https://nodejs.org/) (v18+ recommended)
-- [pnpm](https://pnpm.io/) (monorepo package manager)
-- [Cloudflare account](https://cloudflare.com) (optional, for deployment)
-- [Supabase](https://supabase.com/) account (for authentication)
-
-### 1. Clone and Install
-
-```sh
-git clone <repo-url>
-cd budgetwise
-pnpm install
-```
-
-### 2. Environment Variables
-
-Copy example env files and fill in values:
-
-**Frontend `.dev.vars` example:**
-
-```
-NEXT_PUBLIC_API_URL="http://localhost:8787"
-NEXT_PUBLIC_SUPABASE_URL="https://your-project.supabase.co"
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY="your-publishable-key"
-```
-
-**API env vars:**  
-See [`apps/api/wrangler.jsonc`](apps/api/wrangler.jsonc) and `.dev.vars.example` for local secrets.
+| Category | Description | Quick Link |
+|----------|-------------|------------|
+| **Architecture** | Design decisions, clean architecture | [DESIGN.md](docs/architecture/DESIGN.md) |
+| **Setup** | Local development, database guides | [LOCAL_DEVELOPMENT_GUIDE.md](docs/setup/LOCAL_DEVELOPMENT_GUIDE.md) |
+| **Testing** | Test guide, coverage, rationale | [TESTING_GUIDE.md](docs/testing/TESTING_GUIDE.md) |
+| **Sprints** | Sprint worksheets | [Sprint 1](docs/sprints/sprint1_worksheet.md) • [2](docs/sprints/sprint2_worksheet.md) • [3](docs/sprints/sprint3_worksheet.md) |
+| **Security** | Security analysis | [SECURITY_ANALYSIS.md](docs/security/SECURITY_ANALYSIS.md) |
+| **DevOps** | CI/CD reports | [CI_CD_REPORT.md](docs/devops/CI_CD_REPORT.md) |
+| **Acknowledgments** | AI usage credits | [ACKNOWLEDGMENTS.md](docs/acknowledgments/ACKNOWLEDGMENTS.md) |
 
 ---
 
-## Running the App
+## 🧪 Testing & Benchmarks
 
-### Backend/API
-
-```sh
-cd apps/api
-pnpm install
-pnpm dev
-# API runs on http://localhost:8787 by default
-```
-
-### Frontend
-
-```sh
-cd apps/frontend
-pnpm install
-pnpm dev
-# Frontend runs on http://localhost:3000
-```
-
-Open [http://localhost:3000](http://localhost:3000) in your browser.
-
----
-
-## Testing
-
-> **📚 See [TESTING_GUIDE.md](TESTING_GUIDE.md) for the complete testing guide**
-
-### Quick Start
-
-```sh
-# Run all tests
-pnpm test
-
-# Run with coverage
-pnpm test:coverage
-
-# View coverage report
-pnpm coverage:report
-
-# Run smoke tests (production)
-pnpm test:smoke:production
-```
-
-### What We Test
-
-- **525 unit & integration tests** across 47 files
-- **17 smoke tests** validating production deployment
-- **55.3% lines coverage** | **74.5% functions coverage**
-
-### Test Types
-
-| Type | Location | Command | Purpose |
+| Type | Location | Command | Results |
 |------|----------|---------|---------|
-| **Unit** | `packages/*/src/*.test.ts` | `pnpm test:unit` | Test individual components |
-| **Integration** | `packages/*/tests/integration/` | `pnpm test:int` | Test component interactions |
-| **Smoke/E2E** | `e2e-tests/smoke-tests/` | `pnpm test:smoke:production` | Validate production |
+| **Unit/Integration** | `packages/*/` | `pnpm test` | 525 tests, 74.5% functions |
+| **Smoke/E2E** | [`e2e-tests/`](e2e-tests/) | `pnpm test:smoke:production` | 17 tests |
+| **Load Testing** | [`load-tests/`](load-tests/) | `k6 run load-test.js` | [Report](load-tests/LOAD_TEST_REPORT.md) |
+| **LLM Profiler** | [`profiler/`](profiler/) | `npx tsx run-stats.ts` | [Dashboard](profiler/profiler-report.html) |
 
-### Documentation
+### LLM AI Benchmarks
 
-- **[TESTING_GUIDE.md](TESTING_GUIDE.md)** - Complete testing guide (commands, best practices, troubleshooting)
-- **[e2e-tests/README.md](e2e-tests/README.md)** - Smoke test documentation
-- **[TESTING-RATIONALE.md](TESTING-RATIONALE.md)** - Domain-specific testing rationale
-- **[course-work/TESTING_PLAN.md](course-work/TESTING_PLAN.md)** - Original test plan
-
----
-
-## Known Issues
-
-- Some bugs and edge cases are tracked in the [GitHub Issues](https://github.com/COMP-4350-Group-6/budgetwise/issues) tab.
-- Please check issues before reporting new bugs.
-- API integration tests may fail if environment variables are missing
+| Feature | Success | Mean | P50 | P95 |
+|---------|---------|------|-----|-----|
+| Auto-Categorization | 99% | 682ms | 596ms | 1103ms |
+| Invoice Parsing | 100% | 2695ms | 1788ms | 6601ms |
 
 ---
 
-## Branching Workflow
+## 🔌 API Documentation
 
-Repo uses a GitFlow-like workflow:
+### Option 1: Run Swagger UI Locally
+```sh
+cd apps/api && pnpm dev
+# Open http://localhost:8787/docs
+```
 
-| Branch              | Description                                                                                                          | Branches from     | Merges to                   |
-| ------------------- | -------------------------------------------------------------------------------------------------------------------- | ----------------- | --------------------------- |
-| `main`              | Production code                                                                                                      | NONE              | N/A                         |
-| `dev`               | Development code                                                                                                     | `main`            |                             |
-| `release/{VERSION}` | Releases                                                                                                             | `dev`             | `dev`, `main`               |
-| `feature/{TITLE}`   | Feature work                                                                                                         | `dev`             | `dev`                       |
-| `hotfix/{TITLE}`    | Critical production fixes                                                                                            | `main`            | `main`, `dev`               |
-| `test/{TITLE}`      | Testing/experiments (never merged to main/dev)                                                                       | (ANY)             | only other `test/` branches |
-| `doc/{TITLE}`       | Documentation updates                                                                                                | `dev`, `feature/` | `dev`, `feature/`           |
+### Option 2: Use OpenAPI Spec Directly
 
-See table and details above for merge requirements.
+Copy the spec file to any OpenAPI tool:
+- **YAML:** [`packages/schemas/dist/openapi.yaml`](packages/schemas/dist/openapi.yaml)
+- **JSON:** [`packages/schemas/dist/openapi.json`](packages/schemas/dist/openapi.json)
+
+**Import to:**
+- [Swagger Editor](https://editor.swagger.io/) - Paste YAML/JSON
+- [Postman](https://postman.com/) - Import OpenAPI
+- [Insomnia](https://insomnia.rest/) - Import from file
+
+### Regenerate OpenAPI Spec
+```sh
+cd packages/schemas && pnpm run openapi:generate
+# Output: packages/schemas/dist/openapi.yaml
+```
+
+### Authentication
+1. Login via `POST /auth/login` → Cookie set automatically
+2. All `/v1/*` endpoints work with session cookie
+3. Bearer tokens also supported for API clients
 
 ---
 
-## Versioning
+## Versioning & Workflow
 
-- **V**X**.0.0** - Major releases (Sprints)
-- **V0.**X**.0** - Minor releases (Features)
-- **V0.0.**X** - Patches (Hotfixes, missing deliverables, etc.)
+**Versioning:** `VX.0.0` (Sprints) • `V0.X.0` (Features) • `V0.0.X` (Patches)
+
+**Branches:** `main` → `dev` → `feature/*` → PR
 
 ---
 
 ## Acknowledgments
 
-All code and documentation in this repository was written with the help of AI (prompt engineering, Copilot, GPT-4/5) and human intervention for verification, review, and integration.  
-Special thanks to all open-source libraries and tools used.
-
-See [`ACKNOWLEDGMENTS.md`](ACKNOWLEDGMENTS.md) for more details and attributions.
-
----
-
-## Further Reading
-
-- **[DESIGN.md](DESIGN.md)** — Comprehensive architecture, design patterns, and technical decisions
-- **[TESTING_GUIDE.md](TESTING_GUIDE.md)** — Complete testing strategy, commands, and troubleshooting
-- **[TESTING-RATIONALE.md](TESTING-RATIONALE.md)** — Domain-specific testing reasoning
-- **[ACKNOWLEDGMENTS.md](ACKNOWLEDGMENTS.md)** — AI usage and tool acknowledgments
-- **[test-coverage/test-summary.md](./test-coverage/test-summary.md)** — Test coverage reports
-
-*For API documentation and sprint planning, see the [API Doc](https://docs.google.com/document/d/1tYB-VAGl5qK_Bi0bbtqdJ5mbaJzvSiDYkD_54Wbm0mI/edit?usp=sharing) and [`course-work/`](course-work/) folder.*
+Built with AI assistance (GPT-4, Copilot, Claude). See [docs/acknowledgments/](docs/acknowledgments/) for details.

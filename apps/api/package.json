@@ -7,10 +7,10 @@
     "dev": "wrangler dev",
     "build": "tsc -p tsconfig.json && wrangler deploy --dry-run",
     "typecheck": "tsc -p tsconfig.json",
-    "lint": "echo skip",
+    "lint": "eslint src/",
     "test": "vitest run",
     "test:unit": "vitest run src/**/*.test.ts",
-    "test:int": "vitest run tests/integration/**/*.int.test.{ts,tsx}",
+    "test:int": "vitest run tests/integration/*.int.test.ts",
     "test:critical": "vitest run -t @critical",
     "test:auth": "vitest run src/middleware/auth.test.ts",
     "deploy": "wrangler deploy"
@@ -20,7 +20,7 @@
     "dotenv": "^17.2.3",
     "jose": "^5.10.0",
     "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "^3.2.4",
+    "vitest": "^4.0.14",
     "wrangler": "^4.42.2"
   },
   "dependencies": {

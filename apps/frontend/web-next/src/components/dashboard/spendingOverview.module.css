@@ -1,0 +1,253 @@
+/**
+ * SPENDING OVERVIEW STYLES
+ * ===================================
+ * CSS module for the unified spending calendar with weekly
+ * and monthly view modes, heatmap visualization, and responsive design.
+ * 
+ * AI Assistance: This file was developed with ChatGPT model GPT-4
+ * for code organization and documentation.
+ */
+
+/* ===== MAIN CARD CONTAINER ===== */
+
+.card {
+  background: #fffaf4;
+  border-radius: 12px;
+  padding: 1rem;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* ===== HEADER & CONTROLS ===== */
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* Navigation button container */
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+/* Base button styling for date navigation */
+.controls button {
+  background-color: #4e7c66;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.35rem 0.7rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+/* Hover state for better interactivity */
+.controls button:hover {
+  background-color: #3f6654;
+}
+
+/* View toggle button (week/calendar) - inactive state */
+.toggleBtn {
+  background-color: #e8f4ed;
+  color: #2f2f2f;
+}
+
+/* View toggle button - active state */
+.toggleBtn.active {
+  background-color: #4e7c66;
+  color: #fff;
+}
+
+/* ===== CHART CONTAINER ===== */
+
+.chartWrapper {
+  width: 100%;
+  height: 240px;
+}
+
+/* ===== DAILY TRANSACTIONS SECTION ===== */
+
+.todaysSection {
+  background: #fffaf4;
+  border-radius: 12px;
+  padding: 1rem 1.2rem;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.txHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-right: 0.3rem;
+}
+
+.txList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.txItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  background: #fff;
+  padding: 0.9rem 1rem;
+  border-radius: 14px;
+
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+.txItem:hover {
+  background: #f9f9f7;
+  transform: translateY(-1px);
+}
+
+.txName {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #111;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.txAmount {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #111;
+  font-variant-numeric: tabular-nums;
+}
+
+.addMini {
+  background-color: #4e7c66;
+  color: white;
+  padding: 0.35rem 0.9rem;
+  font-size: 0.78rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.addMini:hover {
+  background-color: #3f6654;
+}
+
+.empty {
+  text-align: center;
+  font-size: 0.85rem;
+  color: #6b7280;
+  padding: 1rem 0;
+}
+
+/* ===== CALENDAR GRID LAYOUT ===== */
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.4rem;
+}
+
+/* Individual calendar day cell */
+.day {
+  height: 38px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  background-color: #faf9f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+/* Hover feedback for calendar days */
+.day:hover {
+  background-color: #e8f0eb;
+}
+
+/* ===== SPENDING HEATMAP COLORS ===== */
+/* No spending - lightest shade */
+.none {
+  background-color: #faf9f6;
+}
+
+/* Low spending range (< $50) */
+.low {
+  background-color: #e8f4ed;
+}
+
+/* Medium spending range ($50 - $150) */
+.mid {
+  background-color: #c9e1d1;
+}
+
+/* High spending range (> $150) */
+.high {
+  background-color: #98c1a1;
+}
+
+/* ===== CALENDAR DAY STATES ===== */
+/* Highlight today's date in calendar */
+.today {
+  border: 2px solid #4e7c66;
+  background-color: #eaf3ee;
+}
+
+/* Selected date state */
+.selected {
+  background-color: #4e7c66;
+  color: #fff;
+}
+
+/* ===== HEATMAP LEGEND ===== */
+/* Legend container below calendar */
+.legend {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 0.8rem;
+  padding-top: 0.4rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* Individual legend item with color dot */
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  color: #333;
+}
+
+/* Color indicator dot for legend */
+.legendDot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+/* Mobile optimization for smaller screens */
+@media (max-width: 768px) {
+  .grid {
+    gap: 0.3rem;
+  }
+  .day {
+    height: 34px;
+    font-size: 0.75rem;
+  }
+}

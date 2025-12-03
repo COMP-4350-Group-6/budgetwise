@@ -39,6 +39,7 @@ export function makeBulkImportTransactions(deps: {
 
     for (let i = 0; i < transactions.length; i++) {
       const txInput = transactions[i];
+      if (!txInput) continue;
       try {
         const tx = new Transaction({
           id: deps.id.ulid(),

@@ -14,7 +14,11 @@ import type { AppDeps } from "./types";
  * Routes receive only the specific functions they need.
  */
 export function createAppDeps(container: ReturnType<typeof makeContainer>): AppDeps {
-  const { usecases } = container;
+  const { usecases, tokenVerifier, authProvider, cookieDomain } = container;
+
+  if (!tokenVerifier) {
+    throw new Error("tokenVerifier is required - ensure SUPABASE_URL is configured");
+  }
 
   return {
     transactions: {
@@ -44,5 +48,8 @@ export function createAppDeps(container: ReturnType<typeof makeContainer>): AppD
       getBudgetDashboard: usecases.getBudgetDashboard,
       getCategory: usecases.getCategory,
     },
+    tokenVerifier,
+    authProvider,
+    cookieDomain,
   };
 }
