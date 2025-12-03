@@ -161,7 +161,7 @@ Example: If suggesting "Groceries (ID: a1b2c3d4-e5f6-7890-abcd-ef1234567890)", u
             }
           ],
           temperature: 0.1, // Very low for consistent parsing
-          max_tokens: 800 // Enough for detailed invoice data
+          max_tokens: 6400 // Increased for detailed invoice data with many items
         })
       });
 
