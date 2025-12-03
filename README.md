@@ -26,6 +26,7 @@ It enables users to manage categories, budgets, and transactions, with real-time
   - [Table of Contents](#table-of-contents)
   - [Architecture \& Design](#architecture--design)
   - [Project Structure](#project-structure)
+    - [Quick Links](#quick-links)
   - [Setup Guide](#setup-guide)
     - [Prerequisites](#prerequisites)
     - [1. Clone and Install](#1-clone-and-install)
@@ -82,17 +83,25 @@ budgetwise/
 │   ├── ports/       # Interfaces for repositories/services
 │   ├── adapters/    # Implementations (in-memory, firebase, system)
 │   ├── usecases/    # Application logic
-│   ├── schemas/     # API validation schemas
+│   ├── schemas/     # API validation schemas & OpenAPI spec
 │   └── composition/ # Dependency injection containers
+├── load-tests/      # Load testing with k6
+├── e2e-tests/       # End-to-end smoke tests
 ├── course-work/     # Sprint worksheets and planning
 ├── infra/           # Infrastructure configs (firebase, cloudflare)
-├── .env*            # Environment variables (see below)
-├── README.md        # This file
-├── DESIGN.md        # Architecture/design rationale
-├── TESTING.md       # Testing strategy and guide
-├── ACKNOWLEDGMENTS.md
 └── ...
 ```
+
+### Quick Links
+
+| Directory | Description | Key Files |
+|-----------|-------------|-----------|
+| **[`apps/api/`](apps/api/)** | Backend REST API | [`src/routes/`](apps/api/src/routes/), [`wrangler.jsonc`](apps/api/wrangler.jsonc) |
+| **[`apps/frontend/`](apps/frontend/)** | Next.js web app | [`web-next/`](apps/frontend/web-next/) |
+| **[`packages/schemas/`](packages/schemas/)** | Zod schemas & OpenAPI | [`dist/openapi.yaml`](packages/schemas/dist/openapi.yaml), [`README.md`](packages/schemas/README.md) |
+| **[`load-tests/`](load-tests/)** | k6 load tests | [`LOAD_TEST_REPORT.md`](load-tests/LOAD_TEST_REPORT.md), [`load-test.js`](load-tests/load-test.js) |
+| **[`e2e-tests/`](e2e-tests/)** | Playwright smoke tests | [`smoke-tests/`](e2e-tests/smoke-tests/) |
+| **[`course-work/`](course-work/)** | Sprint planning | Worksheets, testing plan |
 
 For more on the folder structure and rationale, see [DESIGN.md](DESIGN.md#package-structure).
 
