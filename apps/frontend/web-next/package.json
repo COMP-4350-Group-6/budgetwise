@@ -11,7 +11,7 @@
     "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
     "test": "vitest run",
     "test:unit": "vitest run src/**/*.test.ts src/**/*.test.tsx",
-    "test:int": "vitest run tests/integration/**/*.int.test.{ts,tsx}",
+    "test:int": "vitest run tests/integration",
     "test:watch": "vitest",
     "lint": "eslint"
   },
