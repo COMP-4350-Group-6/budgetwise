@@ -18,5 +18,10 @@ onMounted(async () => {
 </template>
 
 <style>
-@import '@/assets/main.css';
+
+.loading-text {
+  color: white;
+  font-size: 1.5rem;
+  font-weight: 500;
+}
 </style>

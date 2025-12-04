@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from "react";
 import type { WebAuthApiContainerType } from "@budget/composition-web-auth-api";
 import type { AuthUser, AuthState } from "@budget/schemas";
+import { LoadingSpinner } from "@/components/ui";
 
 /** Auth client type derived from container */
 type AuthClient = WebAuthApiContainerType["authClient"];
@@ -28,12 +29,7 @@ export function AuthProvider({
   }, [authClient]);
 
   if (!initialized) {
-    // Show loading state
-    return (
-      <div className="flex h-screen w-full items-center justify-center bg-gray-50">
-        <div className="text-green-700">Loading...</div>
-      </div>
-    );
+    return <LoadingSpinner message="Loading..." />;
   }
 
   return (

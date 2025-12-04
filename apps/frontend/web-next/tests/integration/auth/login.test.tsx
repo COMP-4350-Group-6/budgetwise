@@ -1,7 +1,6 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { vi, Mock } from "vitest";
 import LoginPage from "@/app/(public)/login/page";
-import { authService } from "@/app/services/authService";
 import { useRouter } from "next/navigation";
 
 // Mock Next.js router
@@ -9,96 +8,87 @@ vi.mock("next/navigation", () => ({
   useRouter: vi.fn(),
 }));
 
-// Mock auth service
-vi.mock("@/app/services/authService", () => ({
-  authService: {
-    login: vi.fn(),
-  },
+// Mock useAuth hook
+vi.mock("@/hooks/useAuth", () => ({
+  useAuth: vi.fn(),
 }));
 
+// Mock config
+vi.mock("@/lib/config", () => ({
+  getLoginUrl: () => "https://auth.example.com/login",
+}));
+
+import { useAuth } from "@/hooks/useAuth";
+
 describe("LoginPage", () => {
-  let mockPush: Mock;
+  let mockReplace: Mock;
+  const originalLocation = window.location;
 
   beforeEach(() => {
-    mockPush = vi.fn();
-    (useRouter as Mock).mockReturnValue({ push: mockPush });
+    mockReplace = vi.fn();
+    (useRouter as Mock).mockReturnValue({ replace: mockReplace });
+    
+    // Mock window.location
+    Object.defineProperty(window, "location", {
+      value: { href: "" },
+      writable: true,
+    });
+    
     vi.clearAllMocks();
   });
 
-  it("renders form elements correctly", () => {
-    render(<LoginPage />);
-    expect(screen.getByText(/BudgetWise/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Email Address/i)).toBeInTheDocument();
-    // ✅ Only select the input, not the toggle button
-    expect(screen.getByLabelText(/Password/i, { selector: "input" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Sign In/i })).toBeInTheDocument();
+  afterEach(() => {
+    Object.defineProperty(window, "location", {
+      value: originalLocation,
+      writable: true,
+    });
   });
 
-  it("toggles password visibility", () => {
-    render(<LoginPage />);
-    const toggleButton = screen.getByRole("button", { name: /toggle password visibility/i });
-    const passwordInput = screen.getByLabelText(/Password/i, { selector: "input" });
+  it("shows loading spinner while checking auth", () => {
+    (useAuth as Mock).mockReturnValue({
+      isAuthenticated: false,
+      isLoading: true,
+    });
 
-    expect(passwordInput).toHaveAttribute("type", "password");
-    fireEvent.click(toggleButton);
-    expect(passwordInput).toHaveAttribute("type", "text");
-    fireEvent.click(toggleButton);
-    expect(passwordInput).toHaveAttribute("type", "password");
+    render(<LoginPage />);
+    expect(screen.getByText(/Redirecting.../i)).toBeInTheDocument();
   });
 
-  it("calls authService.login with correct credentials", async () => {
-    (authService.login as Mock).mockResolvedValueOnce(true);
+  it("redirects authenticated users to /home", async () => {
+    (useAuth as Mock).mockReturnValue({
+      isAuthenticated: true,
+      isLoading: false,
+    });
+
     render(<LoginPage />);
-
-    fireEvent.change(screen.getByLabelText(/Email Address/i), {
-      target: { value: "user@example.com" },
-    });
-    fireEvent.change(screen.getByLabelText(/Password/i, { selector: "input" }), {
-      target: { value: "mypassword" },
-    });
-
-    fireEvent.submit(screen.getByRole("button", { name: /Sign In/i }));
 
     await waitFor(() => {
-      expect(authService.login).toHaveBeenCalledWith("user@example.com", "mypassword");
-      expect(mockPush).toHaveBeenCalledWith("/home");
+      expect(mockReplace).toHaveBeenCalledWith("/home");
     });
   });
 
-  it("shows an error when login fails", async () => {
-    (authService.login as Mock).mockRejectedValueOnce(new Error("Invalid credentials"));
+  it("redirects unauthenticated users to auth app", async () => {
+    (useAuth as Mock).mockReturnValue({
+      isAuthenticated: false,
+      isLoading: false,
+    });
+
     render(<LoginPage />);
 
-    fireEvent.change(screen.getByLabelText(/Email Address/i), {
-      target: { value: "wrong@example.com" },
+    await waitFor(() => {
+      expect(window.location.href).toBe("https://auth.example.com/login");
     });
-    fireEvent.change(screen.getByLabelText(/Password/i, { selector: "input" }), {
-      target: { value: "wrongpass" },
-    });
-
-    fireEvent.submit(screen.getByRole("button", { name: /Sign In/i }));
-
-    expect(await screen.findByText(/Invalid credentials/i)).toBeInTheDocument();
   });
 
-  it("disables button while loading", async () => {
-    (authService.login as Mock).mockImplementation(
-      () => new Promise((resolve) => setTimeout(() => resolve(true), 500))
-    );
+  it("does not redirect while loading", () => {
+    (useAuth as Mock).mockReturnValue({
+      isAuthenticated: false,
+      isLoading: true,
+    });
+
     render(<LoginPage />);
 
-    fireEvent.change(screen.getByLabelText(/Email Address/i), {
-      target: { value: "user@example.com" },
-    });
-    fireEvent.change(screen.getByLabelText(/Password/i, { selector: "input" }), {
-      target: { value: "mypassword" },
-    });
-
-    const button = screen.getByRole("button", { name: /Sign In/i });
-    fireEvent.submit(button);
-
-    expect(button).toBeDisabled();
-
-    await waitFor(() => expect(button).not.toBeDisabled());
+    expect(mockReplace).not.toHaveBeenCalled();
+    expect(window.location.href).toBe("");
   });
 });

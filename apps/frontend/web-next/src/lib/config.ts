@@ -43,6 +43,20 @@ export function getLoginUrl(redirectPath?: string): string {
 }
 
 /**
+ * Get the signup URL with optional redirect.
+ */
+export function getSignupUrl(redirectPath?: string): string {
+  const baseUrl = config.authAppUrl.startsWith('http') 
+    ? config.authAppUrl 
+    : `http://${config.authAppUrl}`;
+  const signupUrl = new URL("/signup", baseUrl);
+  if (redirectPath) {
+    signupUrl.searchParams.set("redirect", redirectPath);
+  }
+  return signupUrl.toString();
+}
+
+/**
  * Get the logout URL.
  */
 export function getLogoutUrl(): string {
