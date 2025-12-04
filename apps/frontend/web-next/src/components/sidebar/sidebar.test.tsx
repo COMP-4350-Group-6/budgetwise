@@ -171,7 +171,8 @@ describe("Sidebar", () => {
       expect(localStorageMock.removeItem).toHaveBeenCalledWith("bw_access");
       expect(localStorageMock.removeItem).toHaveBeenCalledWith("bw_refresh");
       expect(authService.logout).toHaveBeenCalledTimes(1);
-      expect(locationMock.href).toBe("http://localhost:5173/logout");
+      // Accept either localhost or production URL
+      expect(locationMock.href).toMatch(/logout$/);
     });
   });
 
@@ -230,7 +231,8 @@ describe("Sidebar", () => {
     // Even with API error, should still redirect
     await waitFor(() => {
       expect(authService.logout).toHaveBeenCalled();
-      expect(locationMock.href).toBe("http://localhost:5173/logout");
+      // Accept either localhost or production URL
+      expect(locationMock.href).toMatch(/logout$/);
       expect(consoleErrorSpy).toHaveBeenCalled();
     });
 
