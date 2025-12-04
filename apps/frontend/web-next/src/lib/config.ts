@@ -8,13 +8,13 @@
  */
 export const config = {
   // Auth app URL (for redirects)
-  authAppUrl: process.env.NEXT_PUBLIC_AUTH_APP_URL || "http://localhost:5173",
+  authAppUrl: process.env.NEXT_PUBLIC_AUTH_APP_URL || "https://auth.budgetwise.ca",
   
   // API URL
-  apiUrl: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8787",
+  apiUrl: process.env.NEXT_PUBLIC_API_URL || "https://api.budgetwise.ca",
   
   // Cookie domain (shared across subdomains)
-  cookieDomain: process.env.NEXT_PUBLIC_COOKIE_DOMAIN || ".localhost",
+  cookieDomain: process.env.NEXT_PUBLIC_COOKIE_DOMAIN || ".budgetwise.ca",
 } as const;
 
 /**

@@ -1,23 +1,50 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { FiArrowLeft, FiArrowRight } from "react-icons/fi";
 import { FaHome, FaChartLine, FaWallet } from "react-icons/fa";
 import { FaSignOutAlt } from "react-icons/fa";
 import { useSidebarState } from "@/app/(protected)/ProtectedLayoutClient";
-import { getLogoutUrl } from "@/lib/config";
+import { authService } from "@/app/services/authService";
+import { getLoginUrl } from "@/lib/config";
+import { ConfirmModal } from "@/components/ui";
 import styles from "./sidebar.module.css";
 
 export default function Sidebar() {
   const { collapsed, toggleCollapse } = useSidebarState();
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-  // Handle user logout by redirecting to auth app's logout page
-  const handleLogout = () => {
-    // Clear local storage tokens
-    localStorage.removeItem("bw_access");
-    localStorage.removeItem("bw_refresh");
-    // Redirect to Vue auth app's logout page (clears cookies there)
-    window.location.href = getLogoutUrl();
+  // Handle logout confirmation - shows modal first
+  const handleLogoutClick = () => {
+    setShowLogoutModal(true);
+  };
+
+  // Handle confirmed logout - calls API then redirects
+  const handleConfirmLogout = async () => {
+    setIsLoggingOut(true);
+    try {
+      // Clear local storage tokens
+      localStorage.removeItem("bw_access");
+      localStorage.removeItem("bw_refresh");
+      
+      // Call logout API to clear httpOnly cookies
+      await authService.logout();
+      
+      // Redirect to Vue auth app's logout page
+      window.location.href = getLoginUrl();
+    } catch (error) {
+      console.error("Logout error:", error);
+      // Still redirect even if API call fails
+      window.location.href = getLoginUrl();
+    }
+  };
+
+  // Handle logout cancellation
+  const handleCancelLogout = () => {
+    setShowLogoutModal(false);
+    setIsLoggingOut(false);
   };
 
   return (
@@ -65,10 +92,23 @@ export default function Sidebar() {
       </nav>
 
       {/* Logout button at bottom */}
-      <button onClick={handleLogout} className={styles.logout}>
+      <button onClick={handleLogoutClick} className={styles.logout}>
         <FaSignOutAlt className={styles.logoutIcon} />
         {!collapsed && <span>Logout</span>}
       </button>
+
+      {/* Logout confirmation modal */}
+      <ConfirmModal
+        show={showLogoutModal}
+        title="Confirm Logout"
+        message="Are you sure you want to log out? You will need to sign in again to access your account."
+        confirmText="Logout"
+        cancelText="Cancel"
+        onConfirm={handleConfirmLogout}
+        onCancel={handleCancelLogout}
+        isLoading={isLoggingOut}
+        variant="danger"
+      />
     </aside>
   );
 }

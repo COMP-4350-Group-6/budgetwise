@@ -1,9 +1,11 @@
 "use client";
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import Sidebar from "./sidebar";
 import { useSidebarState } from "@/app/(protected)/ProtectedLayoutClient";
+import { authService } from "@/app/services/authService";
 
 // Mock Next.js Link
 vi.mock("next/link", () => ({
@@ -28,6 +30,13 @@ vi.mock("react-icons/fa", () => ({
 // Mock the sidebar state hook
 vi.mock("@/app/(protected)/ProtectedLayoutClient", () => ({
   useSidebarState: vi.fn(),
+}));
+
+// Mock authService
+vi.mock("@/app/services/authService", () => ({
+  authService: {
+    logout: vi.fn(),
+  },
 }));
 
 // Mock localStorage
@@ -112,8 +121,10 @@ describe("Sidebar", () => {
     expect(screen.getByTestId("logout-icon")).toBeInTheDocument();
   });
 
-  it("calls toggleCollapse when toggle button is clicked", () => {
+  it("calls toggleCollapse when toggle button is clicked", async () => {
     const mockToggle = vi.fn();
+    const user = userEvent.setup();
+    
     render(
       <TestWrapper collapsed={false} toggleCollapse={mockToggle}>
         <Sidebar />
@@ -121,24 +132,109 @@ describe("Sidebar", () => {
     );
 
     const toggleButton = screen.getByTestId("arrow-left").closest("button");
-    fireEvent.click(toggleButton);
+    await user.click(toggleButton!);
 
     expect(mockToggle).toHaveBeenCalledTimes(1);
   });
 
-  it("handles logout correctly", () => {
+  it("handles logout correctly", async () => {
+    vi.mocked(authService.logout).mockResolvedValue();
+    const user = userEvent.setup();
+    
     render(
       <TestWrapper collapsed={false}>
         <Sidebar />
       </TestWrapper>
     );
 
+    // Click logout button - should show modal
     const logoutButton = screen.getByText("Logout").closest("button");
-    fireEvent.click(logoutButton!);
+    await user.click(logoutButton!);
 
-    expect(localStorageMock.removeItem).toHaveBeenCalledWith("bw_access");
-    expect(localStorageMock.removeItem).toHaveBeenCalledWith("bw_refresh");
-    expect(locationMock.href).toBe("http://localhost:5173/logout");
+    // Modal should appear with confirmation message
+    expect(screen.getByText("Confirm Logout")).toBeInTheDocument();
+    expect(screen.getByText(/Are you sure you want to log out/)).toBeInTheDocument();
+
+    // Logout API should NOT be called yet
+    expect(authService.logout).not.toHaveBeenCalled();
+    expect(localStorageMock.removeItem).not.toHaveBeenCalled();
+
+    // Get all buttons with "Logout" text and find the modal confirm button (not the sidebar button)
+    const allLogoutButtons = screen.getAllByRole("button", { name: /Logout/i });
+    const confirmButton = allLogoutButtons.find(btn => 
+      btn.className.includes("btnDanger")
+    );
+    await user.click(confirmButton!);
+
+    // Wait for async operations
+    await waitFor(() => {
+      expect(localStorageMock.removeItem).toHaveBeenCalledWith("bw_access");
+      expect(localStorageMock.removeItem).toHaveBeenCalledWith("bw_refresh");
+      expect(authService.logout).toHaveBeenCalledTimes(1);
+      expect(locationMock.href).toBe("http://localhost:5173/logout");
+    });
+  });
+
+  it("cancels logout when cancel button is clicked", async () => {
+    const user = userEvent.setup();
+    
+    render(
+      <TestWrapper collapsed={false}>
+        <Sidebar />
+      </TestWrapper>
+    );
+
+    // Click logout button - should show modal
+    const logoutButton = screen.getByText("Logout").closest("button");
+    await user.click(logoutButton!);
+
+    // Modal should appear
+    expect(screen.getByText("Confirm Logout")).toBeInTheDocument();
+
+    // Click cancel button
+    const cancelButton = screen.getByRole("button", { name: /Cancel/i });
+    await user.click(cancelButton);
+
+    // Modal should disappear
+    expect(screen.queryByText("Confirm Logout")).not.toBeInTheDocument();
+
+    // Logout should not happen
+    expect(authService.logout).not.toHaveBeenCalled();
+    expect(localStorageMock.removeItem).not.toHaveBeenCalled();
+    expect(locationMock.href).toBe("");
+  });
+
+  it("handles logout API failure gracefully", async () => {
+    // Mock API failure
+    vi.mocked(authService.logout).mockRejectedValue(new Error("API Error"));
+    const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const user = userEvent.setup();
+
+    render(
+      <TestWrapper collapsed={false}>
+        <Sidebar />
+      </TestWrapper>
+    );
+
+    // Click logout and confirm
+    const logoutButton = screen.getByText("Logout").closest("button");
+    await user.click(logoutButton!);
+    
+    // Get the modal confirm button (with danger styling)
+    const allLogoutButtons = screen.getAllByRole("button", { name: /Logout/i });
+    const confirmButton = allLogoutButtons.find(btn => 
+      btn.className.includes("btnDanger")
+    );
+    await user.click(confirmButton!);
+
+    // Even with API error, should still redirect
+    await waitFor(() => {
+      expect(authService.logout).toHaveBeenCalled();
+      expect(locationMock.href).toBe("http://localhost:5173/logout");
+      expect(consoleErrorSpy).toHaveBeenCalled();
+    });
+
+    consoleErrorSpy.mockRestore();
   });
 
   it("renders navigation links with correct hrefs", () => {

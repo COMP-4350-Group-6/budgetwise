@@ -35,6 +35,10 @@ COMP 4350 - Full-Stack Budgeting Application
 
 BudgetWise is a full-stack budgeting application built with [Clean Architecture](docs/architecture/DESIGN.md) principles in a monorepo. It enables users to manage categories, budgets, and transactions, with real-time dashboards and AI-powered features.
 
+**Live Application:** [budgetwise.ca](https://budgetwise.ca)  
+**Authentication Domain:** [auth.budgetwise.ca](https://auth.budgetwise.ca)  
+**API Documentation:** [api.budgetwise.ca/docs](https://api.budgetwise.ca/docs)
+
 ---
 
 ## Prerequisites
@@ -141,13 +145,11 @@ All documentation lives in [`docs/`](docs/README.md):
 
 ## 🔌 API Documentation
 
-### Option 1: Run Swagger UI Locally
-```sh
-cd apps/api && pnpm dev
-# Open http://localhost:8787/docs
-```
+### Live Documentation
+- **Production API:** [api.budgetwise.ca/docs](https://api.budgetwise.ca/docs)
+- **Local API:** [http://localhost:8787/docs](http://localhost:8787/docs) (run `pnpm dev` first)
 
-### Option 2: Use OpenAPI Spec Directly
+### OpenAPI Specification
 
 Copy the spec file to any OpenAPI tool:
 - **YAML:** [`packages/schemas/dist/openapi.yaml`](packages/schemas/dist/openapi.yaml)

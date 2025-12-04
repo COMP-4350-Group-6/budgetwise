@@ -1,7 +1,8 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import Sidebar from "@/components/sidebar/sidebar";
 import { vi } from "vitest";
 import { useSidebarState } from "@/app/(protected)/ProtectedLayoutClient";
+import { authService } from "@/app/services/authService";
 
 // Mock sidebar state
 vi.mock("@/app/(protected)/ProtectedLayoutClient", () => ({
@@ -11,6 +12,13 @@ vi.mock("@/app/(protected)/ProtectedLayoutClient", () => ({
 // Mock config
 vi.mock("@/lib/config", () => ({
   getLogoutUrl: () => "https://auth.budgetwise.ca/logout",
+}));
+
+// Mock authService
+vi.mock("@/app/services/authService", () => ({
+  authService: {
+    logout: vi.fn(),
+  },
 }));
 
 describe("Sidebar Component", () => {
@@ -53,17 +61,32 @@ describe("Sidebar Component", () => {
     expect(mockToggle).toHaveBeenCalled();
   });
 
-  it("removes tokens and redirects to auth app on logout", () => {
+  it("removes tokens and redirects to auth app on logout", async () => {
+    vi.mocked(authService.logout).mockResolvedValue();
     localStorage.setItem("bw_access", "token123");
     localStorage.setItem("bw_refresh", "refresh123");
 
     render(<Sidebar />);
+    
+    // Click logout button to show modal
     const logoutBtn = screen.getByText("Logout");
     fireEvent.click(logoutBtn);
 
-    expect(localStorage.getItem("bw_access")).toBeNull();
-    expect(localStorage.getItem("bw_refresh")).toBeNull();
-    expect(window.location.href).toBe("https://auth.budgetwise.ca/logout");
+    // Modal should appear
+    expect(screen.getByText("Confirm Logout")).toBeInTheDocument();
+
+    // Click the confirm button in the modal (find by button type and danger styling)
+    const confirmButton = screen.getAllByRole("button", { name: /Logout/i })
+      .find(btn => btn.className.includes("btnDanger"));
+    fireEvent.click(confirmButton!);
+
+    // Wait for async logout operations
+    await waitFor(() => {
+      expect(localStorage.getItem("bw_access")).toBeNull();
+      expect(localStorage.getItem("bw_refresh")).toBeNull();
+      expect(authService.logout).toHaveBeenCalled();
+      expect(window.location.href).toBe("https://auth.budgetwise.ca/logout");
+    });
   });
 
   it("renders collapsed version correctly", () => {

@@ -27,6 +27,7 @@
 				"NEXT_PUBLIC_AUTH_APP_URL": "https://auth.budgetwise.ca",
 				"NEXT_PUBLIC_COOKIE_DOMAIN": ".budgetwise.ca"
 			},
+			
   
   "observability": {
     "enabled": false,
