@@ -45,7 +45,11 @@ describe('App', () => {
     // Should not show loading screen
     expect(wrapper.text()).not.toContain('Loading...')
 
-    // Should contain login form elements
-    expect(wrapper.text()).toContain('Sign in to BudgetWise Or create a new accountEmail addressPassword Forgot your password? Sign in')
+    // Should contain login form elements - key content
+    expect(wrapper.text()).toContain('BudgetWise')
+    expect(wrapper.text()).toContain('Please sign in')
+    expect(wrapper.text()).toContain('Email address')
+    expect(wrapper.text()).toContain('Password')
+    expect(wrapper.text()).toContain('Sign in')
   })
 })

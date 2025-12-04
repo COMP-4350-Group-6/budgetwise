@@ -1,7 +1,6 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { vi, Mock } from "vitest";
 import SignupPage from "@/app/(public)/signup/page";
-import { authService } from "@/app/services/authService";
 import { useRouter } from "next/navigation";
 
 // Mock Next.js router
@@ -9,108 +8,87 @@ vi.mock("next/navigation", () => ({
   useRouter: vi.fn(),
 }));
 
-// Mock auth service
-vi.mock("@/app/services/authService", () => ({
-  authService: {
-    signup: vi.fn(),
-  },
+// Mock useAuth hook
+vi.mock("@/hooks/useAuth", () => ({
+  useAuth: vi.fn(),
 }));
 
-// Mock password validation module & component
-vi.mock("@/components/validation/PasswordRequirement", () => ({
-  __esModule: true,
-  default: ({ password }: { password: string }) => (
-    <div data-testid="password-requirements">Password: {password}</div>
-  ),
-  isPasswordValid: vi.fn(),
+// Mock config
+vi.mock("@/lib/config", () => ({
+  getSignupUrl: () => "https://auth.example.com/signup",
 }));
 
-// Import after mocks for safe access
-import { isPasswordValid } from "@/components/validation/PasswordRequirement";
+import { useAuth } from "@/hooks/useAuth";
 
 describe("SignupPage", () => {
-  let mockPush: Mock;
+  let mockReplace: Mock;
+  const originalLocation = window.location;
 
   beforeEach(() => {
-    mockPush = vi.fn();
-    (useRouter as Mock).mockReturnValue({ push: mockPush });
+    mockReplace = vi.fn();
+    (useRouter as Mock).mockReturnValue({ replace: mockReplace });
+    
+    // Mock window.location
+    Object.defineProperty(window, "location", {
+      value: { href: "" },
+      writable: true,
+    });
+    
     vi.clearAllMocks();
-    (isPasswordValid as Mock).mockReturnValue(true);
   });
 
-  it("renders all fields correctly", () => {
-    render(<SignupPage />);
-    expect(screen.getByText(/Create Your Account/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Full Name/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Email Address/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/^Password$/i, { selector: "input" })).toBeInTheDocument();
-    expect(screen.getByLabelText(/Confirm Password/i, { selector: "input" })).toBeInTheDocument();
+  afterEach(() => {
+    Object.defineProperty(window, "location", {
+      value: originalLocation,
+      writable: true,
+    });
   });
 
-  it("shows error if passwords do not match", async () => {
-    render(<SignupPage />);
-    fireEvent.change(screen.getByLabelText(/Full Name/i), { target: { value: "Bryce" } });
-    fireEvent.change(screen.getByLabelText(/Email Address/i), { target: { value: "bryce@test.com" } });
-    fireEvent.change(screen.getByLabelText(/^Password$/i, { selector: "input" }), {
-      target: { value: "abcdefg" },
+  it("shows loading spinner while checking auth", () => {
+    (useAuth as Mock).mockReturnValue({
+      isAuthenticated: false,
+      isLoading: true,
     });
-    fireEvent.change(screen.getByLabelText(/Confirm Password/i, { selector: "input" }), {
-      target: { value: "wrongpass" },
-    });
-    fireEvent.submit(screen.getByRole("button", { name: /Create Account/i }));
 
-    expect(await screen.findByText(/Passwords do not match/i)).toBeInTheDocument();
+    render(<SignupPage />);
+    expect(screen.getByText(/Redirecting.../i)).toBeInTheDocument();
   });
 
-  it("shows error if password does not meet requirements", async () => {
-    (isPasswordValid as Mock).mockReturnValue(false);
+  it("redirects authenticated users to /home", async () => {
+    (useAuth as Mock).mockReturnValue({
+      isAuthenticated: true,
+      isLoading: false,
+    });
+
     render(<SignupPage />);
-    fireEvent.change(screen.getByLabelText(/Full Name/i), { target: { value: "Bryce" } });
-    fireEvent.change(screen.getByLabelText(/Email Address/i), { target: { value: "bryce@test.com" } });
-    fireEvent.change(screen.getByLabelText(/^Password$/i, { selector: "input" }), {
-      target: { value: "123" },
-    });
-    fireEvent.change(screen.getByLabelText(/Confirm Password/i, { selector: "input" }), {
-      target: { value: "123" },
-    });
-    fireEvent.submit(screen.getByRole("button", { name: /Create Account/i }));
-
-    expect(await screen.findByText(/Password does not meet/i)).toBeInTheDocument();
-  });
-
-  it("calls authService.signup when valid", async () => {
-    (authService.signup as Mock).mockResolvedValueOnce(true);
-    render(<SignupPage />);
-
-    fireEvent.change(screen.getByLabelText(/Full Name/i), { target: { value: "Bryce" } });
-    fireEvent.change(screen.getByLabelText(/Email Address/i), { target: { value: "bryce@test.com" } });
-    fireEvent.change(screen.getByLabelText(/^Password$/i, { selector: "input" }), {
-      target: { value: "GoodPass123" },
-    });
-    fireEvent.change(screen.getByLabelText(/Confirm Password/i, { selector: "input" }), {
-      target: { value: "GoodPass123" },
-    });
-    fireEvent.submit(screen.getByRole("button", { name: /Create Account/i }));
 
     await waitFor(() => {
-      expect(authService.signup).toHaveBeenCalledWith("bryce@test.com", "GoodPass123", "Bryce");
-      expect(mockPush).toHaveBeenCalledWith("/login");
+      expect(mockReplace).toHaveBeenCalledWith("/home");
     });
   });
 
-  it("shows error when signup fails", async () => {
-    (authService.signup as Mock).mockRejectedValueOnce(new Error("Server error"));
-    render(<SignupPage />);
-    fireEvent.change(screen.getByLabelText(/Full Name/i), { target: { value: "Bryce" } });
-    fireEvent.change(screen.getByLabelText(/Email Address/i), { target: { value: "bryce@test.com" } });
-    fireEvent.change(screen.getByLabelText(/^Password$/i, { selector: "input" }), {
-      target: { value: "GoodPass123" },
+  it("redirects unauthenticated users to auth app signup", async () => {
+    (useAuth as Mock).mockReturnValue({
+      isAuthenticated: false,
+      isLoading: false,
     });
-    fireEvent.change(screen.getByLabelText(/Confirm Password/i, { selector: "input" }), {
-      target: { value: "GoodPass123" },
-    });
-    fireEvent.submit(screen.getByRole("button", { name: /Create Account/i }));
 
-    expect(await screen.findByText(/Signup failed/i)).toBeInTheDocument();
+    render(<SignupPage />);
+
+    await waitFor(() => {
+      expect(window.location.href).toBe("https://auth.example.com/signup");
+    });
+  });
+
+  it("does not redirect while loading", () => {
+    (useAuth as Mock).mockReturnValue({
+      isAuthenticated: false,
+      isLoading: true,
+    });
+
+    render(<SignupPage />);
+
+    expect(mockReplace).not.toHaveBeenCalled();
+    expect(window.location.href).toBe("");
   });
 });

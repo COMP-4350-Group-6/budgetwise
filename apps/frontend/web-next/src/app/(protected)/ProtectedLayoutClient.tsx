@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import Sidebar from "@/components/sidebar/sidebar";
 import { useAuth } from "@/hooks/useAuth";
 import { getLoginUrl } from "@/lib/config";
+import { LoadingSpinner } from "@/components/ui";
 
 // Context shared between layout and sidebar
 const SidebarContext = createContext<{
@@ -51,11 +52,7 @@ export default function ProtectedLayoutClient({
 
   // Show loading while checking auth
   if (isLoading) {
-    return (
-      <div className="flex h-screen w-full items-center justify-center bg-gray-50">
-        <div className="text-green-700">Loading...</div>
-      </div>
-    );
+    return <LoadingSpinner message="Loading..." />;
   }
 
   // Don't render protected content if not authenticated

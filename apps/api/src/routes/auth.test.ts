@@ -57,7 +57,8 @@ describe("Auth Routes", () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: "test@example.com",
-          password: "password123",
+          password: "StrongPass123!",
+          confirmPassword: "StrongPass123!",
           name: "Test User"
         })
       });
@@ -69,7 +70,8 @@ describe("Auth Routes", () => {
       expect(data).toEqual({ user: mockUser });
       expect(mockAuthProvider.signup).toHaveBeenCalledWith({
         email: "test@example.com",
-        password: "password123",
+        password: "StrongPass123!",
+        confirmPassword: "StrongPass123!",
         name: "Test User",
         defaultCurrency: "USD"
       });
@@ -111,7 +113,7 @@ describe("Auth Routes", () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: "test@example.com",
-          password: "password123"
+          password: "StrongPass123!"
         })
       });
 
@@ -122,7 +124,7 @@ describe("Auth Routes", () => {
       expect(data).toEqual({ user: mockUser });
       expect(mockAuthProvider.login).toHaveBeenCalledWith({
         email: "test@example.com",
-        password: "password123"
+        password: "StrongPass123!"
       });
     });
 
@@ -259,7 +261,7 @@ describe("Auth Routes", () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           token: "reset-token",
-          newPassword: "newpassword123"
+          newPassword: "NewStrongPass123!"
         })
       });
 
@@ -268,7 +270,7 @@ describe("Auth Routes", () => {
       expect(res.status).toBe(200);
       const data = await res.json();
       expect(data).toEqual({ message: "Password reset successfully" });
-      expect(mockAuthProvider.resetPassword).toHaveBeenCalledWith("reset-token", "newpassword123");
+      expect(mockAuthProvider.resetPassword).toHaveBeenCalledWith("reset-token", "NewStrongPass123!");
     });
 
     it("should handle reset password failure", async () => {
@@ -283,7 +285,7 @@ describe("Auth Routes", () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           token: "expired-token",
-          newPassword: "newpassword123"
+          newPassword: "NewStrongPass123!"
         })
       });
 
