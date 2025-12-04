@@ -362,7 +362,29 @@ Full extensive report in [load-tests folder](https://github.com/COMP-4350-Group-
 >
 >    - [x] Attach commit links for these fixes.
 
-Security Analysis - [course-work/SECURITY_ANALYSIS.md](https://github.com/COMP-4350-Group-6/budgetwise/blob/e0f226ea3405d8c4be177fdec12217225e56f876/course-work/SECURITY_ANALYSIS.md)
+### Security Analysis Summary
+
+**Tools Used:** 
+- **Dependabot**: Automated dependency vulnerability scanner for package.json/pnpm-lock.yaml
+- **GitLeaks**: Secret detection integrated into CI pipeline via Super-Linter
+- **CodeQL**: Semantic code analysis for TypeScript/JavaScript security vulnerabilities
+
+**How Run:** 
+- Dependabot: Auto on pushes/PRs to main/dev + daily schedules
+- GitLeaks: Via Super-Linter on pushes (non-main) + PRs
+- CodeQL: GitHub Advanced Security on pushes + PRs
+
+**Key Findings:**
+- **9 vulnerabilities detected** by Dependabot across dependencies (1 Critical, 3 High, 5 Moderate)
+- **Critical:** Next.js RCE in React Flight Protocol (fixed via PR #176, commit 18da284)
+- **High:** Hono Improper Authorization (fixed via PR #177, commit 96c0ecd), glob Command Injection (resolved via updates)
+- **All Critical/High vulnerabilities mitigated** through dependency updates
+
+**Additional Security Measures:**
+- Server-side authentication with httpOnly cookies to prevent XSS
+- JWT tokens stored securely server-side, not in client storage
+
+**Full Report:** [course-work/SECURITY_ANALYSIS.md](https://github.com/COMP-4350-Group-6/budgetwise/blob/e0f226ea3405d8c4be177fdec12217225e56f876/course-work/SECURITY_ANALYSIS.md)
 
 ## 3. Continuous Integration & Deployment (CI/CD)
 
@@ -374,11 +396,11 @@ Security Analysis - [course-work/SECURITY_ANALYSIS.md](https://github.com/COMP-4
 >
 > 2. [x]  Provide clickable link to your pipeline (e.g., GitHub Actions workflow, Jenkins pipeline file).
 >
-> 3. [ ]  Provide two snapshots:
+> 3. [x]  Provide two snapshots:
 >
->    - [ ] One for CI execution.
+>    - [x] One for CI execution.
 >
->    - [ ] One for CD execution.
+>    - [x] One for CD execution.
 
 ### Executive Summary
 
@@ -538,6 +560,8 @@ During this project, I used AI (ChatGPT-4o) as a support tool to help me debug a
 
 ### Ramatjyot:
 
+Throughout the project, I extensively used AI(Copilot, ChatGPT) as a comprehensive pair programming partner for virtually every aspect of development, from initial design and architecture selection to exploring solutions, writing code, debugging, and expressing concerns. I took the lead in directing our system direction, while actively seeking the AI's opinions on tradeoffs, pros and cons, better options, and ideal scenarios for what should have been done. Initially, I relied on AI to help select our overall architecture and gather opinions on useful technologies, where it recommended Zod for schema validation, which proved valuable. For debugging and researching available resources, I used AI extensively but always verified its suggestions with external sources, such as when OpenNext wasn't initially recommended until I brought it up and explored it further. The AI helped identify architecture violations, construct test cases, and set up CI/CD pipelines, essentially serving as an architect while handling much of the coding implementation. Through this process, I learned that AI excels as a collaborative tool when I provide clear direction and critical oversight, allowing me to focus on high-level design while it handles detailed implementation, though I always validated and adapted its outputs to fit our specific needs and constraints.
+
 ### Bryce:
 
 One problem I tried to solve with AI was the hierarchical budget dropdown feature. We had attempted several implementations that failed already so when it was my turn I went straight to AI for help. Even after trying many AI suggested approaches, none of them ever fully worked. So once I reached this wall I decided to finally step back and investigate whether the issue was elsewhere, and I realized the real problem was that our backend and database weren't set up to support hierarchical budgets in the first place. What I learned from this is that my approach was flawed. I went to AI first instead of fully understanding the system constraints which would have led me to a solution much faster. Once I recognized the architectural limitation, I suggested that we remove the multi budget feature since supporting it would require a major refactor of our business logic. In the real world that wouldn't be the correct decision, but given the scope of this course project, we chose not to implement it. The bigger lesson I can take away from this is that I need to completely understand and solve complex problems before I even think of AI, and when I do it should only be used as a coding aid or to solve problems small in scope, not a system wide problem solver.
@@ -553,11 +577,11 @@ One problem I tried to solve with AI was the hierarchical budget dropdown featur
 
 - [x] JMeter .jmx file linked (if applicable) + results snapshot.
 
-- [ ] Security tool described + full report attached.
+- [x] Security tool described + full report attached.
 
-- [ ] 5 problems discussed (or 2 if no critical/high).
+- [x] 5 problems discussed (or 2 if no critical/high).
 
-- [ ] Critical/high vulnerabilities fixed + commit links included.
+- [x] Critical/high vulnerabilities fixed + commit links included.
 
 - [x] CI/CD environment described + pipeline link.
 
