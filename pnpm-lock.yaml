@@ -21,8 +21,8 @@ importers:
         specifier: ^3.0.1
         version: 3.0.1
       hono:
-        specifier: ^4.9.11
-        version: 4.9.11
+        specifier: ^4.10.3
+        version: 4.10.3
       turbo:
         specifier: ^2.5.8
         version: 2.5.8
@@ -49,10 +49,10 @@ importers:
         version: link:../../packages/schemas
       '@hono/zod-validator':
         specifier: ^0.7.4
-        version: 0.7.4(hono@4.9.11)(zod@4.1.12)
+        version: 0.7.4(hono@4.10.3)(zod@4.1.12)
       hono:
-        specifier: ^4.9.11
-        version: 4.9.11
+        specifier: ^4.10.3
+        version: 4.10.3
       zod:
         specifier: ^4.1.12
         version: 4.1.12
@@ -4622,8 +4622,8 @@ packages:
   headers-polyfill@4.0.3:
     resolution: {integrity: sha512-IScLbePpkvO846sIwOtOTDjutRMWdXdJmXdMvk6gCBHxFO8d+QKOQedyZSxFTTFYRSmlgSTDtXqqq4pcenBXLQ==}
 
-  hono@4.9.11:
-    resolution: {integrity: sha512-MyJ4xop3boTyXl8bJBh4i20AAZTLM3AXUJphyrUb0CpgTKYb1N703z53XiKUKchGUpcPqiiYkiLOXA3kqK3icA==}
+  hono@4.10.3:
+    resolution: {integrity: sha512-2LOYWUbnhdxdL8MNbNg9XZig6k+cZXm5IjHn2Aviv7honhBMOHb+jxrKIeJRZJRmn+htUCKhaicxwXuUDlchRA==}
     engines: {node: '>=16.9.0'}
 
   hookable@5.5.3:
@@ -8559,9 +8559,9 @@ snapshots:
       '@eslint/core': 0.17.0
       levn: 0.4.1
 
-  '@hono/zod-validator@0.7.4(hono@4.9.11)(zod@4.1.12)':
+  '@hono/zod-validator@0.7.4(hono@4.10.3)(zod@4.1.12)':
     dependencies:
-      hono: 4.9.11
+      hono: 4.10.3
       zod: 4.1.12
 
   '@humanfs/core@0.19.1': {}
@@ -12067,7 +12067,7 @@ snapshots:
 
   headers-polyfill@4.0.3: {}
 
-  hono@4.9.11: {}
+  hono@4.10.3: {}
 
   hookable@5.5.3: {}
 
