@@ -7,7 +7,7 @@ import { FaHome, FaChartLine, FaWallet } from "react-icons/fa";
 import { FaSignOutAlt } from "react-icons/fa";
 import { useSidebarState } from "@/app/(protected)/ProtectedLayoutClient";
 import { authService } from "@/app/services/authService";
-import { getLoginUrl } from "@/lib/config";
+import { getLogoutUrl } from "@/lib/config";
 import { ConfirmModal } from "@/components/ui";
 import styles from "./sidebar.module.css";
 
@@ -33,11 +33,11 @@ export default function Sidebar() {
       await authService.logout();
       
       // Redirect to Vue auth app's logout page
-      window.location.href = getLoginUrl();
+      window.location.href = getLogoutUrl();
     } catch (error) {
       console.error("Logout error:", error);
       // Still redirect even if API call fails
-      window.location.href = getLoginUrl();
+      window.location.href = getLogoutUrl();
     }
   };
 
